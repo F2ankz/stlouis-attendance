@@ -1542,18 +1542,9 @@ async function renderHistory() {
   const list = $('#historyList');
   list.innerHTML = '';
   
-  const periods = scheduleData.periods.slice().sort((a,b) => String(a.date||'').localeCompare(String(b.date||'')));
-  
-  if(periods.length === 0){
-    list.innerHTML = '<div class="empty">ยังไม่มีตารางเรียนหรือประวัติการเข้าเรียน</div>';
-    return;
-  }
-  
-  periods.forEach(p => {
-    if(!p.date) return;
-    
-    // Parse ugly GMT string if present
-    let rawDate = String(p.date);
+  // Pre-parse dates to fix GMT and sort properly (ascending)
+  let periods = scheduleData.periods.map(p => {
+    let rawDate = String(p.date || '');
     if (rawDate.includes('GMT')) {
        const tDate = new Date(rawDate);
        if (!isNaN(tDate)) {
@@ -1562,6 +1553,17 @@ async function renderHistory() {
          rawDate = tDate.getFullYear() + '-' + (m < 10 ? '0'+m : m) + '-' + (day < 10 ? '0'+day : day);
        }
     }
+    return { ...p, parsedDate: rawDate };
+  }).filter(p => p.parsedDate)
+    .sort((a,b) => a.parsedDate.localeCompare(b.parsedDate));
+  
+  if(periods.length === 0){
+    list.innerHTML = '<div class="empty">ยังไม่มีตารางเรียนหรือประวัติการเข้าเรียน</div>';
+    return;
+  }
+  
+  periods.forEach(p => {
+    let rawDate = p.parsedDate;
     
     let status = '';
     let time = '';
