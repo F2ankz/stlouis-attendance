@@ -1165,8 +1165,10 @@ async function handleScannedId(rawId){
 function scanTick(){
   const video = $('#scanVideo');
   if(video.readyState === video.HAVE_ENOUGH_DATA){
-    scanCanvas.width = video.videoWidth;
-    scanCanvas.height = video.videoHeight;
+    const maxW = 800;
+    const scale = video.videoWidth > maxW ? maxW / video.videoWidth : 1;
+    scanCanvas.width = video.videoWidth * scale;
+    scanCanvas.height = video.videoHeight * scale;
     scanCtx.drawImage(video, 0, 0, scanCanvas.width, scanCanvas.height);
     const imageData = scanCtx.getImageData(0, 0, scanCanvas.width, scanCanvas.height);
     const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" });
