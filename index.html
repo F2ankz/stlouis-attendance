@@ -1562,11 +1562,6 @@ async function init(){
     applyRoleUI();
   }
   
-  if(scheduleData.periods.length === 0){
-    scheduleData.periods.push({ id: pid(), date: upcomingSunday(), start:'09:30', end:'11:30', topic:'เรียนคำสอนศาสนา', special:'' });
-    await saveSchedule();
-  }
-  
   $$('.tab-btn').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
 
   $('#addStudentBtn').onclick = async () => {
