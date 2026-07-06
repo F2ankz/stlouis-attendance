@@ -381,7 +381,6 @@
 
   <!-- ROLL CALL TAB -->
   <section id="tab-roll">
-    <div class="today-schedule no-print" id="todayScheduleBox" style="display:none;"></div>
     <div class="card">
       <h2>เช็คชื่อ</h2>
       <div class="row" style="margin-bottom:14px;">
@@ -389,6 +388,7 @@
         <input type="date" id="rollDate">
         <button class="btn-ghost" id="markAllPresent">✓ มาทั้งหมด (เวลานี้)</button>
       </div>
+      <div class="today-schedule no-print" id="todayScheduleBox" style="display:none;"></div>
       <div id="rollList"></div>
       <div class="export-row">
         <button class="btn-primary" id="saveRoll">บันทึกการเช็คชื่อ</button>
@@ -684,7 +684,12 @@ async function renderRoll(){
     const status = getRecordStatus(rec);
     const time = getRecordTime(rec);
     item.innerHTML = `
-      <div class="roll-name"><span class="idx">${String(i+1).padStart(2,'0')}</span>${s.name}</div>
+      <div class="roll-name">
+        <span class="idx">${String(i+1).padStart(2,'0')}</span>${s.name}
+        <span class="time-display" style="font-size:12px; color:var(--ink-soft); margin-left:6px;">
+          ${status ? `(เช็คชื่อ: ${time || '-'})` : ''}
+        </span>
+      </div>
       <div class="stamps">
         <button class="stamp-btn" data-s="present" data-id="${s.id}">มา</button>
         <button class="stamp-btn" data-s="late" data-id="${s.id}">สาย</button>
@@ -694,6 +699,7 @@ async function renderRoll(){
     `;
     box.appendChild(item);
     const timeInput = $('.time-input', item);
+    const timeDisplay = $('.time-display', item);
     $$('.stamp-btn', item).forEach(btn => {
       if(btn.dataset.s === status) btn.classList.add('active');
       btn.onclick = () => {
@@ -704,12 +710,14 @@ async function renderRoll(){
         btn.classList.add('active');
         timeInput.value = currentRoll[s.id].time;
         timeInput.style.display = '';
+        if(timeDisplay) timeDisplay.textContent = `(เช็คชื่อ: ${currentRoll[s.id].time})`;
       };
     });
     timeInput.onchange = () => {
       if(currentRoll[s.id]){
         const st = getRecordStatus(currentRoll[s.id]);
         currentRoll[s.id] = { status: st, time: timeInput.value };
+        if(timeDisplay) timeDisplay.textContent = `(เช็คชื่อ: ${timeInput.value})`;
       }
     };
   });
@@ -722,12 +730,12 @@ function renderTodaySchedule(){
     return;
   }
   const items = scheduleData.periods
-    .filter(p => p.date === currentDate && p.topic && p.topic.trim())
+    .filter(p => p.date === currentDate)
     .sort((a,b) => (a.start||'').localeCompare(b.start||''))
-    .map(p => `<b>${p.start||'?'}-${p.end||'?'}</b> ${p.topic}`);
+    .map(p => `<b>${p.start||'?'}-${p.end||'?'}</b> ${p.topic ? p.topic : '(ไม่มีหัวข้อ)'}`);
   if(items.length === 0){ box.style.display = 'none'; return; }
   box.style.display = 'block';
-  box.innerHTML = `📅 ตารางเรียนวันนี้: ${items.join(' &nbsp;•&nbsp; ')}`;
+  box.innerHTML = `📅 <b>หัวข้อที่มีเรียนวันนี้:</b> ${items.join(' &nbsp;•&nbsp; ')}`;
 }
 
 async function renderStats(){
@@ -886,8 +894,9 @@ function renderQrGrid(){
       text: QR_PREFIX + s.id,
       width: 120,
       height: 120,
-      colorDark: '#1F3D2B',
-      colorLight: '#ffffff'
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.L
     });
   });
 }
@@ -1073,11 +1082,13 @@ async function handleScannedId(rawId){
 function scanTick(){
   const video = $('#scanVideo');
   if(video.readyState === video.HAVE_ENOUGH_DATA){
-    scanCanvas.width = video.videoWidth;
-    scanCanvas.height = video.videoHeight;
+    const maxW = 500;
+    const scale = video.videoWidth > maxW ? maxW / video.videoWidth : 1;
+    scanCanvas.width = video.videoWidth * scale;
+    scanCanvas.height = video.videoHeight * scale;
     scanCtx.drawImage(video, 0, 0, scanCanvas.width, scanCanvas.height);
     const imageData = scanCtx.getImageData(0, 0, scanCanvas.width, scanCanvas.height);
-    const code = jsQR(imageData.data, imageData.width, imageData.height);
+    const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
     if(code && code.data && code.data.startsWith(QR_PREFIX)){
       const id = code.data.slice(QR_PREFIX.length);
       handleScannedId(id);
