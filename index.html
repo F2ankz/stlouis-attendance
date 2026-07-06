@@ -708,26 +708,35 @@ function renderStudentList(){
   ul.innerHTML = '';
   if(students.length === 0){
     ul.innerHTML = '<div class="empty">ยังไม่มีรายชื่อนักเรียน เพิ่มรายชื่อด้านบนได้เลย</div>';
-    return;
+  } else {
+    students.forEach((s, i) => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span><span class="idx">${String(i+1).padStart(2,'0')}</span>${s.name}</span>`;
+      const delBtn = document.createElement('button');
+      delBtn.className = 'btn-danger';
+      delBtn.textContent = 'ลบ';
+      delBtn.onclick = async () => {
+        if(confirm(`ลบ "${s.name}" ออกจากรายชื่อ?`)){
+          students = students.filter(x => x.id !== s.id);
+          await saveStudents();
+          renderStudentList();
+          renderRoll();
+          renderQrGrid();
+        }
+      };
+      li.appendChild(delBtn);
+      ul.appendChild(li);
+    });
   }
-  students.forEach((s, i) => {
-    const li = document.createElement('li');
-    li.innerHTML = `<span><span class="idx">${String(i+1).padStart(2,'0')}</span>${s.name}</span>`;
-    const delBtn = document.createElement('button');
-    delBtn.className = 'btn-danger';
-    delBtn.textContent = 'ลบ';
-    delBtn.onclick = async () => {
-      if(confirm(`ลบ "${s.name}" ออกจากรายชื่อ?`)){
-        students = students.filter(x => x.id !== s.id);
-        await saveStudents();
-        renderStudentList();
-        renderRoll();
-        renderQrGrid();
-      }
-    };
-    li.appendChild(delBtn);
-    ul.appendChild(li);
-  });
+  
+  // Populate GPS Dropdown
+  const gpsSel = $('#gpsStudentSelect');
+  if(gpsSel) {
+    const curVal = gpsSel.value;
+    gpsSel.innerHTML = '<option value="">-- เลือกชื่อของตนเอง --</option>' + 
+      students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+    if(curVal) gpsSel.value = curVal;
+  }
 }
 
 async function renderRoll(){
