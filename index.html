@@ -372,6 +372,7 @@
   <div class="tabs no-print">
     <button class="tab-btn active" data-tab="roll">เช็คชื่อวันนี้</button>
     <button class="tab-btn" data-tab="scan">สแกน QR หน้าห้อง</button>
+    <button class="tab-btn" data-tab="gps">📍 เช็คชื่อนักเรียน (GPS)</button>
     <button class="tab-btn" data-tab="students">จัดการรายชื่อ</button>
     <button class="tab-btn" data-tab="qrcodes">QR นักเรียน</button>
     <button class="tab-btn" data-tab="schedule">ตารางเรียน</button>
@@ -394,6 +395,27 @@
         <button class="btn-primary" id="saveRoll">บันทึกการเช็คชื่อ</button>
         <span id="saveStatus" style="align-self:center; font-size:13.5px; color:var(--present); font-weight:600;"></span>
       </div>
+    </div>
+  </section>
+
+  <!-- GPS TAB -->
+  <section id="tab-gps" style="display:none;">
+    <div class="card" style="text-align:center;">
+      <h2>📍 เช็คชื่อด้วยพิกัด GPS</h2>
+      <p style="color:var(--ink-soft); font-size:14px; margin-bottom:20px;">
+        ฟีเจอร์นี้สำหรับนักเรียนที่อยู่ภายในบริเวณ <b>วัดเซนต์หลุยส์ (ไม่เกิน 100 เมตร)</b><br>
+        กรุณาอนุญาตการเข้าถึงตำแหน่งที่ตั้ง (Location) ก่อนใช้งาน
+      </p>
+      
+      <div style="margin-bottom:20px;">
+        <select id="gpsStudentSelect" style="width:100%; max-width:400px; padding:10px; font-size:15px; border-radius:8px; border:2px solid var(--paper-line);">
+          <option value="">-- เลือกชื่อของตนเอง --</option>
+        </select>
+      </div>
+      
+      <button class="btn-primary" id="gpsCheckInBtn" style="font-size:16px; padding:12px 24px;">📍 กดเพื่อเช็คชื่อเข้าเรียน</button>
+      
+      <div id="gpsStatusMsg" style="margin-top:20px; font-size:15px; font-weight:600; white-space:pre-line;"></div>
     </div>
   </section>
 
@@ -590,6 +612,17 @@ const QR_PREFIX = 'qr-checkin:';
 const DAY_KEYS = ['sun','mon','tue','wed','thu','fri','sat'];
 const DAY_LABELS_TH = { sun:'อาทิตย์', mon:'จันทร์', tue:'อังคาร', wed:'พุธ', thu:'พฤหัสบดี', fri:'ศุกร์', sat:'เสาร์' };
 const SCHOOL_DAYS = ['sun'];
+
+// GPS Helper Functions
+function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+  const R = 6371; 
+  const dLat = deg2rad(lat2-lat1);
+  const dLon = deg2rad(lon2-lon1); 
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2); 
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  return R * c * 1000; // Return in meters
+}
+function deg2rad(deg) { return deg * (Math.PI/180); }
 
 let students = [];
 let currentDate = new Date().toISOString().slice(0,10);
@@ -1235,7 +1268,7 @@ async function refreshScanFeed(){
 
 // ---------- TABS ----------
 function switchTab(name){
-  ['roll','scan','students','qrcodes','schedule','absence','stats'].forEach(t => {
+  ['roll','scan','students','qrcodes','schedule','absence','stats','gps'].forEach(t => {
     $('#tab-' + t).style.display = (t === name) ? 'block' : 'none';
   });
   $$('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
@@ -1246,6 +1279,88 @@ function switchTab(name){
   if(name === 'absence') renderAbsence();
   if(name === 'scan'){ $('#scanFeedList').innerHTML=''; refreshScanFeed(); }
   else { stopScan(); }
+}
+
+// ---------- GPS CHECK-IN ----------
+function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
+  var R = 6371e3; // Radius of the earth in m
+  var dLat = (lat2 - lat1) * Math.PI / 180;
+  var dLon = (lon2 - lon1) * Math.PI / 180;
+  var a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c; 
+}
+
+async function handleGpsCheckIn(){
+  const msgEl = $('#gpsStatusMsg');
+  const stId = $('#gpsStudentSelect').value;
+  if(!stId){
+    msgEl.textContent = '❌ กรุณาเลือกชื่อของตนเองก่อน';
+    msgEl.style.color = 'var(--absent)';
+    return;
+  }
+  
+  if (!navigator.geolocation) {
+    msgEl.textContent = '❌ เบราว์เซอร์ของคุณไม่รองรับระบบพิกัดตำแหน่ง (GPS)';
+    msgEl.style.color = 'var(--absent)';
+    return;
+  }
+
+  msgEl.textContent = 'กำลังตรวจสอบพิกัดของคุณ... 📡';
+  msgEl.style.color = 'var(--ink-soft)';
+  
+  navigator.geolocation.getCurrentPosition(async (position) => {
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
+    const targetLat = 13.7197;
+    const targetLon = 100.5258;
+    
+    const distance = getDistanceFromLatLonInMeters(lat, lon, targetLat, targetLon);
+    if(distance > 100) {
+      msgEl.innerHTML = `❌ คุณอยู่นอกระยะที่กำหนด<br><span style="font-size:13px;font-weight:400;">(ระยะห่าง: ${Math.round(distance)} เมตร จากวัดเซนต์หลุยส์)</span>`;
+      msgEl.style.color = 'var(--absent)';
+      return;
+    }
+    
+    msgEl.textContent = 'กำลังบันทึกข้อมูล... ⏳';
+    
+    // Auto-calculate status exactly like handleScannedId
+    const student = students.find(s => s.id === stId);
+    const scanDate = currentDate;
+    const time = nowTimeValue();
+    let status = 'present';
+    const todaysPeriods = scheduleData.periods.filter(p => p.date === scanDate).sort((a,b) => (a.start||'').localeCompare(b.start||''));
+    
+    if (todaysPeriods.length > 0) {
+      const p = todaysPeriods[0];
+      if (p.start) {
+        const sh = parseInt(p.start.split(':')[0], 10);
+        const sm = parseInt(p.start.split(':')[1], 10);
+        const th = parseInt(time.split(':')[0], 10);
+        const tm = parseInt(time.split(':')[1], 10);
+        const startMins = sh * 60 + sm;
+        const scanMins = th * 60 + tm;
+        if (scanMins > startMins + 15) {
+          status = 'late';
+        }
+      }
+    }
+
+    const roll = await loadRoll(scanDate);
+    roll[stId] = { status, time };
+    await saveRollData(scanDate, roll);
+    if(scanDate === currentDate) currentRoll = roll;
+    
+    msgEl.innerHTML = `✅ เช็คชื่อสำเร็จ!\n${student.name}\n${STATUS_LABEL[status]} • ${time}`;
+    msgEl.style.color = 'var(--present)';
+    
+  }, (err) => {
+    msgEl.textContent = '❌ ไม่สามารถดึงตำแหน่งได้ กรุณาอนุญาต Location ในการตั้งค่าเบราว์เซอร์';
+    msgEl.style.color = 'var(--absent)';
+  }, { enableHighAccuracy: true, timeout: 10000 });
 }
 
 // ---------- INIT ----------
@@ -1332,6 +1447,7 @@ async function init(){
   $('#printQrBtn').onclick = () => window.print();
   $('#startScanBtn').onclick = startScan;
   $('#stopScanBtn').onclick = stopScan;
+  $('#gpsCheckInBtn').onclick = handleGpsCheckIn;
   $('#cameraSelect').onchange = async () => {
     if(scanStream){ stopScan(); await startScan(); }
   };
