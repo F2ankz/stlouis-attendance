@@ -1068,7 +1068,7 @@ function renderSchedule(){
   newTable.innerHTML = thead + rows;
   document.getElementById('schedTable').replaceWith(newTable);
 
-  $$('.sched-subject, input[type=date]', newTable).forEach(inp => {
+  $$('.sched-subject, input[type=date], input[type=time]', newTable).forEach(inp => {
     inp.onchange = () => {
       const p = scheduleData.periods.find(x => x.id === inp.dataset.pid);
       if(!p) return;
