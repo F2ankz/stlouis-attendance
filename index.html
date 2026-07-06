@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สมุดเช็คชื่อ เซนต์หลุยส์ 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bitter:wght@500;600;700&family=Sarabun:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+  :root{
+    --paper: #F7F3E8;
+    --paper-line: #D9CFAF;
+    --ink: #1F3D2B;
+    --ink-soft: #4B5C4E;
+    --present: #2F7A4F;
+    --present-bg: #E3EFE3;
+    --late: #B9791E;
+    --late-bg: #F6EBD8;
+    --absent: #A83A31;
+    --absent-bg: #F5E1DD;
+    --gold: #A9863A;
+    --card: #FFFCF4;
+    --shadow: 0 2px 0 rgba(31,61,43,0.06), 0 8px 20px -12px rgba(31,61,43,0.25);
+  }
+  *{ box-sizing: border-box; }
+  body{
+    margin:0;
+    font-family:'Sarabun', sans-serif;
+    background:
+      repeating-linear-gradient(var(--paper) 0px, var(--paper) 34px, var(--paper-line) 35px),
+      var(--paper);
+    color: var(--ink);
+    min-height:100vh;
+    padding: 28px 18px 60px;
+  }
+  .wrap{ max-width: 1060px; margin: 0 auto; }
+
+  header{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+    border-bottom: 3px double var(--ink);
+    padding-bottom: 14px;
+    margin-bottom: 22px;
+  }
+  header h1{
+    font-family:'Bitter', serif;
+    font-size: 28px;
+    margin:0;
+    letter-spacing: 0.3px;
+  }
+  header .stamp-mini{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    border: 1.5px solid var(--gold);
+    color: var(--gold);
+    border-radius: 999px;
+    padding: 4px 12px;
+    transform: rotate(-2deg);
+  }
+
+  .tabs{
+    display:flex;
+    gap: 6px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .tab-btn{
+    font-family:'Bitter', serif;
+    font-weight: 600;
+    font-size: 13.5px;
+    background: transparent;
+    border: 2px solid var(--ink);
+    color: var(--ink);
+    padding: 8px 13px;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .tab-btn.active{
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .tab-btn:not(.active):hover{
+    background: rgba(31,61,43,0.08);
+  }
+
+  .card{
+    background: var(--card);
+    border: 1px solid var(--paper-line);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    padding: 22px;
+    margin-bottom: 18px;
+  }
+  .card h2{
+    font-family:'Bitter', serif;
+    font-size: 19px;
+    margin: 0 0 16px;
+    display:flex;
+    align-items:center;
+    gap: 8px;
+  }
+  .card h2::before{
+    content:'';
+    width: 9px; height: 9px;
+    background: var(--gold);
+    border-radius: 50%;
+    display:inline-block;
+  }
+  .card p.hint{ color: var(--ink-soft); font-size: 13.5px; margin: -8px 0 16px; }
+
+  .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+
+  input[type=text], input[type=date], input[type=time], select{
+    font-family:'Sarabun', sans-serif;
+    font-size: 15px;
+    padding: 9px 12px;
+    border: 1.5px solid var(--paper-line);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--ink);
+  }
+  input[type=text]:focus, input[type=date]:focus, input[type=time]:focus, select:focus{
+    outline: none;
+    border-color: var(--gold);
+  }
+  button{
+    font-family:'Sarabun', sans-serif;
+    font-weight:600;
+    font-size: 14.5px;
+    cursor:pointer;
+    border-radius: 6px;
+    border: none;
+    padding: 9px 16px;
+    transition: transform .1s ease, filter .15s ease;
+  }
+  button:active{ transform: scale(0.97); }
+  button:disabled{ opacity: .5; cursor: not-allowed; }
+  .btn-primary{ background: var(--ink); color: var(--paper); }
+  .btn-primary:hover{ filter: brightness(1.15); }
+  .btn-ghost{ background: transparent; border: 1.5px solid var(--ink); color: var(--ink); }
+  .btn-ghost:hover{ background: rgba(31,61,43,0.08); }
+  .btn-danger{ background: transparent; color: var(--absent); border: 1.5px solid var(--absent); padding: 6px 10px; font-size: 13px;}
+  .btn-danger:hover{ background: var(--absent-bg); }
+  .btn-stop{ background: var(--absent); color: #fff; }
+
+  .student-list{ list-style:none; padding:0; margin: 14px 0 0; display:flex; flex-direction:column; gap:8px;}
+  .student-list li{
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 9px 12px;
+    border-bottom: 1px dashed var(--paper-line);
+    font-size: 15px;
+  }
+  .student-list li .idx{ font-family:'IBM Plex Mono', monospace; color: var(--ink-soft); margin-right: 10px; font-size:13px;}
+
+  .empty{
+    text-align:center;
+    color: var(--ink-soft);
+    padding: 26px 10px;
+    font-size: 14.5px;
+    border: 1.5px dashed var(--paper-line);
+    border-radius: 8px;
+  }
+
+  .roll-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 12px;
+    padding: 12px 4px;
+    border-bottom: 1px dashed var(--paper-line);
+    flex-wrap: wrap;
+  }
+  .roll-item:last-child{ border-bottom:none; }
+  .roll-name{ font-size: 15.5px; font-weight:500; display:flex; align-items:center; gap:10px;}
+  .roll-name .idx{ font-family:'IBM Plex Mono', monospace; font-size:12.5px; color: var(--ink-soft); width: 22px; }
+  .stamps{ display:flex; gap:8px; align-items:center; }
+  .stamp-btn{
+    font-family:'Bitter', serif;
+    font-weight:700;
+    font-size: 13px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 2px solid var(--paper-line);
+    background: #fff;
+    color: var(--ink-soft);
+  }
+  .stamp-btn[data-s="present"].active{ border-color: var(--present); color: var(--present); background: var(--present-bg); transform: rotate(-3deg); }
+  .stamp-btn[data-s="late"].active{ border-color: var(--late); color: var(--late); background: var(--late-bg); transform: rotate(-3deg); }
+  .stamp-btn[data-s="absent"].active{ border-color: var(--absent); color: var(--absent); background: var(--absent-bg); transform: rotate(-3deg); }
+  .stamp-btn:hover{ filter: brightness(0.98); }
+  .time-input{ width: 96px; font-family:'IBM Plex Mono', monospace; font-size: 13.5px; padding: 6px 8px; }
+
+  .summary-bar{
+    display:flex; gap: 18px; flex-wrap:wrap;
+    margin-bottom: 14px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 13.5px;
+  }
+  .summary-bar span b{ font-size: 16px; }
+  .summary-bar .p b{ color: var(--present); }
+  .summary-bar .l b{ color: var(--late); }
+  .summary-bar .a b{ color: var(--absent); }
+
+  table{ width:100%; border-collapse: collapse; font-size: 14.5px; }
+  thead th{
+    text-align:left;
+    font-family:'Bitter', serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    border-bottom: 2px solid var(--ink);
+    padding: 8px 6px;
+  }
+  tbody td{
+    padding: 9px 6px;
+    border-bottom: 1px dashed var(--paper-line);
+    font-family:'IBM Plex Mono', monospace;
+  }
+  tbody td.name{ font-family:'Sarabun', sans-serif; font-weight:500; }
+  .pct-bar{
+    display:inline-block; height:6px; border-radius:3px; background: var(--present);
+    vertical-align:middle; margin-right:6px;
+  }
+
+  .export-row{ display:flex; gap:10px; margin-top: 16px; flex-wrap:wrap; }
+
+  footer{ text-align:center; color: var(--ink-soft); font-size:12.5px; margin-top: 30px; }
+
+  .today-schedule{
+    background: var(--present-bg);
+    border: 1.5px solid var(--present);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13.5px;
+    margin-bottom: 16px;
+    color: #1F4A30;
+  }
+  .today-schedule b{ font-family:'IBM Plex Mono', monospace; }
+
+  .scan-warning{
+    background: var(--late-bg);
+    border: 1.5px solid var(--late);
+    color: #6B4A0F;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13.5px;
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+  .scan-stage{ display:flex; gap: 22px; flex-wrap: wrap; }
+  .scan-video-box{
+    position: relative;
+    width: 320px;
+    max-width: 100%;
+    aspect-ratio: 4/3;
+    background: #10241A;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 3px solid var(--ink);
+  }
+  .scan-video-box video{ width:100%; height:100%; object-fit: cover; }
+  .scan-video-box .frame{
+    position:absolute; inset: 14%;
+    border: 2.5px dashed rgba(247,243,232,0.7);
+    border-radius: 10px;
+    pointer-events: none;
+  }
+  .scan-flash{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    background: rgba(47,122,79,0.88);
+    color:#fff; font-family:'Bitter',serif; font-weight:700; font-size: 17px;
+    text-align:center; padding: 10px;
+    opacity:0; transition: opacity .15s ease;
+    pointer-events:none;
+    white-space: pre-line;
+  }
+  .scan-flash.err{ background: rgba(168,58,49,0.9); }
+  .scan-flash.show{ opacity:1; }
+  .scan-feed{ flex:1; min-width: 220px; }
+  .scan-feed h3{ font-family:'Bitter', serif; font-size:15px; margin: 0 0 10px; }
+  .scan-feed-list{ list-style:none; margin:0; padding:0; max-height: 320px; overflow-y:auto; }
+  .scan-feed-list li{
+    display:flex; justify-content:space-between; gap:10px;
+    padding: 8px 4px; border-bottom: 1px dashed var(--paper-line);
+    font-size: 14px;
+    animation: pop .25s ease;
+  }
+  .scan-feed-list li .t{ font-family:'IBM Plex Mono', monospace; color: var(--ink-soft); font-size:12.5px; }
+  @keyframes pop{ from{ opacity:0; transform: translateY(-4px);} to{opacity:1; transform:translateY(0);} }
+
+  .qr-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 14px;
+  }
+  .qr-card{
+    border: 1.5px dashed var(--paper-line);
+    border-radius: 8px;
+    padding: 12px;
+    text-align:center;
+    background: #fff;
+    break-inside: avoid;
+  }
+  .qr-card .qrbox{ display:flex; justify-content:center; margin-bottom: 8px; }
+  .qr-card .name{ font-size: 13.5px; font-weight:600; }
+  .qr-card .idx{ font-family:'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-soft); }
+
+  /* --- Schedule tab --- */
+  .sched-table{ width:100%; border-collapse: collapse; }
+  .sched-table th, .sched-table td{
+    border: 1px solid var(--paper-line);
+    padding: 6px;
+    vertical-align: middle;
+  }
+  .sched-table th{
+    font-family:'Bitter', serif;
+    font-size: 13.5px;
+    background: rgba(169,134,58,0.1);
+  }
+  .sched-time{ display:flex; align-items:center; gap:4px; flex-wrap:nowrap; white-space:nowrap; }
+  .sched-time input[type=time]{ width: 92px; padding: 6px 6px; font-size: 13px; }
+  .sched-subject{ width: 100%; min-width: 110px; font-size: 14px; padding: 7px 8px; }
+  .sched-del{ margin-left: 4px; }
+  .sched-day-th{ min-width: 130px; }
+
+  /* --- Absence tab --- */
+  .abs-row{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+    padding: 12px 6px; border-bottom: 1px dashed var(--paper-line); flex-wrap:wrap;
+  }
+  .abs-row:last-child{ border-bottom:none; }
+  .abs-name{ font-size:15.5px; font-weight:600; display:flex; align-items:center; gap:10px; min-width:180px; }
+  .abs-name .idx{ font-family:'IBM Plex Mono', monospace; font-size:12.5px; color:var(--ink-soft); width:22px; }
+  .abs-count{
+    font-family:'IBM Plex Mono', monospace; font-size:13px; font-weight:700;
+    padding: 3px 10px; border-radius: 999px; white-space:nowrap;
+  }
+  .abs-count.none{ color: var(--present); background: var(--present-bg); }
+  .abs-count.some{ color: var(--absent); background: var(--absent-bg); }
+  .abs-dates{ display:flex; flex-wrap:wrap; gap:6px; flex:1; min-width:200px; justify-content:flex-end; }
+  .abs-chip{
+    font-family:'IBM Plex Mono', monospace; font-size:12px;
+    padding: 3px 9px; border-radius: 6px;
+    border: 1.5px solid var(--absent); color: var(--absent); background: var(--absent-bg);
+  }
+  .abs-chip.ok{ border-color: var(--present); color: var(--present); background: var(--present-bg); }
+
+  @media print{
+    body{ background: #fff; padding:0; }
+    .tabs, .no-print{ display:none !important; }
+    .card{ box-shadow:none; border: none; }
+  }
+  @media (max-width: 560px){
+    .roll-item{ flex-direction:column; align-items:flex-start; }
+    .stamps{ width:100%; justify-content:space-between; }
+    .scan-video-box{ width: 100%; }
+    .sched-table{ font-size: 12.5px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>📖 สมุดเช็คชื่อ เซนต์หลุยส์</h1>
+    <span class="stamp-mini" id="todayLabel"></span>
+  </header>
+
+  <div class="tabs no-print">
+    <button class="tab-btn active" data-tab="roll">เช็คชื่อวันนี้</button>
+    <button class="tab-btn" data-tab="scan">สแกน QR หน้าห้อง</button>
+    <button class="tab-btn" data-tab="students">จัดการรายชื่อ</button>
+    <button class="tab-btn" data-tab="qrcodes">QR นักเรียน</button>
+    <button class="tab-btn" data-tab="schedule">ตารางเรียน</button>
+    <button class="tab-btn" data-tab="absence">🚩 ใครขาดบ้าง</button>
+    <button class="tab-btn" data-tab="stats">สรุปสถิติ</button>
+  </div>
+
+  <!-- ROLL CALL TAB -->
+  <section id="tab-roll">
+    <div class="today-schedule no-print" id="todayScheduleBox" style="display:none;"></div>
+    <div class="card">
+      <h2>เช็คชื่อ</h2>
+      <div class="row" style="margin-bottom:14px;">
+        <label style="font-size:14.5px; color:var(--ink-soft);">วันที่:</label>
+        <input type="date" id="rollDate">
+        <button class="btn-ghost" id="markAllPresent">✓ มาทั้งหมด (เวลานี้)</button>
+      </div>
+      <div id="rollList"></div>
+      <div class="export-row">
+        <button class="btn-primary" id="saveRoll">บันทึกการเช็คชื่อ</button>
+        <span id="saveStatus" style="align-self:center; font-size:13.5px; color:var(--present); font-weight:600;"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCAN TAB -->
+  <section id="tab-scan" style="display:none;">
+    <div class="card">
+      <h2>สแกน QR หน้าห้อง</h2>
+      <p class="hint">ให้นักเรียนนำ QR โค้ดของตัวเอง (แท็บ "QR นักเรียน") มาสแกนที่กล้องนี้ ระบบจะเช็คชื่อพร้อมบันทึกเวลาให้อัตโนมัติ</p>
+      <div class="scan-warning">
+        ⚠️ ถ้ากล้องเปิดไม่ได้ในหน้าต่างนี้ ให้ลองเปิดไฟล์นี้ในแท็บเบราว์เซอร์แยกต่างหาก (ไม่ใช่ในกรอบแชท) แล้วอนุญาตการใช้กล้อง เบราว์เซอร์บางตัวบล็อกกล้องเมื่อฝังอยู่ในหน้าอื่น
+      </div>
+      <div class="row" style="margin-bottom:16px;">
+        <label style="font-size:14.5px; color:var(--ink-soft);">วันที่เช็คชื่อ:</label>
+        <input type="date" id="scanDate">
+        <label style="font-size:14.5px; color:var(--ink-soft); margin-left:10px;">สถานะเมื่อสแกน:</label>
+        <select id="scanStatus">
+          <option value="present">มา</option>
+          <option value="late">สาย</option>
+        </select>
+      </div>
+      <div class="scan-stage">
+        <div class="scan-video-box">
+          <video id="scanVideo" playsinline muted></video>
+          <div class="frame"></div>
+          <div class="scan-flash" id="scanFlash"></div>
+        </div>
+        <div class="scan-feed">
+          <h3>เช็คชื่อแล้ววันนี้ (<span id="feedCount">0</span>)</h3>
+          <ul class="scan-feed-list" id="scanFeedList"></ul>
+        </div>
+      </div>
+      <div class="export-row">
+        <button class="btn-primary" id="startScanBtn">▶ เริ่มสแกน</button>
+        <button class="btn-stop" id="stopScanBtn" style="display:none;">■ หยุดสแกน</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STUDENTS TAB -->
+  <section id="tab-students" style="display:none;">
+    <div class="card">
+      <h2>รายชื่อนักเรียน</h2>
+      <div class="row">
+        <input type="text" id="newStudentName" placeholder="ชื่อ-นามสกุลนักเรียน">
+        <button class="btn-primary" id="addStudentBtn">+ เพิ่มรายชื่อ</button>
+      </div>
+      <ul class="student-list" id="studentList"></ul>
+    </div>
+  </section>
+
+  <!-- QR CODES TAB -->
+  <section id="tab-qrcodes" style="display:none;">
+    <div class="card">
+      <h2>QR โค้ดนักเรียน</h2>
+      <p class="hint">พิมพ์หน้านี้แล้วตัดแจกนักเรียนแต่ละคน หรือให้นักเรียนถ่ายภาพหน้าจอ QR ของตัวเองเก็บไว้สแกนหน้าห้อง</p>
+      <div class="qr-grid" id="qrGrid"></div>
+      <div class="export-row no-print">
+        <button class="btn-ghost" id="printQrBtn">🖨 พิมพ์บัตร QR ทั้งหมด</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCHEDULE TAB -->
+  <section id="tab-schedule" style="display:none;">
+    <div class="card">
+      <h2>ตารางเรียน</h2>
+      <p class="hint">กำหนดคาบเรียนและวิชาในแต่ละวัน ระบบจะบันทึกให้อัตโนมัติ และแสดงตารางของวันนั้นในหน้าเช็คชื่อ</p>
+      <div style="overflow-x:auto;">
+        <table class="sched-table" id="schedTable"></table>
+      </div>
+      <div class="export-row no-print">
+        <button class="btn-ghost" id="addPeriodBtn">+ เพิ่มคาบเรียน</button>
+        <span id="schedSaveStatus" style="align-self:center; font-size:13.5px; color:var(--present); font-weight:600;"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABSENCE TAB -->
+  <section id="tab-absence" style="display:none;">
+    <div class="card">
+      <h2>ใครขาดหน้าไหนบ้าง</h2>
+      <p class="hint">ระบบเทียบ "วันที่มีเรียน" (จากแท็บตารางเรียน ที่ถึงวันแล้ว) กับการเช็คชื่อ นักเรียนที่ยังไม่ถูกเช็ค หรือถูกทำเครื่องหมาย "ขาด" จะถือว่าขาดในครั้งนั้น</p>
+      <div class="summary-bar" id="absenceSummary"></div>
+      <div class="row no-print" style="margin-bottom:6px;">
+        <label style="font-size:14px; color:var(--ink-soft); display:flex; align-items:center; gap:6px; cursor:pointer;">
+          <input type="checkbox" id="absOnlyMissing"> แสดงเฉพาะคนที่มีขาด
+        </label>
+      </div>
+      <div id="absenceList"></div>
+      <div class="export-row no-print">
+        <button class="btn-ghost" id="exportAbsence">⬇ ส่งออกรายชื่อคนขาด (Excel)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS TAB -->
+  <section id="tab-stats" style="display:none;">
+    <div class="card">
+      <h2>สรุปสถิติการมาเรียน</h2>
+      <div class="summary-bar" id="overallSummary"></div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr><th>ชื่อ</th><th>มา</th><th>สาย</th><th>ขาด</th><th>% เข้าเรียน</th></tr>
+          </thead>
+          <tbody id="statsBody"></tbody>
+        </table>
+      </div>
+      <div class="export-row no-print">
+        <button class="btn-ghost" id="exportExcel">⬇ ส่งออก Excel</button>
+        <button class="btn-ghost" id="exportPdf">🖨 ส่งออก PDF</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>ข้อมูลถูกบันทึกไว้ในเบราว์เซอร์ของบัญชีนี้เท่านั้น</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.js"></script>
+<script>
+// --- Storage fallback: ใช้ localStorage ของเบราว์เซอร์ ---
+// ทำให้เว็บทำงานได้เมื่อเปิดเป็นเว็บไซต์ปกติ (เช่น GitHub Pages) โดยไม่ต้องมี window.storage ของโฮสต์
+if(!window.storage || typeof window.storage.get !== 'function'){
+  window.storage = {
+    async get(key){
+      const v = localStorage.getItem(key);
+      return v === null ? null : { value: v };
+    },
+    async set(key, value){
+      localStorage.setItem(key, value);
+      return true;
+    },
+    async list(prefix){
+      const keys = [];
+      for(let i = 0; i < localStorage.length; i++){
+        const k = localStorage.key(i);
+        if(k && k.indexOf(prefix) === 0) keys.push(k);
+      }
+      return { keys };
+    }
+  };
+}
+
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+const STATUS_LABEL = { present: 'มา', late: 'สาย', absent: 'ขาด' };
+const QR_PREFIX = 'qr-checkin:';
+const DAY_KEYS = ['sun','mon','tue','wed','thu','fri','sat'];
+const DAY_LABELS_TH = { sun:'อาทิตย์', mon:'จันทร์', tue:'อังคาร', wed:'พุธ', thu:'พฤหัสบดี', fri:'ศุกร์', sat:'เสาร์' };
+const SCHOOL_DAYS = ['sun'];
+
+let students = [];
+let currentDate = new Date().toISOString().slice(0,10);
+let currentRoll = {};
+let scheduleData = { periods: [] };
+
+function todayThaiLabel(){
+  const d = new Date();
+  const opts = { day:'numeric', month:'long', year:'numeric' };
+  return d.toLocaleDateString('th-TH', opts);
+}
+function nowTimeValue(){
+  const d = new Date();
+  return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+function getRecordStatus(rec){
+  if(!rec) return null;
+  return typeof rec === 'string' ? rec : rec.status;
+}
+function getRecordTime(rec){
+  if(!rec || typeof rec === 'string') return '';
+  return rec.time || '';
+}
+function weekdayKeyOf(dateStr){
+  const d = new Date(dateStr + 'T00:00:00');
+  return DAY_KEYS[d.getDay()];
+}
+function upcomingSunday(fromDateStr){
+  const d = fromDateStr ? new Date(fromDateStr + 'T00:00:00') : new Date();
+  const add = (7 - d.getDay()) % 7;
+  d.setDate(d.getDate() + add);
+  return d.toISOString().slice(0,10);
+}
+function addDays(dateStr, days){
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0,10);
+}
+
+async function loadStudents(){
+  try{
+    const res = await window.storage.get('students', false);
+    students = res ? JSON.parse(res.value) : [];
+  }catch(e){ students = []; }
+}
+async function saveStudents(){
+  await window.storage.set('students', JSON.stringify(students), false);
+}
+
+async function loadRoll(date){
+  try{
+    const res = await window.storage.get('attendance:' + date, false);
+    return res ? JSON.parse(res.value) : {};
+  }catch(e){ return {}; }
+}
+async function saveRollData(date, data){
+  await window.storage.set('attendance:' + date, JSON.stringify(data), false);
+}
+
+async function loadAllAttendance(){
+  const out = {};
+  try{
+    const listRes = await window.storage.list('attendance:', false);
+    const keys = listRes ? listRes.keys : [];
+    for(const k of keys){
+      try{
+        const r = await window.storage.get(k, false);
+        if(r) out[k.replace('attendance:','')] = JSON.parse(r.value);
+      }catch(e){}
+    }
+  }catch(e){}
+  return out;
+}
+
+async function loadSchedule(){
+  try{
+    const res = await window.storage.get('schedule', false);
+    scheduleData = res ? JSON.parse(res.value) : { periods: [] };
+  }catch(e){ scheduleData = { periods: [] }; }
+}
+async function saveSchedule(){
+  await window.storage.set('schedule', JSON.stringify(scheduleData), false);
+  const el = $('#schedSaveStatus');
+  if(el){ el.textContent = '✓ บันทึกแล้ว'; setTimeout(() => el.textContent='', 1500); }
+}
+
+function uid(){ return 's_' + Math.random().toString(36).slice(2,9); }
+function pid(){ return 'p_' + Math.random().toString(36).slice(2,9); }
+
+function renderStudentList(){
+  const ul = $('#studentList');
+  ul.innerHTML = '';
+  if(students.length === 0){
+    ul.innerHTML = '<div class="empty">ยังไม่มีรายชื่อนักเรียน เพิ่มรายชื่อด้านบนได้เลย</div>';
+    return;
+  }
+  students.forEach((s, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span><span class="idx">${String(i+1).padStart(2,'0')}</span>${s.name}</span>`;
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn-danger';
+    delBtn.textContent = 'ลบ';
+    delBtn.onclick = async () => {
+      if(confirm(`ลบ "${s.name}" ออกจากรายชื่อ?`)){
+        students = students.filter(x => x.id !== s.id);
+        await saveStudents();
+        renderStudentList();
+        renderRoll();
+        renderQrGrid();
+      }
+    };
+    li.appendChild(delBtn);
+    ul.appendChild(li);
+  });
+}
+
+async function renderRoll(){
+  currentRoll = await loadRoll(currentDate);
+  renderTodaySchedule();
+  const box = $('#rollList');
+  box.innerHTML = '';
+  if(students.length === 0){
+    box.innerHTML = '<div class="empty">เพิ่มรายชื่อนักเรียนก่อนในแท็บ "จัดการรายชื่อ"</div>';
+    return;
+  }
+  students.forEach((s, i) => {
+    const item = document.createElement('div');
+    item.className = 'roll-item';
+    const rec = currentRoll[s.id];
+    const status = getRecordStatus(rec);
+    const time = getRecordTime(rec);
+    item.innerHTML = `
+      <div class="roll-name"><span class="idx">${String(i+1).padStart(2,'0')}</span>${s.name}</div>
+      <div class="stamps">
+        <button class="stamp-btn" data-s="present" data-id="${s.id}">มา</button>
+        <button class="stamp-btn" data-s="late" data-id="${s.id}">สาย</button>
+        <button class="stamp-btn" data-s="absent" data-id="${s.id}">ขาด</button>
+        <input type="time" class="time-input" value="${time}" style="${status ? '' : 'display:none;'}">
+      </div>
+    `;
+    box.appendChild(item);
+    const timeInput = $('.time-input', item);
+    $$('.stamp-btn', item).forEach(btn => {
+      if(btn.dataset.s === status) btn.classList.add('active');
+      btn.onclick = () => {
+        const existing = currentRoll[s.id];
+        const existingTime = getRecordTime(existing);
+        currentRoll[s.id] = { status: btn.dataset.s, time: existingTime || nowTimeValue() };
+        $$('.stamp-btn', item).forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        timeInput.value = currentRoll[s.id].time;
+        timeInput.style.display = '';
+      };
+    });
+    timeInput.onchange = () => {
+      if(currentRoll[s.id]){
+        const st = getRecordStatus(currentRoll[s.id]);
+        currentRoll[s.id] = { status: st, time: timeInput.value };
+      }
+    };
+  });
+}
+
+function renderTodaySchedule(){
+  const box = $('#todayScheduleBox');
+  if(!scheduleData.periods.length){
+    box.style.display = 'none';
+    return;
+  }
+  const items = scheduleData.periods
+    .filter(p => p.date === currentDate && p.topic && p.topic.trim())
+    .sort((a,b) => (a.start||'').localeCompare(b.start||''))
+    .map(p => `<b>${p.start||'?'}-${p.end||'?'}</b> ${p.topic}`);
+  if(items.length === 0){ box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  box.innerHTML = `📅 ตารางเรียนวันนี้: ${items.join(' &nbsp;•&nbsp; ')}`;
+}
+
+async function renderStats(){
+  const all = await loadAllAttendance();
+  const totals = {};
+  students.forEach(s => totals[s.id] = { present:0, late:0, absent:0 });
+
+  let daysCounted = 0;
+  Object.values(all).forEach(dayRecord => {
+    let hasAny = false;
+    Object.entries(dayRecord).forEach(([sid, rec]) => {
+      const status = getRecordStatus(rec);
+      if(totals[sid] && status){
+        totals[sid][status] = (totals[sid][status]||0) + 1;
+        hasAny = true;
+      }
+    });
+    if(hasAny) daysCounted++;
+  });
+
+  let sumP=0,sumL=0,sumA=0;
+  const tbody = $('#statsBody');
+  tbody.innerHTML = '';
+  if(students.length === 0){
+    tbody.innerHTML = '<tr><td colspan="5" style="font-family:Sarabun,sans-serif;">ยังไม่มีนักเรียน</td></tr>';
+  }
+  students.forEach(s => {
+    const t = totals[s.id];
+    sumP += t.present; sumL += t.late; sumA += t.absent;
+    const total = t.present + t.late + t.absent;
+    const pct = total > 0 ? Math.round(((t.present + t.late) / total) * 100) : 0;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="name">${s.name}</td>
+      <td style="color:var(--present); font-weight:600;">${t.present}</td>
+      <td style="color:var(--late); font-weight:600;">${t.late}</td>
+      <td style="color:var(--absent); font-weight:600;">${t.absent}</td>
+      <td><span class="pct-bar" style="width:${Math.max(pct,4)}px; background:${pct>=80?'var(--present)':pct>=50?'var(--late)':'var(--absent)'}"></span>${pct}%</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  $('#overallSummary').innerHTML = `
+    <span>จำนวนวันที่เช็คชื่อแล้ว: <b>${daysCounted}</b> วัน</span>
+    <span class="p">มารวม: <b>${sumP}</b></span>
+    <span class="l">สายรวม: <b>${sumL}</b></span>
+    <span class="a">ขาดรวม: <b>${sumA}</b></span>
+  `;
+
+  return { all, totals };
+}
+
+// ---------- ABSENCE (ใครขาดหน้าไหนบ้าง) ----------
+function shortThaiDate(dateStr){
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('th-TH', { day:'numeric', month:'short' });
+}
+function classSessionDates(){
+  // วันเรียนจากตารางเรียน เฉพาะที่ถึงวัน (<= วันนี้) แล้ว
+  const today = new Date().toISOString().slice(0,10);
+  const set = new Set(scheduleData.periods.map(p => p.date).filter(Boolean));
+  return Array.from(set).filter(d => d <= today).sort();
+}
+async function computeAbsence(){
+  const all = await loadAllAttendance();
+  const dates = classSessionDates();
+  const rows = students.map(s => {
+    const missed = dates.filter(d => {
+      const rec = all[d] ? all[d][s.id] : null;
+      const st = getRecordStatus(rec);
+      return !(st === 'present' || st === 'late'); // ขาด หรือ ยังไม่ถูกเช็ค = ถือว่าขาด
+    });
+    return { student: s, missed };
+  });
+  return { dates, rows };
+}
+async function renderAbsence(){
+  const { dates, rows } = await computeAbsence();
+  const box = $('#absenceList');
+  const summary = $('#absenceSummary');
+  const onlyMissing = $('#absOnlyMissing').checked;
+
+  if(students.length === 0){
+    summary.innerHTML = '';
+    box.innerHTML = '<div class="empty">ยังไม่มีรายชื่อนักเรียน เพิ่มก่อนในแท็บ "จัดการรายชื่อ"</div>';
+    return;
+  }
+  if(dates.length === 0){
+    summary.innerHTML = '';
+    box.innerHTML = '<div class="empty">ยังไม่มีวันเรียนที่ถึงกำหนด กำหนดวันเรียนในแท็บ "ตารางเรียน" ก่อน</div>';
+    return;
+  }
+
+  const withMissing = rows.filter(r => r.missed.length > 0).length;
+  const perfect = rows.length - withMissing;
+  summary.innerHTML = `
+    <span>วันเรียนทั้งหมด: <b>${dates.length}</b> ครั้ง</span>
+    <span class="a">มีขาด: <b>${withMissing}</b> คน</span>
+    <span class="p">มาครบ: <b>${perfect}</b> คน</span>
+  `;
+
+  const sorted = rows.slice().sort((a,b) => b.missed.length - a.missed.length);
+  box.innerHTML = '';
+  let shown = 0;
+  sorted.forEach(r => {
+    if(onlyMissing && r.missed.length === 0) return;
+    shown++;
+    const div = document.createElement('div');
+    div.className = 'abs-row';
+    const cntClass = r.missed.length ? 'some' : 'none';
+    const cntText = r.missed.length ? `ขาด ${r.missed.length}/${dates.length}` : `มาครบ (${dates.length})`;
+    const chips = r.missed.length
+      ? r.missed.map(d => `<span class="abs-chip">${shortThaiDate(d)}</span>`).join('')
+      : `<span class="abs-chip ok">✓ ครบทุกครั้ง</span>`;
+    div.innerHTML = `
+      <div class="abs-name"><span class="idx">${String(students.indexOf(r.student)+1).padStart(2,'0')}</span>${r.student.name}</div>
+      <span class="abs-count ${cntClass}">${cntText}</span>
+      <div class="abs-dates">${chips}</div>
+    `;
+    box.appendChild(div);
+  });
+  if(shown === 0){
+    box.innerHTML = '<div class="empty">🎉 ทุกคนมาครบทุกครั้ง</div>';
+  }
+}
+async function exportAbsence(){
+  const { dates, rows } = await computeAbsence();
+  if(dates.length === 0){ alert('ยังไม่มีวันเรียนที่ถึงกำหนด'); return; }
+  const wb = XLSX.utils.book_new();
+  const aoa = [['ชื่อ', 'จำนวนครั้งที่ขาด', 'จากทั้งหมด (ครั้ง)', 'วันที่ขาด']];
+  rows.slice().sort((a,b) => b.missed.length - a.missed.length).forEach(r => {
+    aoa.push([r.student.name, r.missed.length, dates.length, r.missed.join(', ') || '-']);
+  });
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  XLSX.utils.book_append_sheet(wb, ws, 'คนขาด');
+  XLSX.writeFile(wb, 'รายชื่อคนขาด-เซนต์หลุยส์.xlsx');
+}
+
+function renderQrGrid(){
+  const grid = $('#qrGrid');
+  grid.innerHTML = '';
+  if(students.length === 0){
+    grid.innerHTML = '<div class="empty">ยังไม่มีรายชื่อนักเรียน เพิ่มก่อนในแท็บ "จัดการรายชื่อ"</div>';
+    return;
+  }
+  students.forEach((s, i) => {
+    const card = document.createElement('div');
+    card.className = 'qr-card';
+    card.innerHTML = `
+      <div class="qrbox" id="qrbox-${s.id}"></div>
+      <div class="name">${s.name}</div>
+      <div class="idx">เลขที่ ${String(i+1).padStart(2,'0')}</div>
+    `;
+    grid.appendChild(card);
+    new QRCode(card.querySelector('.qrbox'), {
+      text: QR_PREFIX + s.id,
+      width: 120,
+      height: 120,
+      colorDark: '#1F3D2B',
+      colorLight: '#ffffff'
+    });
+  });
+}
+
+// ---------- SCHEDULE ----------
+function renderSchedule(){
+  const table = $('#schedTable');
+  if(scheduleData.periods.length === 0){
+    table.innerHTML = '';
+    const wrap = document.createElement('div');
+    wrap.className = 'empty';
+    wrap.textContent = 'ยังไม่มีคาบเรียน กด "+ เพิ่มคาบเรียน" ด้านล่างเพื่อเริ่มสร้างตาราง';
+    table.replaceWith(wrap);
+    wrap.id = 'schedTable';
+    return;
+  }
+  let thead = `<tr><th>วันที่ / เวลา</th><th>หัวข้อ</th><th></th></tr>`;
+  let rows = scheduleData.periods
+    .slice()
+    .sort((a,b) => (a.date||'').localeCompare(b.date||''))
+    .map(p => `
+      <tr>
+        <td>
+          <div class="sched-time">
+            <input type="date" data-pid="${p.id}" data-field="date" value="${p.date||''}">
+            <input type="time" data-pid="${p.id}" data-field="start" value="${p.start||''}">
+            <span>-</span>
+            <input type="time" data-pid="${p.id}" data-field="end" value="${p.end||''}">
+          </div>
+        </td>
+        <td><input type="text" class="sched-subject" data-pid="${p.id}" value="${p.topic||''}" placeholder="หัวข้อ"></td>
+        <td><button class="btn-danger sched-del" data-pid="${p.id}">ลบ</button></td>
+      </tr>
+    `).join('');
+  const newTable = document.createElement('table');
+  newTable.className = 'sched-table';
+  newTable.id = 'schedTable';
+  newTable.innerHTML = thead + rows;
+  document.getElementById('schedTable').replaceWith(newTable);
+
+  $$('.sched-subject', newTable).forEach(inp => {
+    inp.onchange = () => {
+      const p = scheduleData.periods.find(x => x.id === inp.dataset.pid);
+      if(!p) return;
+      p.topic = inp.value;
+      saveSchedule();
+      renderTodaySchedule();
+    };
+  });
+  $$('input[type=time], input[type=date]', newTable).forEach(inp => {
+    inp.onchange = () => {
+      const p = scheduleData.periods.find(x => x.id === inp.dataset.pid);
+      if(!p) return;
+      p[inp.dataset.field] = inp.value;
+      saveSchedule();
+      renderTodaySchedule();
+    };
+  });
+  $$('.sched-del', newTable).forEach(btn => {
+    btn.onclick = () => {
+      scheduleData.periods = scheduleData.periods.filter(p => p.id !== btn.dataset.pid);
+      saveSchedule();
+      renderSchedule();
+      renderTodaySchedule();
+    };
+  });
+}
+
+// ---------- EXPORT ----------
+async function exportExcel(){
+  const { all, totals } = await renderStats();
+  const wb = XLSX.utils.book_new();
+
+  const summaryRows = [['ชื่อ','มา','สาย','ขาด','% เข้าเรียน']];
+  students.forEach(s => {
+    const t = totals[s.id];
+    const total = t.present + t.late + t.absent;
+    const pct = total > 0 ? Math.round(((t.present + t.late) / total) * 100) : 0;
+    summaryRows.push([s.name, t.present, t.late, t.absent, pct + '%']);
+  });
+  const ws1 = XLSX.utils.aoa_to_sheet(summaryRows);
+  XLSX.utils.book_append_sheet(wb, ws1, 'สรุปสถิติ');
+
+  const dates = Object.keys(all).sort();
+  const detailHeader = ['ชื่อ', ...dates];
+  const detailRows = [detailHeader];
+  students.forEach(s => {
+    const row = [s.name];
+    dates.forEach(d => {
+      const rec = all[d][s.id];
+      const status = getRecordStatus(rec);
+      const time = getRecordTime(rec);
+      row.push(status ? (STATUS_LABEL[status] + (time ? ' (' + time + ')' : '')) : '-');
+    });
+    detailRows.push(row);
+  });
+  const ws2 = XLSX.utils.aoa_to_sheet(detailRows);
+  XLSX.utils.book_append_sheet(wb, ws2, 'รายละเอียดรายวัน');
+
+  const logRows = [['วันที่','เวลา','ชื่อ','สถานะ']];
+  dates.forEach(d => {
+    students.forEach(s => {
+      const rec = all[d][s.id];
+      const status = getRecordStatus(rec);
+      if(status){
+        logRows.push([d, getRecordTime(rec) || '-', s.name, STATUS_LABEL[status]]);
+      }
+    });
+  });
+  const ws3 = XLSX.utils.aoa_to_sheet(logRows);
+  XLSX.utils.book_append_sheet(wb, ws3, 'บันทึกเวลาเข้าเรียน');
+
+  XLSX.writeFile(wb, 'รายงานการเช็คชื่อ.xlsx');
+}
+
+function exportPdf(){
+  window.print();
+}
+
+// ---------- QR SCANNING ----------
+let scanStream = null;
+let scanLoopId = null;
+let scanCanvas = document.createElement('canvas');
+let scanCtx = scanCanvas.getContext('2d', { willReadFrequently: true });
+let lastScanTime = {};
+const SCAN_COOLDOWN_MS = 5000;
+
+function beep(ok){
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.frequency.value = ok ? 880 : 220;
+    osc.connect(gain); gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.12);
+  }catch(e){}
+}
+
+function flashScan(text, isErr){
+  const el = $('#scanFlash');
+  el.textContent = text;
+  el.classList.toggle('err', !!isErr);
+  el.classList.add('show');
+  clearTimeout(flashScan._t);
+  flashScan._t = setTimeout(() => el.classList.remove('show'), 900);
+}
+
+function addFeedItem(name, timeStr){
+  const list = $('#scanFeedList');
+  const li = document.createElement('li');
+  li.innerHTML = `<span>${name}</span><span class="t">${timeStr}</span>`;
+  list.prepend(li);
+  $('#feedCount').textContent = list.children.length;
+}
+
+async function handleScannedId(rawId){
+  const now = Date.now();
+  if(lastScanTime[rawId] && (now - lastScanTime[rawId]) < SCAN_COOLDOWN_MS) return;
+  lastScanTime[rawId] = now;
+
+  const student = students.find(s => s.id === rawId);
+  if(!student){
+    flashScan('ไม่พบรายชื่อนี้ในระบบ', true);
+    beep(false);
+    return;
+  }
+  const scanDate = $('#scanDate').value || currentDate;
+  const status = $('#scanStatus').value || 'present';
+  const time = nowTimeValue();
+  const roll = await loadRoll(scanDate);
+  roll[student.id] = { status, time };
+  await saveRollData(scanDate, roll);
+
+  flashScan(`✅ ${student.name}\n${STATUS_LABEL[status]} • ${time}`, false);
+  beep(true);
+  addFeedItem(student.name, time);
+
+  if(scanDate === currentDate) currentRoll = roll;
+}
+
+function scanTick(){
+  const video = $('#scanVideo');
+  if(video.readyState === video.HAVE_ENOUGH_DATA){
+    scanCanvas.width = video.videoWidth;
+    scanCanvas.height = video.videoHeight;
+    scanCtx.drawImage(video, 0, 0, scanCanvas.width, scanCanvas.height);
+    const imageData = scanCtx.getImageData(0, 0, scanCanvas.width, scanCanvas.height);
+    const code = jsQR(imageData.data, imageData.width, imageData.height);
+    if(code && code.data && code.data.startsWith(QR_PREFIX)){
+      const id = code.data.slice(QR_PREFIX.length);
+      handleScannedId(id);
+    }
+  }
+  scanLoopId = requestAnimationFrame(scanTick);
+}
+
+async function startScan(){
+  try{
+    scanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    const video = $('#scanVideo');
+    video.srcObject = scanStream;
+    await video.play();
+    scanLoopId = requestAnimationFrame(scanTick);
+    $('#startScanBtn').style.display = 'none';
+    $('#stopScanBtn').style.display = 'inline-block';
+  }catch(e){
+    alert('เปิดกล้องไม่สำเร็จ: ' + e.message + '\n\nลองเปิดไฟล์นี้ในแท็บเบราว์เซอร์แยกต่างหากแล้วอนุญาตการใช้กล้อง');
+  }
+}
+function stopScan(){
+  if(scanLoopId) cancelAnimationFrame(scanLoopId);
+  if(scanStream) scanStream.getTracks().forEach(t => t.stop());
+  scanStream = null;
+  $('#startScanBtn').style.display = 'inline-block';
+  $('#stopScanBtn').style.display = 'none';
+}
+
+async function refreshScanFeed(){
+  const list = $('#scanFeedList');
+  list.innerHTML = '';
+  const date = $('#scanDate').value || currentDate;
+  const roll = await loadRoll(date);
+  const entries = Object.entries(roll).filter(([id, rec]) => {
+    const st = getRecordStatus(rec);
+    return st === 'present' || st === 'late';
+  });
+  entries.forEach(([id, rec]) => {
+    const s = students.find(x => x.id === id);
+    if(s) addFeedItem(s.name, getRecordTime(rec) || '-');
+  });
+  $('#feedCount').textContent = list.children.length;
+}
+
+// ---------- TABS ----------
+function switchTab(name){
+  ['roll','scan','students','qrcodes','schedule','absence','stats'].forEach(t => {
+    $('#tab-' + t).style.display = (t === name) ? 'block' : 'none';
+  });
+  $$('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  if(name === 'stats') renderStats();
+  if(name === 'roll') renderRoll();
+  if(name === 'qrcodes') renderQrGrid();
+  if(name === 'schedule') renderSchedule();
+  if(name === 'absence') renderAbsence();
+  if(name === 'scan'){ $('#scanFeedList').innerHTML=''; refreshScanFeed(); }
+  else { stopScan(); }
+}
+
+// ---------- INIT ----------
+async function init(){
+  $('#todayLabel').textContent = todayThaiLabel();
+  $('#rollDate').value = currentDate;
+  $('#scanDate').value = currentDate;
+
+  await loadStudents();
+  await loadSchedule();
+  if(scheduleData.periods.length === 0){
+    scheduleData.periods.push({ id: pid(), date: upcomingSunday(), start:'09:30', end:'11:30', topic:'เรียนคำสอนศาสนา' });
+    await saveSchedule();
+  }
+  renderStudentList();
+  await renderRoll();
+  renderQrGrid();
+
+  $$('.tab-btn').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
+
+  $('#addStudentBtn').onclick = async () => {
+    const input = $('#newStudentName');
+    const name = input.value.trim();
+    if(!name) return;
+    students.push({ id: uid(), name });
+    await saveStudents();
+    input.value = '';
+    renderStudentList();
+    renderRoll();
+    renderQrGrid();
+  };
+  $('#newStudentName').addEventListener('keydown', e => {
+    if(e.key === 'Enter') $('#addStudentBtn').click();
+  });
+
+  $('#rollDate').onchange = async (e) => {
+    currentDate = e.target.value;
+    $('#scanDate').value = currentDate;
+    await renderRoll();
+  };
+  $('#scanDate').onchange = () => { refreshScanFeed(); };
+
+  $('#markAllPresent').onclick = () => {
+    const t = nowTimeValue();
+    students.forEach(s => currentRoll[s.id] = { status: 'present', time: t });
+    renderRoll();
+  };
+
+  $('#saveRoll').onclick = async () => {
+    await saveRollData(currentDate, currentRoll);
+    const el = $('#saveStatus');
+    el.textContent = '✓ บันทึกแล้ว';
+    setTimeout(() => el.textContent = '', 2000);
+  };
+
+  $('#addPeriodBtn').onclick = () => {
+    const dates = scheduleData.periods.map(p => p.date).filter(Boolean).sort();
+    const lastDate = dates.length ? dates[dates.length-1] : null;
+    const nextDate = lastDate ? addDays(lastDate, 7) : upcomingSunday();
+    scheduleData.periods.push({ id: pid(), date: nextDate, start:'09:30', end:'11:30', topic:'' });
+    saveSchedule();
+    renderSchedule();
+  };
+
+  $('#exportExcel').onclick = exportExcel;
+  $('#exportPdf').onclick = exportPdf;
+  $('#exportAbsence').onclick = exportAbsence;
+  $('#absOnlyMissing').onchange = renderAbsence;
+  $('#printQrBtn').onclick = () => window.print();
+  $('#startScanBtn').onclick = startScan;
+  $('#stopScanBtn').onclick = stopScan;
+
+  window.addEventListener('beforeunload', stopScan);
+}
+
+init();
+</script>
+</body>
+</html>
