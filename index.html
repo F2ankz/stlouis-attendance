@@ -1519,23 +1519,39 @@ async function renderHistory() {
   const list = $('#historyList');
   list.innerHTML = '';
   
-  const dates = Object.keys(allAttendance).sort().reverse();
-  if(dates.length === 0){
-    list.innerHTML = '<div class="empty">ยังไม่มีประวัติการเข้าเรียน</div>';
+  const periods = scheduleData.periods.slice().sort((a,b) => (a.date||'').localeCompare(b.date||''));
+  
+  if(periods.length === 0){
+    list.innerHTML = '<div class="empty">ยังไม่มีตารางเรียนหรือประวัติการเข้าเรียน</div>';
     return;
   }
   
-  dates.forEach(d => {
-    const rec = allAttendance[d][currentUser.refId];
-    const status = getRecordStatus(rec);
-    const time = getRecordTime(rec);
+  periods.forEach(p => {
+    if(!p.date) return;
+    
+    let status = '';
+    let time = '';
+    if (allAttendance[p.date] && allAttendance[p.date][currentUser.refId]) {
+      const rec = allAttendance[p.date][currentUser.refId];
+      status = getRecordStatus(rec);
+      time = getRecordTime(rec);
+    }
     
     const item = document.createElement('div');
     item.className = 'roll-item';
+    item.style.alignItems = 'center';
+    
+    const topicStr = p.topic || '(ไม่มีหัวข้อ)';
+    const timeStr = `${p.start||'?'}-${p.end||'?'}`;
+    
     item.innerHTML = `
-      <div class="roll-name">${d}</div>
+      <div class="roll-name" style="flex: 1;">
+        📅 ${p.date} <span style="font-size:13px; color:var(--ink-soft); font-weight:normal; margin-left:6px;">(${timeStr})</span>
+        <div style="font-size:13px; color:var(--ink-soft); font-weight:normal; margin-top:4px;">${topicStr} ${p.special ? `<span style="color:var(--primary);">[${p.special}]</span>` : ''}</div>
+      </div>
       <div class="stamps">
-        <span class="stamp-mini ${status}">${STATUS_LABEL[status]} ${time ? 'เวลา ' + time : ''}</span>
+        ${status ? `<span class="stamp-mini ${status}">${STATUS_LABEL[status]} ${time ? '<br><span style="font-size:0.9em;font-weight:normal;">เวลา ' + time + '</span>' : ''}</span>` 
+                 : `<span style="font-size:13px; color:var(--ink-soft);">ยังไม่มีบันทึก</span>`}
       </div>
     `;
     list.appendChild(item);
