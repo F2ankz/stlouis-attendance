@@ -1397,12 +1397,14 @@ async function handleGpsCheckIn(){
   navigator.geolocation.getCurrentPosition(async (position) => {
     const lat = position.coords.latitude;
     const lon = position.coords.longitude;
-    const targetLat = 13.7197;
-    const targetLon = 100.5258;
+    // TARGET LOCATION (Saint Louis Suksa School)
+    const TARGET_LAT = 13.71832;
+    const TARGET_LNG = 100.52416;
+    const MAX_DISTANCE_METERS = 50; 
     
-    const distance = getDistanceFromLatLonInMeters(lat, lon, targetLat, targetLon);
-    if(distance > 100) {
-      msgEl.innerHTML = `❌ คุณอยู่นอกระยะที่กำหนด<br><span style="font-size:13px;font-weight:400;">(ระยะห่าง: ${Math.round(distance)} เมตร จากวัดเซนต์หลุยส์)</span>`;
+    const distance = getDistanceFromLatLonInMeters(lat, lon, TARGET_LAT, TARGET_LNG);
+    if(distance > MAX_DISTANCE_METERS) {
+      msgEl.innerHTML = `❌ คุณอยู่นอกระยะที่กำหนด<br><span style="font-size:13px;font-weight:400;">(ระยะห่าง: ${Math.round(distance)} เมตร จากโรงเรียนเซนต์หลุยส์ศึกษา)</span>`;
       msgEl.style.color = 'var(--absent)';
       return;
     }
