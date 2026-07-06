@@ -521,28 +521,98 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.js"></script>
 <script>
-// --- Storage fallback: ใช้ localStorage ของเบราว์เซอร์ ---
-// ทำให้เว็บทำงานได้เมื่อเปิดเป็นเว็บไซต์ปกติ (เช่น GitHub Pages) โดยไม่ต้องมี window.storage ของโฮสต์
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx2AiTrBPLfv4dWsgl0lpkUMydr9lrciA-XXHvXAVqV4WnNMtBID5kXoZIuNagtaF6E/exec'; // <-- นำ Web App URL ที่ได้จาก Google Apps Script มาใส่ตรงนี้
+
+// --- Storage fallback: ใช้ Google Sheets เป็นฐานข้อมูล (ถ้าใส่ URL แล้ว) หรือใช้ localStorage (ถ้ายังไม่ใส่) ---
 if(!window.storage || typeof window.storage.get !== 'function'){
   window.storage = {
-    async get(key){
-      const v = localStorage.getItem(key);
-      return v === null ? null : { value: v };
-    },
-    async set(key, value){
-      localStorage.setItem(key, value);
-      return true;
-    },
-    async list(prefix){
-      const keys = [];
-      for(let i = 0; i < localStorage.length; i++){
-        const k = localStorage.key(i);
-        if(k && k.indexOf(prefix) === 0) keys.push(k);
+    async get(key, showLoading = true){
+      if(showLoading) showGlobalLoading();
+      if(!WEB_APP_URL){
+        const v = localStorage.getItem(key);
+        if(showLoading) hideGlobalLoading();
+        return v === null ? null : { value: v };
       }
-      return { keys };
+      try {
+        const res = await fetch(WEB_APP_URL + '?action=get&key=' + encodeURIComponent(key));
+        const data = await res.json();
+        if(showLoading) hideGlobalLoading();
+        if(data.success && data.value !== null) return { value: data.value };
+        return null;
+      } catch(e) {
+        if(showLoading) hideGlobalLoading();
+        console.error('API Error (get):', e);
+        return null;
+      }
+    },
+    async set(key, value, showLoading = true){
+      if(showLoading) showGlobalLoading();
+      if(!WEB_APP_URL){
+        localStorage.setItem(key, value);
+        if(showLoading) hideGlobalLoading();
+        return true;
+      }
+      try {
+        const res = await fetch(WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'set', key, value })
+        });
+        const data = await res.json();
+        if(showLoading) hideGlobalLoading();
+        return data.success;
+      } catch(e) {
+        if(showLoading) hideGlobalLoading();
+        console.error('API Error (set):', e);
+        return false;
+      }
+    },
+    async list(prefix, showLoading = true){
+      if(showLoading) showGlobalLoading();
+      if(!WEB_APP_URL){
+        const keys = [];
+        for(let i = 0; i < localStorage.length; i++){
+          const k = localStorage.key(i);
+          if(k && k.indexOf(prefix) === 0) keys.push(k);
+        }
+        if(showLoading) hideGlobalLoading();
+        return { keys };
+      }
+      try {
+        const res = await fetch(WEB_APP_URL + '?action=list&prefix=' + encodeURIComponent(prefix));
+        const data = await res.json();
+        if(showLoading) hideGlobalLoading();
+        return { keys: data.keys || [] };
+      } catch(e) {
+        if(showLoading) hideGlobalLoading();
+        console.error('API Error (list):', e);
+        return { keys: [] };
+      }
     }
   };
 }
+
+// Global Loading UI
+function showGlobalLoading() {
+  let el = document.getElementById('global-loading');
+  if(!el) {
+    el = document.createElement('div');
+    el.id = 'global-loading';
+    el.innerHTML = '<div style="background:var(--ink);color:white;padding:10px 20px;border-radius:999px;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,0.15);">กำลังโหลดข้อมูล / บันทึก... ☁️</div>';
+    el.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;transition:opacity 0.2s;';
+    document.body.appendChild(el);
+  }
+  el.style.opacity = '1';
+  el.style.pointerEvents = 'auto';
+}
+function hideGlobalLoading() {
+  const el = document.getElementById('global-loading');
+  if(el) {
+    el.style.opacity = '0';
+    el.style.pointerEvents = 'none';
+  }
+}
+
 
 const $ = (sel, root=document) => root.querySelector(sel);
 const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
