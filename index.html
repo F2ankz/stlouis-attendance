@@ -760,7 +760,8 @@ function renderTodaySchedule(){
   }
   const items = scheduleData.periods
     .filter(p => p.date === currentDate)
-    .map(p => `<b>${p.topic || '(ไม่มีหัวข้อ)'}</b> ${p.special ? `<span style="color:var(--ink-soft);font-size:0.9em;">[${p.special}]</span>` : ''}`);
+    .sort((a,b) => (a.start||'').localeCompare(b.start||''))
+    .map(p => `<b>${p.start||'?'}-${p.end||'?'}</b> ${p.topic || '(ไม่มีหัวข้อ)'} ${p.special ? `<span style="color:var(--ink-soft);font-size:0.9em;">[${p.special}]</span>` : ''}`);
   if(items.length === 0){ box.style.display = 'none'; return; }
   box.style.display = 'block';
   box.innerHTML = `📅 <b>เรียนวันนี้:</b> ${items.join(' &nbsp;•&nbsp; ')}`;
@@ -941,13 +942,20 @@ function renderSchedule(){
     wrap.id = 'schedTable';
     return;
   }
-  let thead = `<tr><th>วันที่</th><th>หัวข้อ</th><th>กิจกรรมพิเศษ</th><th></th></tr>`;
+  let thead = `<tr><th>วันที่/เวลา</th><th>หัวข้อ</th><th>กิจกรรมพิเศษ</th><th></th></tr>`;
   let rows = scheduleData.periods
     .slice()
     .sort((a,b) => (a.date||'').localeCompare(b.date||''))
     .map(p => `
       <tr>
-        <td><input type="date" data-pid="${p.id}" data-field="date" value="${p.date||''}"></td>
+        <td>
+          <div class="sched-time">
+            <input type="date" data-pid="${p.id}" data-field="date" value="${p.date||''}">
+            <input type="time" data-pid="${p.id}" data-field="start" value="${p.start||''}">
+            <span>-</span>
+            <input type="time" data-pid="${p.id}" data-field="end" value="${p.end||''}">
+          </div>
+        </td>
         <td><input type="text" class="sched-subject" data-pid="${p.id}" data-field="topic" value="${p.topic||''}" placeholder="หัวข้อ"></td>
         <td><input type="text" class="sched-subject" data-pid="${p.id}" data-field="special" value="${p.special||''}" placeholder="กิจกรรมพิเศษ"></td>
         <td><button class="btn-danger sched-del" data-pid="${p.id}">ลบ</button></td>
@@ -1079,8 +1087,28 @@ async function handleScannedId(rawId){
     return;
   }
   const scanDate = $('#scanDate').value || currentDate;
-  const status = $('#scanStatus').value || 'present';
   const time = nowTimeValue();
+  
+  // Auto-calculate status based on class start time
+  let status = $('#scanStatus').value || 'present';
+  const todaysPeriods = scheduleData.periods.filter(p => p.date === scanDate).sort((a,b) => (a.start||'').localeCompare(b.start||''));
+  if (todaysPeriods.length > 0) {
+    const p = todaysPeriods[0];
+    if (p.start) {
+      const sh = parseInt(p.start.split(':')[0], 10);
+      const sm = parseInt(p.start.split(':')[1], 10);
+      const th = parseInt(time.split(':')[0], 10);
+      const tm = parseInt(time.split(':')[1], 10);
+      const startMins = sh * 60 + sm;
+      const scanMins = th * 60 + tm;
+      if (scanMins > startMins + 15) {
+        status = 'late';
+      } else {
+        status = 'present';
+      }
+    }
+  }
+
   const roll = await loadRoll(scanDate);
   roll[student.id] = { status, time };
   await saveRollData(scanDate, roll);
@@ -1228,7 +1256,7 @@ async function init(){
 
   await loadAllData();
   if(scheduleData.periods.length === 0){
-    scheduleData.periods.push({ id: pid(), date: upcomingSunday(), topic:'เรียนคำสอนศาสนา', special:'' });
+    scheduleData.periods.push({ id: pid(), date: upcomingSunday(), start:'09:30', end:'11:30', topic:'เรียนคำสอนศาสนา', special:'' });
     await saveSchedule();
   }
   renderStudentList();
@@ -1292,7 +1320,7 @@ async function init(){
     const dates = scheduleData.periods.map(p => p.date).filter(Boolean).sort();
     const lastDate = dates.length ? dates[dates.length-1] : null;
     const nextDate = lastDate ? addDays(lastDate, 7) : upcomingSunday();
-    scheduleData.periods.push({ id: pid(), date: nextDate, topic:'', special:'' });
+    scheduleData.periods.push({ id: pid(), date: nextDate, start:'09:30', end:'11:30', topic:'', special:'' });
     saveSchedule();
     renderSchedule();
   };
