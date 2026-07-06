@@ -1447,7 +1447,7 @@ async function handleGpsCheckIn(){
 
 // ---------- LOGIN ----------
 async function doLogin(){
-  const user = $('#loginUser').value.trim();
+  let user = $('#loginUser').value.trim();
   const pass = $('#loginPass').value.trim();
   const errEl = $('#loginError');
   const btn = $('#loginBtn');
@@ -1457,6 +1457,9 @@ async function doLogin(){
     errEl.style.display = 'block';
     return;
   }
+  
+  // บังคับพิมพ์เล็กทั้งหมดเผื่อมือถือพิมพ์ใหญ่ตัวแรกให้อัตโนมัติ
+  user = user.toLowerCase();
   
   btn.textContent = 'กำลังตรวจสอบ...';
   btn.disabled = true;
