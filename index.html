@@ -360,13 +360,49 @@
     .scan-video-box{ width: 100%; }
     .sched-table{ font-size: 12.5px; }
   }
+<style>
+  /* Login Overlay */
+  #loginOverlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #fdfbf7; z-index: 9999; display: flex;
+    align-items: center; justify-content: center;
+  }
+  .login-box {
+    background: #fff; padding: 30px; border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; max-width: 350px;
+    text-align: center; border: 1px solid var(--paper-line);
+  }
+  .login-box h2 { margin-bottom: 20px; font-family: 'Bitter', serif; color: var(--ink); }
+  .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid var(--paper-line); font-size: 15px; }
+  .login-box button { width: 100%; padding: 12px; font-size: 16px; border-radius: 8px; }
+  .login-error { color: var(--absent); font-size: 13.5px; margin-bottom: 10px; display: none; }
+  
+  /* Logged In Info */
+  .user-info { font-size: 13px; color: var(--ink-soft); display: flex; align-items: center; gap: 8px; }
+  .user-info button { background: none; border: none; color: var(--absent); cursor: pointer; font-size: 13px; text-decoration: underline; padding: 0; }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>📖 สมุดเช็คชื่อ เซนต์หลุยส์</h1>
-    <span class="stamp-mini" id="todayLabel"></span>
+<div id="loginOverlay">
+  <div class="login-box">
+    <h2>ระบบลงเวลาเรียน</h2>
+    <div id="loginError" class="login-error"></div>
+    <input type="text" id="loginUser" placeholder="Username" autocomplete="off">
+    <input type="password" id="loginPass" placeholder="Password">
+    <button class="btn-primary" id="loginBtn">เข้าสู่ระบบ</button>
+  </div>
+</div>
+
+<div class="wrap" id="appWrap" style="display:none;">
+  <header style="justify-content:space-between; flex-wrap:wrap; gap:10px;">
+    <div>
+      <h1>📖 สมุดเช็คชื่อ เซนต์หลุยส์</h1>
+      <span class="stamp-mini" id="todayLabel"></span>
+    </div>
+    <div class="user-info">
+      <span id="loggedInRole"></span>
+      <button id="logoutBtn">ออกจากระบบ</button>
+    </div>
   </header>
 
   <div class="tabs no-print">
@@ -378,6 +414,7 @@
     <button class="tab-btn" data-tab="schedule">ตารางเรียน</button>
     <button class="tab-btn" data-tab="absence">🚩 ใครขาดบ้าง</button>
     <button class="tab-btn" data-tab="stats">สรุปสถิติ</button>
+    <button class="tab-btn" data-tab="history" style="display:none;">📅 ประวัติของฉัน</button>
   </div>
 
   <!-- ROLL CALL TAB -->
@@ -540,6 +577,14 @@
     </div>
   </section>
 
+  <!-- HISTORY TAB (For Students) -->
+  <section id="tab-history" style="display:none;">
+    <div class="card">
+      <h2>📅 ประวัติการเข้าเรียนของฉัน</h2>
+      <div id="historyList"></div>
+    </div>
+  </section>
+
   <footer>ข้อมูลถูกบันทึกไว้ในเบราว์เซอร์ของบัญชีนี้เท่านั้น</footer>
 </div>
 
@@ -629,6 +674,7 @@ let currentDate = new Date().toISOString().slice(0,10);
 let currentRoll = {};
 let scheduleData = { periods: [] };
 let allAttendance = {}; // Cache จาก Server
+let currentUser = null; // { role: 'admin'|'student', refId: '' }
 
 function todayThaiLabel(){
   const d = new Date();
@@ -729,13 +775,22 @@ function renderStudentList(){
     });
   }
   
-  // Populate GPS Dropdown
+  // Populate GPS Dropdown (if admin)
   const gpsSel = $('#gpsStudentSelect');
   if(gpsSel) {
-    const curVal = gpsSel.value;
-    gpsSel.innerHTML = '<option value="">-- เลือกชื่อของตนเอง --</option>' + 
-      students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-    if(curVal) gpsSel.value = curVal;
+    if(currentUser && currentUser.role === 'student'){
+      const s = students.find(x => x.id === currentUser.refId);
+      if(s) {
+        gpsSel.innerHTML = `<option value="${s.id}" selected>${s.name}</option>`;
+        gpsSel.disabled = true;
+      }
+    } else {
+      const curVal = gpsSel.value;
+      gpsSel.innerHTML = '<option value="">-- เลือกชื่อของตนเอง --</option>' + 
+        students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+      if(curVal) gpsSel.value = curVal;
+      gpsSel.disabled = false;
+    }
   }
 }
 
@@ -952,7 +1007,11 @@ function renderQrGrid(){
     grid.innerHTML = '<div class="empty">ยังไม่มีรายชื่อนักเรียน เพิ่มก่อนในแท็บ "จัดการรายชื่อ"</div>';
     return;
   }
-  students.forEach((s, i) => {
+  let listToRender = students;
+  if(currentUser && currentUser.role === 'student'){
+    listToRender = students.filter(s => s.id === currentUser.refId);
+  }
+  listToRender.forEach((s, i) => {
     const card = document.createElement('div');
     card.className = 'qr-card';
     card.innerHTML = `
@@ -1286,7 +1345,11 @@ async function refreshScanFeed(){
 
 // ---------- TABS ----------
 function switchTab(name){
-  ['roll','scan','students','qrcodes','schedule','absence','stats','gps'].forEach(t => {
+  if(currentUser && currentUser.role === 'student' && !['gps','qrcodes','history'].includes(name)){
+    name = 'history'; // Force student to allowed tabs
+  }
+  
+  ['roll','scan','students','qrcodes','schedule','absence','stats','gps','history'].forEach(t => {
     $('#tab-' + t).style.display = (t === name) ? 'block' : 'none';
   });
   $$('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
@@ -1295,6 +1358,7 @@ function switchTab(name){
   if(name === 'qrcodes') renderQrGrid();
   if(name === 'schedule') renderSchedule();
   if(name === 'absence') renderAbsence();
+  if(name === 'history') renderHistory();
   if(name === 'scan'){ $('#scanFeedList').innerHTML=''; refreshScanFeed(); }
   else { stopScan(); }
 }
@@ -1381,21 +1445,123 @@ async function handleGpsCheckIn(){
   }, { enableHighAccuracy: true, timeout: 10000 });
 }
 
+// ---------- LOGIN ----------
+async function doLogin(){
+  const user = $('#loginUser').value.trim();
+  const pass = $('#loginPass').value.trim();
+  const errEl = $('#loginError');
+  const btn = $('#loginBtn');
+  
+  if(!user || !pass) {
+    errEl.textContent = 'กรุณากรอก Username และ Password';
+    errEl.style.display = 'block';
+    return;
+  }
+  
+  btn.textContent = 'กำลังตรวจสอบ...';
+  btn.disabled = true;
+  errEl.style.display = 'none';
+  
+  const res = await api.req('login', { username: user, password: pass });
+  btn.textContent = 'เข้าสู่ระบบ';
+  btn.disabled = false;
+  
+  if(res && res.success) {
+    currentUser = { role: res.role, refId: res.refId || '' };
+    sessionStorage.setItem('stlouis_user', JSON.stringify(currentUser));
+    applyRoleUI();
+  } else {
+    errEl.textContent = res ? res.error : 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้';
+    errEl.style.display = 'block';
+  }
+}
+
+function doLogout(){
+  sessionStorage.removeItem('stlouis_user');
+  currentUser = null;
+  $('#loginUser').value = '';
+  $('#loginPass').value = '';
+  $('#loginOverlay').style.display = 'flex';
+  $('#appWrap').style.display = 'none';
+}
+
+function applyRoleUI(){
+  $('#loginOverlay').style.display = 'none';
+  $('#appWrap').style.display = 'block';
+  
+  const roleName = currentUser.role === 'admin' ? '👤 ครู (Admin)' : '🎓 นักเรียน';
+  $('#loggedInRole').textContent = roleName;
+  
+  $$('.tab-btn').forEach(btn => {
+    const tab = btn.dataset.tab;
+    if(currentUser.role === 'student'){
+      if(['gps', 'qrcodes', 'history'].includes(tab)) btn.style.display = 'inline-block';
+      else btn.style.display = 'none';
+    } else {
+      if(tab === 'history') btn.style.display = 'none';
+      else btn.style.display = 'inline-block';
+    }
+  });
+  
+  renderStudentList(); // Re-render dropdowns
+  renderQrGrid(); // Re-render QR to show only own QR
+  switchTab(currentUser.role === 'admin' ? 'roll' : 'history');
+}
+
+async function renderHistory() {
+  if(!currentUser || currentUser.role !== 'student') return;
+  const list = $('#historyList');
+  list.innerHTML = '';
+  
+  const dates = Object.keys(allAttendance).sort().reverse();
+  if(dates.length === 0){
+    list.innerHTML = '<div class="empty">ยังไม่มีประวัติการเข้าเรียน</div>';
+    return;
+  }
+  
+  dates.forEach(d => {
+    const rec = allAttendance[d][currentUser.refId];
+    const status = getRecordStatus(rec);
+    const time = getRecordTime(rec);
+    
+    const item = document.createElement('div');
+    item.className = 'roll-item';
+    item.innerHTML = `
+      <div class="roll-name">${d}</div>
+      <div class="stamps">
+        <span class="stamp-mini ${status}">${STATUS_LABEL[status]} ${time ? 'เวลา ' + time : ''}</span>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+}
+
 // ---------- INIT ----------
 async function init(){
+  const savedUser = sessionStorage.getItem('stlouis_user');
+  if(savedUser) {
+    currentUser = JSON.parse(savedUser);
+  }
+  
+  $('#loginBtn').onclick = doLogin;
+  $('#logoutBtn').onclick = doLogout;
+  $('#loginPass').onkeypress = (e) => { if(e.key === 'Enter') doLogin(); };
+
   $('#todayLabel').textContent = todayThaiLabel();
   $('#rollDate').value = currentDate;
   $('#scanDate').value = currentDate;
 
   await loadAllData();
+  
+  if(currentUser) {
+    applyRoleUI();
+  }
+  
   if(scheduleData.periods.length === 0){
     scheduleData.periods.push({ id: pid(), date: upcomingSunday(), start:'09:30', end:'11:30', topic:'เรียนคำสอนศาสนา', special:'' });
     await saveSchedule();
   }
-  renderStudentList();
-  await renderRoll();
-  renderQrGrid();
-
+  
   $$('.tab-btn').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
 
   $('#addStudentBtn').onclick = async () => {
