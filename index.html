@@ -857,9 +857,32 @@ function renderTodaySchedule(){
     return;
   }
   const items = scheduleData.periods
-    .filter(p => p.date === currentDate)
+    .filter(p => {
+       let d = p.date || '';
+       if (d.includes('GMT')) {
+         const tDate = new Date(d);
+         if (!isNaN(tDate)) {
+           const m = tDate.getMonth() + 1;
+           const day = tDate.getDate();
+           d = tDate.getFullYear() + '-' + (m < 10 ? '0'+m : m) + '-' + (day < 10 ? '0'+day : day);
+         }
+       }
+       return d === currentDate;
+    })
     .sort((a,b) => (a.start||'').localeCompare(b.start||''))
-    .map(p => `<b>${p.start||'?'}-${p.end||'?'}</b> ${p.topic || '(ไม่มีหัวข้อ)'} ${p.special ? `<span style="color:var(--ink-soft);font-size:0.9em;">[${p.special}]</span>` : ''}`);
+    .map(p => {
+       let startStr = p.start || '?';
+       let endStr = p.end || '?';
+       if (startStr.includes('GMT')) {
+         const tDate = new Date(startStr);
+         if(!isNaN(tDate)) startStr = String(tDate.getHours()).padStart(2,'0') + ':' + String(tDate.getMinutes()).padStart(2,'0');
+       }
+       if (endStr.includes('GMT')) {
+         const tDate = new Date(endStr);
+         if(!isNaN(tDate)) endStr = String(tDate.getHours()).padStart(2,'0') + ':' + String(tDate.getMinutes()).padStart(2,'0');
+       }
+       return `<b>${startStr}-${endStr}</b> ${p.topic || '(ไม่มีหัวข้อ)'} ${p.special ? `<span style="color:var(--ink-soft);font-size:0.9em;">[${p.special}]</span>` : ''}`;
+    });
   if(items.length === 0){ box.style.display = 'none'; return; }
   box.style.display = 'block';
   box.innerHTML = `📅 <b>เรียนวันนี้:</b> ${items.join(' &nbsp;•&nbsp; ')}`;
@@ -1529,10 +1552,21 @@ async function renderHistory() {
   periods.forEach(p => {
     if(!p.date) return;
     
+    // Parse ugly GMT string if present
+    let rawDate = p.date;
+    if (rawDate.includes('GMT')) {
+       const tDate = new Date(rawDate);
+       if (!isNaN(tDate)) {
+         const m = tDate.getMonth() + 1;
+         const day = tDate.getDate();
+         rawDate = tDate.getFullYear() + '-' + (m < 10 ? '0'+m : m) + '-' + (day < 10 ? '0'+day : day);
+       }
+    }
+    
     let status = '';
     let time = '';
-    if (allAttendance[p.date] && allAttendance[p.date][currentUser.refId]) {
-      const rec = allAttendance[p.date][currentUser.refId];
+    if (allAttendance[rawDate] && allAttendance[rawDate][currentUser.refId]) {
+      const rec = allAttendance[rawDate][currentUser.refId];
       status = getRecordStatus(rec);
       time = getRecordTime(rec);
     }
@@ -1542,11 +1576,22 @@ async function renderHistory() {
     item.style.alignItems = 'center';
     
     const topicStr = p.topic || '(ไม่มีหัวข้อ)';
-    const timeStr = `${p.start||'?'}-${p.end||'?'}`;
+    
+    let startStr = p.start || '?';
+    let endStr = p.end || '?';
+    if (startStr.includes('GMT')) {
+      const tDate = new Date(startStr);
+      if(!isNaN(tDate)) startStr = String(tDate.getHours()).padStart(2,'0') + ':' + String(tDate.getMinutes()).padStart(2,'0');
+    }
+    if (endStr.includes('GMT')) {
+      const tDate = new Date(endStr);
+      if(!isNaN(tDate)) endStr = String(tDate.getHours()).padStart(2,'0') + ':' + String(tDate.getMinutes()).padStart(2,'0');
+    }
+    const timeStr = `${startStr}-${endStr}`;
     
     item.innerHTML = `
       <div class="roll-name" style="flex: 1;">
-        📅 ${p.date} <span style="font-size:13px; color:var(--ink-soft); font-weight:normal; margin-left:6px;">(${timeStr})</span>
+        📅 ${rawDate} <span style="font-size:13px; color:var(--ink-soft); font-weight:normal; margin-left:6px;">(${timeStr})</span>
         <div style="font-size:13px; color:var(--ink-soft); font-weight:normal; margin-top:4px;">${topicStr} ${p.special ? `<span style="color:var(--primary);">[${p.special}]</span>` : ''}</div>
       </div>
       <div class="stamps">
