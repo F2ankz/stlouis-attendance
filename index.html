@@ -586,7 +586,7 @@
     </div>
   </section>
 
-  <footer>ข้อมูลถูกบันทึกไว้ในเบราว์เซอร์ของบัญชีนี้เท่านั้น</footer>
+  <footer>ข้อมูลถูกบันทึกไว้ในเบราว์เซอร์ของบัญชีนี้เท่านั้น <span id="app-version" style="opacity:0.3; margin-left: 10px;">(v2.1)</span></footer>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -858,7 +858,7 @@ function renderTodaySchedule(){
   }
   const items = scheduleData.periods
     .filter(p => {
-       let d = p.date || '';
+       let d = String(p.date || '');
        if (d.includes('GMT')) {
          const tDate = new Date(d);
          if (!isNaN(tDate)) {
@@ -869,10 +869,10 @@ function renderTodaySchedule(){
        }
        return d === currentDate;
     })
-    .sort((a,b) => (a.start||'').localeCompare(b.start||''))
+    .sort((a,b) => String(a.start||'').localeCompare(String(b.start||'')))
     .map(p => {
-       let startStr = p.start || '?';
-       let endStr = p.end || '?';
+       let startStr = String(p.start || '?');
+       let endStr = String(p.end || '?');
        if (startStr.includes('GMT')) {
          const tDate = new Date(startStr);
          if(!isNaN(tDate)) startStr = String(tDate.getHours()).padStart(2,'0') + ':' + String(tDate.getMinutes()).padStart(2,'0');
@@ -1542,7 +1542,7 @@ async function renderHistory() {
   const list = $('#historyList');
   list.innerHTML = '';
   
-  const periods = scheduleData.periods.slice().sort((a,b) => (a.date||'').localeCompare(b.date||''));
+  const periods = scheduleData.periods.slice().sort((a,b) => String(a.date||'').localeCompare(String(b.date||'')));
   
   if(periods.length === 0){
     list.innerHTML = '<div class="empty">ยังไม่มีตารางเรียนหรือประวัติการเข้าเรียน</div>';
@@ -1553,7 +1553,7 @@ async function renderHistory() {
     if(!p.date) return;
     
     // Parse ugly GMT string if present
-    let rawDate = p.date;
+    let rawDate = String(p.date);
     if (rawDate.includes('GMT')) {
        const tDate = new Date(rawDate);
        if (!isNaN(tDate)) {
@@ -1577,8 +1577,8 @@ async function renderHistory() {
     
     const topicStr = p.topic || '(ไม่มีหัวข้อ)';
     
-    let startStr = p.start || '?';
-    let endStr = p.end || '?';
+    let startStr = String(p.start || '?');
+    let endStr = String(p.end || '?');
     if (startStr.includes('GMT')) {
       const tDate = new Date(startStr);
       if(!isNaN(tDate)) startStr = String(tDate.getHours()).padStart(2,'0') + ':' + String(tDate.getMinutes()).padStart(2,'0');
