@@ -441,8 +441,12 @@
   <section id="tab-students" style="display:none;">
     <div class="card">
       <h2>รายชื่อนักเรียน</h2>
-      <div class="row">
-        <input type="text" id="newStudentName" placeholder="ชื่อ-นามสกุลนักเรียน">
+      <div class="row" style="flex-wrap:wrap; gap:6px;">
+        <input type="text" id="newStudentId" placeholder="StudentID" style="width:100px;">
+        <input type="text" id="newStudentFirst" placeholder="ชื่อ" style="width:120px;">
+        <input type="text" id="newStudentLast" placeholder="นามสกุล" style="width:120px;">
+        <input type="text" id="newStudentNick" placeholder="ชื่อเล่น" style="width:80px;">
+        <input type="text" id="newStudentSaint" placeholder="นักบุญ" style="width:120px;">
         <button class="btn-primary" id="addStudentBtn">+ เพิ่มรายชื่อ</button>
       </div>
       <ul class="student-list" id="studentList"></ul>
@@ -523,74 +527,38 @@
 <script>
 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx2AiTrBPLfv4dWsgl0lpkUMydr9lrciA-XXHvXAVqV4WnNMtBID5kXoZIuNagtaF6E/exec'; // <-- นำ Web App URL ที่ได้จาก Google Apps Script มาใส่ตรงนี้
 
-// --- Storage fallback: ใช้ Google Sheets เป็นฐานข้อมูล (ถ้าใส่ URL แล้ว) หรือใช้ localStorage (ถ้ายังไม่ใส่) ---
-if(!window.storage || typeof window.storage.get !== 'function'){
-  window.storage = {
-    async get(key, showLoading = true){
-      if(showLoading) showGlobalLoading();
-      if(!WEB_APP_URL){
-        const v = localStorage.getItem(key);
-        if(showLoading) hideGlobalLoading();
-        return v === null ? null : { value: v };
-      }
-      try {
-        const res = await fetch(WEB_APP_URL + '?action=get&key=' + encodeURIComponent(key));
-        const data = await res.json();
-        if(showLoading) hideGlobalLoading();
-        if(data.success && data.value !== null) return { value: data.value };
-        return null;
-      } catch(e) {
-        if(showLoading) hideGlobalLoading();
-        console.error('API Error (get):', e);
+// --- API Client: เชื่อมต่อ Google Apps Script ---
+const api = {
+  async req(action, payload = {}) {
+    showGlobalLoading();
+    try {
+      if(!WEB_APP_URL) {
+        alert('กรุณาใส่ WEB_APP_URL ในโค้ดก่อนใช้งาน');
+        hideGlobalLoading();
         return null;
       }
-    },
-    async set(key, value, showLoading = true){
-      if(showLoading) showGlobalLoading();
-      if(!WEB_APP_URL){
-        localStorage.setItem(key, value);
-        if(showLoading) hideGlobalLoading();
-        return true;
-      }
-      try {
-        const res = await fetch(WEB_APP_URL, {
+      let url = WEB_APP_URL;
+      let opts = {};
+      if(action === 'readAll') {
+        url += '?action=readAll';
+      } else {
+        opts = {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'set', key, value })
-        });
-        const data = await res.json();
-        if(showLoading) hideGlobalLoading();
-        return data.success;
-      } catch(e) {
-        if(showLoading) hideGlobalLoading();
-        console.error('API Error (set):', e);
-        return false;
+          body: JSON.stringify({ action, ...payload })
+        };
       }
-    },
-    async list(prefix, showLoading = true){
-      if(showLoading) showGlobalLoading();
-      if(!WEB_APP_URL){
-        const keys = [];
-        for(let i = 0; i < localStorage.length; i++){
-          const k = localStorage.key(i);
-          if(k && k.indexOf(prefix) === 0) keys.push(k);
-        }
-        if(showLoading) hideGlobalLoading();
-        return { keys };
-      }
-      try {
-        const res = await fetch(WEB_APP_URL + '?action=list&prefix=' + encodeURIComponent(prefix));
-        const data = await res.json();
-        if(showLoading) hideGlobalLoading();
-        return { keys: data.keys || [] };
-      } catch(e) {
-        if(showLoading) hideGlobalLoading();
-        console.error('API Error (list):', e);
-        return { keys: [] };
-      }
+      const res = await fetch(url, opts);
+      const data = await res.json();
+      hideGlobalLoading();
+      return data;
+    } catch(e) {
+      hideGlobalLoading();
+      console.error('API Error:', e);
+      return null;
     }
-  };
-}
+  }
+};
 
 // Global Loading UI
 function showGlobalLoading() {
@@ -627,6 +595,7 @@ let students = [];
 let currentDate = new Date().toISOString().slice(0,10);
 let currentRoll = {};
 let scheduleData = { periods: [] };
+let allAttendance = {}; // Cache จาก Server
 
 function todayThaiLabel(){
   const d = new Date();
@@ -661,49 +630,39 @@ function addDays(dateStr, days){
   return d.toISOString().slice(0,10);
 }
 
-async function loadStudents(){
-  try{
-    const res = await window.storage.get('students', false);
-    students = res ? JSON.parse(res.value) : [];
-  }catch(e){ students = []; }
+async function loadAllData(){
+  const res = await api.req('readAll');
+  if(res && res.success){
+    students = res.data.students || [];
+    scheduleData.periods = res.data.schedule || [];
+    allAttendance = res.data.attendance || {};
+    // เพิ่ม property name ใช้งานฝั่ง UI
+    students.forEach(s => s.name = `${s.firstName} ${s.lastName} ${s.nickname?`(${s.nickname})`:''}`.trim());
+  }
 }
+
+async function loadStudents(){ /* Included in loadAllData */ }
 async function saveStudents(){
-  await window.storage.set('students', JSON.stringify(students), false);
+  await api.req('saveStudents', { students });
 }
 
 async function loadRoll(date){
-  try{
-    const res = await window.storage.get('attendance:' + date, false);
-    return res ? JSON.parse(res.value) : {};
-  }catch(e){ return {}; }
+  return allAttendance[date] || {};
 }
 async function saveRollData(date, data){
-  await window.storage.set('attendance:' + date, JSON.stringify(data), false);
+  allAttendance[date] = data; // Update cache
+  const res = await api.req('saveRoll', { date: date, roll: data });
+  const el = $('#saveStatus');
+  if(el){ el.textContent = res && res.success ? '✓ บันทึกแล้ว' : '❌ ผิดพลาด'; setTimeout(() => el.textContent='', 1500); }
 }
 
 async function loadAllAttendance(){
-  const out = {};
-  try{
-    const listRes = await window.storage.list('attendance:', false);
-    const keys = listRes ? listRes.keys : [];
-    for(const k of keys){
-      try{
-        const r = await window.storage.get(k, false);
-        if(r) out[k.replace('attendance:','')] = JSON.parse(r.value);
-      }catch(e){}
-    }
-  }catch(e){}
-  return out;
+  return allAttendance;
 }
 
-async function loadSchedule(){
-  try{
-    const res = await window.storage.get('schedule', false);
-    scheduleData = res ? JSON.parse(res.value) : { periods: [] };
-  }catch(e){ scheduleData = { periods: [] }; }
-}
+async function loadSchedule(){ /* Included in loadAllData */ }
 async function saveSchedule(){
-  await window.storage.set('schedule', JSON.stringify(scheduleData), false);
+  await api.req('saveSchedule', { periods: scheduleData.periods });
   const el = $('#schedSaveStatus');
   if(el){ el.textContent = '✓ บันทึกแล้ว'; setTimeout(() => el.textContent='', 1500); }
 }
@@ -801,11 +760,10 @@ function renderTodaySchedule(){
   }
   const items = scheduleData.periods
     .filter(p => p.date === currentDate)
-    .sort((a,b) => (a.start||'').localeCompare(b.start||''))
-    .map(p => `<b>${p.start||'?'}-${p.end||'?'}</b> ${p.topic ? p.topic : '(ไม่มีหัวข้อ)'}`);
+    .map(p => `<b>${p.topic || '(ไม่มีหัวข้อ)'}</b> ${p.special ? `<span style="color:var(--ink-soft);font-size:0.9em;">[${p.special}]</span>` : ''}`);
   if(items.length === 0){ box.style.display = 'none'; return; }
   box.style.display = 'block';
-  box.innerHTML = `📅 <b>หัวข้อที่มีเรียนวันนี้:</b> ${items.join(' &nbsp;•&nbsp; ')}`;
+  box.innerHTML = `📅 <b>เรียนวันนี้:</b> ${items.join(' &nbsp;•&nbsp; ')}`;
 }
 
 async function renderStats(){
@@ -983,21 +941,15 @@ function renderSchedule(){
     wrap.id = 'schedTable';
     return;
   }
-  let thead = `<tr><th>วันที่ / เวลา</th><th>หัวข้อ</th><th></th></tr>`;
+  let thead = `<tr><th>วันที่</th><th>หัวข้อ</th><th>กิจกรรมพิเศษ</th><th></th></tr>`;
   let rows = scheduleData.periods
     .slice()
     .sort((a,b) => (a.date||'').localeCompare(b.date||''))
     .map(p => `
       <tr>
-        <td>
-          <div class="sched-time">
-            <input type="date" data-pid="${p.id}" data-field="date" value="${p.date||''}">
-            <input type="time" data-pid="${p.id}" data-field="start" value="${p.start||''}">
-            <span>-</span>
-            <input type="time" data-pid="${p.id}" data-field="end" value="${p.end||''}">
-          </div>
-        </td>
-        <td><input type="text" class="sched-subject" data-pid="${p.id}" value="${p.topic||''}" placeholder="หัวข้อ"></td>
+        <td><input type="date" data-pid="${p.id}" data-field="date" value="${p.date||''}"></td>
+        <td><input type="text" class="sched-subject" data-pid="${p.id}" data-field="topic" value="${p.topic||''}" placeholder="หัวข้อ"></td>
+        <td><input type="text" class="sched-subject" data-pid="${p.id}" data-field="special" value="${p.special||''}" placeholder="กิจกรรมพิเศษ"></td>
         <td><button class="btn-danger sched-del" data-pid="${p.id}">ลบ</button></td>
       </tr>
     `).join('');
@@ -1007,16 +959,7 @@ function renderSchedule(){
   newTable.innerHTML = thead + rows;
   document.getElementById('schedTable').replaceWith(newTable);
 
-  $$('.sched-subject', newTable).forEach(inp => {
-    inp.onchange = () => {
-      const p = scheduleData.periods.find(x => x.id === inp.dataset.pid);
-      if(!p) return;
-      p.topic = inp.value;
-      saveSchedule();
-      renderTodaySchedule();
-    };
-  });
-  $$('input[type=time], input[type=date]', newTable).forEach(inp => {
+  $$('.sched-subject, input[type=date]', newTable).forEach(inp => {
     inp.onchange = () => {
       const p = scheduleData.periods.find(x => x.id === inp.dataset.pid);
       if(!p) return;
@@ -1283,10 +1226,9 @@ async function init(){
   $('#rollDate').value = currentDate;
   $('#scanDate').value = currentDate;
 
-  await loadStudents();
-  await loadSchedule();
+  await loadAllData();
   if(scheduleData.periods.length === 0){
-    scheduleData.periods.push({ id: pid(), date: upcomingSunday(), start:'09:30', end:'11:30', topic:'เรียนคำสอนศาสนา' });
+    scheduleData.periods.push({ id: pid(), date: upcomingSunday(), topic:'เรียนคำสอนศาสนา', special:'' });
     await saveSchedule();
   }
   renderStudentList();
@@ -1296,19 +1238,35 @@ async function init(){
   $$('.tab-btn').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
 
   $('#addStudentBtn').onclick = async () => {
-    const input = $('#newStudentName');
-    const name = input.value.trim();
-    if(!name) return;
-    students.push({ id: uid(), name });
+    const stId = $('#newStudentId').value.trim();
+    const first = $('#newStudentFirst').value.trim();
+    const last = $('#newStudentLast').value.trim();
+    const nick = $('#newStudentNick').value.trim();
+    const saint = $('#newStudentSaint').value.trim();
+    
+    if(!stId || !first) { alert('กรุณากรอก StudentID และชื่อ'); return; }
+    
+    students.push({
+      id: stId,
+      firstName: first,
+      lastName: last,
+      nickname: nick,
+      saint: saint,
+      qrCode: QR_PREFIX + stId,
+      name: `${first} ${last} ${nick ? '('+nick+')' : ''}`.trim()
+    });
+    
     await saveStudents();
-    input.value = '';
+    $('#newStudentId').value = '';
+    $('#newStudentFirst').value = '';
+    $('#newStudentLast').value = '';
+    $('#newStudentNick').value = '';
+    $('#newStudentSaint').value = '';
+    
     renderStudentList();
     renderRoll();
     renderQrGrid();
   };
-  $('#newStudentName').addEventListener('keydown', e => {
-    if(e.key === 'Enter') $('#addStudentBtn').click();
-  });
 
   $('#rollDate').onchange = async (e) => {
     currentDate = e.target.value;
@@ -1334,7 +1292,7 @@ async function init(){
     const dates = scheduleData.periods.map(p => p.date).filter(Boolean).sort();
     const lastDate = dates.length ? dates[dates.length-1] : null;
     const nextDate = lastDate ? addDays(lastDate, 7) : upcomingSunday();
-    scheduleData.periods.push({ id: pid(), date: nextDate, start:'09:30', end:'11:30', topic:'' });
+    scheduleData.periods.push({ id: pid(), date: nextDate, topic:'', special:'' });
     saveSchedule();
     renderSchedule();
   };
