@@ -426,6 +426,7 @@
         <input type="date" id="rollDate">
         <button class="btn-ghost" id="markAllPresent">✓ มาทั้งหมด (เวลานี้)</button>
       </div>
+      <div id="liveClock" style="font-size: 16px; font-weight: bold; color: var(--primary); text-align: right; margin-bottom: 10px;"></div>
       <div class="today-schedule no-print" id="todayScheduleBox" style="display:none;"></div>
       <div id="rollList"></div>
       <div class="export-row">
@@ -812,9 +813,9 @@ async function renderRoll(){
     item.innerHTML = `
       <div class="roll-name">
         <span class="idx">${String(i+1).padStart(2,'0')}</span>${s.name}
-        <span class="time-display" style="font-size:12px; color:var(--ink-soft); margin-left:6px;">
-          ${status ? `(เช็คชื่อ: ${time || '-'})` : ''}
-        </span>
+        <div class="time-display" style="font-size:13px; color:var(--primary); font-weight:600; margin-top: 4px;">
+          ${status ? `เวลาเช็คชื่อ: ${time || '-'}` : ''}
+        </div>
       </div>
       <div class="stamps">
         <button class="stamp-btn" data-s="present" data-id="${s.id}">มา</button>
@@ -836,14 +837,14 @@ async function renderRoll(){
         btn.classList.add('active');
         timeInput.value = currentRoll[s.id].time;
         timeInput.style.display = '';
-        if(timeDisplay) timeDisplay.textContent = `(เช็คชื่อ: ${currentRoll[s.id].time})`;
+        if(timeDisplay) timeDisplay.textContent = `เวลาเช็คชื่อ: ${currentRoll[s.id].time}`;
       };
     });
     timeInput.onchange = () => {
       if(currentRoll[s.id]){
         const st = getRecordStatus(currentRoll[s.id]);
         currentRoll[s.id] = { status: st, time: timeInput.value };
-        if(timeDisplay) timeDisplay.textContent = `(เช็คชื่อ: ${timeInput.value})`;
+        if(timeDisplay) timeDisplay.textContent = `เวลาเช็คชื่อ: ${timeInput.value}`;
       }
     };
   });
@@ -1637,6 +1638,14 @@ async function init(){
   };
 
   window.addEventListener('beforeunload', stopScan);
+  
+  setInterval(() => {
+    const el = document.getElementById('liveClock');
+    if(el) {
+      const now = new Date();
+      el.textContent = 'เวลาปัจจุบัน: ' + now.toLocaleTimeString('th-TH');
+    }
+  }, 1000);
 }
 
 init();
