@@ -425,9 +425,14 @@
           <ul class="scan-feed-list" id="scanFeedList"></ul>
         </div>
       </div>
+      <div class="row" style="margin-top:14px; margin-bottom:4px;">
+        <label style="font-size:14.5px; color:var(--ink-soft);">เลือกกล้อง:</label>
+        <select id="cameraSelect"><option value="">(กล้องเริ่มต้น)</option></select>
+      </div>
       <div class="export-row">
         <button class="btn-primary" id="startScanBtn">▶ เริ่มสแกน</button>
         <button class="btn-stop" id="stopScanBtn" style="display:none;">■ หยุดสแกน</button>
+        <span id="scanMsg" style="align-self:center; font-size:13px; color:var(--ink-soft);"></span>
       </div>
     </div>
   </section>
@@ -1081,25 +1086,83 @@ function scanTick(){
   scanLoopId = requestAnimationFrame(scanTick);
 }
 
-async function startScan(){
+function scanMsg(text, kind){
+  const el = $('#scanMsg');
+  if(!el) return;
+  el.textContent = text || '';
+  el.style.color = kind === 'err' ? 'var(--absent)' : (kind === 'ok' ? 'var(--present)' : 'var(--ink-soft)');
+}
+
+async function populateCameras(){
   try{
-    scanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-    const video = $('#scanVideo');
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const cams = devices.filter(d => d.kind === 'videoinput');
+    const sel = $('#cameraSelect');
+    if(!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">(กล้องเริ่มต้น)</option>' +
+      cams.map((d, i) => `<option value="${d.deviceId}">${d.label || ('กล้อง ' + (i + 1))}</option>`).join('');
+    if(cur) sel.value = cur;
+  }catch(e){}
+}
+
+async function getCameraStream(){
+  const sel = $('#cameraSelect');
+  const deviceId = sel && sel.value;
+  if(deviceId){
+    try{ return await navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: deviceId } } }); }
+    catch(e){ /* กล้องที่เลือกใช้ไม่ได้ ลองค่าเริ่มต้น */ }
+  }
+  try{
+    // เลือกกล้องหลัง (ถ้ามี) แต่ไม่บังคับ เพื่อให้โน้ตบุ๊กที่มีแต่กล้องหน้าก็ยังใช้ได้
+    return await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
+  }catch(e){
+    return await navigator.mediaDevices.getUserMedia({ video: true });
+  }
+}
+
+async function startScan(){
+  const video = $('#scanVideo');
+  if(!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    scanMsg('เบราว์เซอร์เปิดกล้องไม่ได้ ต้องเปิดผ่าน https:// หรือ localhost (อย่าเปิดจากไฟล์ file:// หรือในกรอบแชท)', 'err');
+    return;
+  }
+  scanMsg('กำลังขอสิทธิ์ใช้กล้อง… ถ้ามีป๊อปอัปให้กด "อนุญาต"');
+  try{
+    scanStream = await getCameraStream();
     video.srcObject = scanStream;
     await video.play();
+    await populateCameras();
     scanLoopId = requestAnimationFrame(scanTick);
     $('#startScanBtn').style.display = 'none';
     $('#stopScanBtn').style.display = 'inline-block';
+    scanMsg('✅ กล้องทำงานแล้ว เล็ง QR ให้อยู่ในกรอบ', 'ok');
   }catch(e){
-    alert('เปิดกล้องไม่สำเร็จ: ' + e.message + '\n\nลองเปิดไฟล์นี้ในแท็บเบราว์เซอร์แยกต่างหากแล้วอนุญาตการใช้กล้อง');
+    let msg;
+    switch(e.name){
+      case 'NotAllowedError':
+      case 'SecurityError':
+        msg = 'ยังไม่ได้อนุญาตให้ใช้กล้อง — กดไอคอนกล้อง 📷 ที่แถบ URL แล้วเลือก "อนุญาต" จากนั้นกดเริ่มสแกนใหม่'; break;
+      case 'NotFoundError':
+      case 'OverconstrainedError':
+        msg = 'ไม่พบกล้องที่ใช้ได้ ลองเลือกกล้องอื่นจากช่อง "เลือกกล้อง"'; break;
+      case 'NotReadableError':
+        msg = 'กล้องถูกใช้งานโดยแอปอื่นอยู่ (เช่น Zoom/กล้อง/Meet) ปิดแอปนั้นก่อนแล้วลองใหม่'; break;
+      default:
+        msg = (e && e.message) ? e.message : String(e);
+    }
+    scanMsg('เปิดกล้องไม่สำเร็จ: ' + msg, 'err');
+    if(scanStream){ scanStream.getTracks().forEach(t => t.stop()); scanStream = null; }
   }
 }
 function stopScan(){
   if(scanLoopId) cancelAnimationFrame(scanLoopId);
   if(scanStream) scanStream.getTracks().forEach(t => t.stop());
   scanStream = null;
+  const v = $('#scanVideo'); if(v) v.srcObject = null;
   $('#startScanBtn').style.display = 'inline-block';
   $('#stopScanBtn').style.display = 'none';
+  scanMsg('');
 }
 
 async function refreshScanFeed(){
@@ -1202,6 +1265,9 @@ async function init(){
   $('#printQrBtn').onclick = () => window.print();
   $('#startScanBtn').onclick = startScan;
   $('#stopScanBtn').onclick = stopScan;
+  $('#cameraSelect').onchange = async () => {
+    if(scanStream){ stopScan(); await startScan(); }
+  };
 
   window.addEventListener('beforeunload', stopScan);
 }
