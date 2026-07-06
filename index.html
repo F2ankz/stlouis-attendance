@@ -963,11 +963,11 @@ function renderQrGrid(){
     grid.appendChild(card);
     new QRCode(card.querySelector('.qrbox'), {
       text: QR_PREFIX + s.id,
-      width: 120,
-      height: 120,
+      width: 140,
+      height: 140,
       colorDark: '#000000',
       colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.L
+      correctLevel: QRCode.CorrectLevel.H
     });
   });
 }
@@ -1172,9 +1172,18 @@ function scanTick(){
     scanCtx.drawImage(video, 0, 0, scanCanvas.width, scanCanvas.height);
     const imageData = scanCtx.getImageData(0, 0, scanCanvas.width, scanCanvas.height);
     const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" });
-    if(code && code.data && code.data.startsWith(QR_PREFIX)){
-      const id = code.data.slice(QR_PREFIX.length);
-      handleScannedId(id);
+    if(code && code.data){
+      if(code.data.startsWith(QR_PREFIX)){
+        const id = code.data.slice(QR_PREFIX.length);
+        handleScannedId(id);
+      } else {
+        const now = Date.now();
+        if(!lastScanTime['invalid'] || (now - lastScanTime['invalid']) > 3000) {
+          lastScanTime['invalid'] = now;
+          flashScan(`QR ไม่ใช่ของระบบนี้ (${code.data.substring(0,10)}...)`, true);
+          beep(false);
+        }
+      }
     }
   }
   scanLoopId = requestAnimationFrame(scanTick);
