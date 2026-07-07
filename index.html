@@ -509,7 +509,9 @@
         <input type="text" id="newStudentSaint" placeholder="นักบุญ" style="width:120px;">
         <button class="btn-primary" id="addStudentBtn">+ เพิ่มรายชื่อ</button>
       </div>
-      <ul class="student-list" id="studentList"></ul>
+      <div style="overflow-x:auto; margin-top: 16px;">
+        <table id="studentTable"></table>
+      </div>
     </div>
   </section>
 
@@ -751,19 +753,32 @@ function uid(){ return 's_' + Math.random().toString(36).slice(2,9); }
 function pid(){ return 'p_' + Math.random().toString(36).slice(2,9); }
 
 function renderStudentList(){
-  const ul = $('#studentList');
-  ul.innerHTML = '';
+  const tbl = $('#studentTable');
+  if(!tbl) return;
+  tbl.innerHTML = '';
   if(students.length === 0){
-    ul.innerHTML = '<div class="empty">ยังไม่มีรายชื่อนักเรียน เพิ่มรายชื่อด้านบนได้เลย</div>';
+    tbl.innerHTML = '<tr><td><div class="empty">ยังไม่มีรายชื่อนักเรียน เพิ่มรายชื่อด้านบนได้เลย</div></td></tr>';
   } else {
-    students.forEach((s, i) => {
-      const li = document.createElement('li');
-      li.innerHTML = `<span><span class="idx">${String(i+1).padStart(2,'0')}</span>${s.name} <span style="font-size: 13px; color: var(--ink-soft); margin-left: 8px;">(รหัส: ${s.id})</span></span>`;
-      const delBtn = document.createElement('button');
-      delBtn.className = 'btn-danger';
-      delBtn.textContent = 'ลบ';
-      delBtn.onclick = async () => {
-        if(confirm(`ลบ "${s.name}" ออกจากรายชื่อ?`)){
+    let thead = `<tr>
+      <th style="width:50px; text-align:center;">ที่</th>
+      <th style="width:120px;">รหัสนักเรียน</th>
+      <th>ชื่อ-นามสกุล</th>
+      <th style="width:60px;"></th>
+    </tr>`;
+    let tbody = students.map((s, i) => `
+      <tr>
+        <td style="text-align:center; color:var(--ink-soft);">${String(i+1).padStart(2,'0')}</td>
+        <td>${s.id}</td>
+        <td class="name">${s.name}</td>
+        <td><button class="btn-danger del-stu" data-id="${s.id}">ลบ</button></td>
+      </tr>
+    `).join('');
+    tbl.innerHTML = thead + tbody;
+    
+    $$('.del-stu', tbl).forEach(btn => {
+      btn.onclick = async () => {
+        const s = students.find(x => x.id === btn.dataset.id);
+        if(s && confirm(`ลบ "${s.name}" ออกจากรายชื่อ?`)){
           students = students.filter(x => x.id !== s.id);
           await saveStudents();
           renderStudentList();
@@ -771,8 +786,6 @@ function renderStudentList(){
           renderQrGrid();
         }
       };
-      li.appendChild(delBtn);
-      ul.appendChild(li);
     });
   }
   
