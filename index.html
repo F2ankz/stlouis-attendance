@@ -1068,7 +1068,23 @@ function renderSchedule(){
     return;
   }
   let thead = `<tr><th>วันที่/เวลา</th><th>หัวข้อ</th><th>กิจกรรมพิเศษ</th><th></th></tr>`;
-  let rows = scheduleData.periods
+  
+  // Parse ugly GMT string if present to prevent empty time inputs
+  let periods = scheduleData.periods.map(p => {
+    let startStr = String(p.start || '');
+    let endStr = String(p.end || '');
+    if (startStr.includes('GMT')) {
+      const tDate = new Date(startStr);
+      if(!isNaN(tDate)) startStr = String(tDate.getHours()).padStart(2,'0') + ':' + String(tDate.getMinutes()).padStart(2,'0');
+    }
+    if (endStr.includes('GMT')) {
+      const tDate = new Date(endStr);
+      if(!isNaN(tDate)) endStr = String(tDate.getHours()).padStart(2,'0') + ':' + String(tDate.getMinutes()).padStart(2,'0');
+    }
+    return { ...p, start: startStr, end: endStr };
+  });
+
+  let rows = periods
     .slice()
     .sort((a,b) => (a.date||'').localeCompare(b.date||''))
     .map(p => `
