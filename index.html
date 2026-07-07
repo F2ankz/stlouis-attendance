@@ -777,11 +777,26 @@ function renderStudentList(){
         <td class="name">${s.firstName || '-'}</td>
         <td class="name">${s.lastName || '-'}</td>
         <td>${s.nickname || '-'}</td>
-        <td>${s.qrCode || '-'}</td>
+        <td><div class="mini-qr" id="mini-qr-${s.id}"></div></td>
         <td><button class="btn-danger del-stu" data-id="${s.id}">ลบ</button></td>
       </tr>
     `).join('');
     tbl.innerHTML = thead + tbody;
+    
+    // Generate mini QR codes
+    students.forEach((s) => {
+      const el = document.getElementById(`mini-qr-${s.id}`);
+      if(el) {
+        new QRCode(el, {
+          text: QR_PREFIX + s.id,
+          width: 50,
+          height: 50,
+          colorDark: '#000000',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.L
+        });
+      }
+    });
     
     $$('.del-stu', tbl).forEach(btn => {
       btn.onclick = async () => {
