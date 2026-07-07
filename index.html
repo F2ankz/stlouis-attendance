@@ -592,6 +592,8 @@ window.onerror = function(msg, url, lineNo, columnNo, error) {
   alert('Error: ' + msg + '\nLine: ' + lineNo + '\nCol: ' + columnNo);
   return false;
 };
+</script>
+<script>
 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx2AiTrBPLfv4dWsgl0lpkUMydr9lrciA-XXHvXAVqV4WnNMtBID5kXoZIuNagtaF6E/exec'; // <-- นำ Web App URL ที่ได้จาก Google Apps Script มาใส่ตรงนี้
 
 // --- API Client: เชื่อมต่อ Google Apps Script ---
@@ -1570,6 +1572,8 @@ async function handleGpsCheckIn(){
 
 // ---------- LOGIN ----------
 async function doLogin(){
+  // Debug: show alert so we know the button works
+  alert('doLogin triggered!');
   let user = $('#loginUser').value.trim();
   const pass = $('#loginPass').value.trim();
   const errEl = $('#loginError');
@@ -1704,6 +1708,9 @@ async function renderHistory() {
 
 // ---------- INIT ----------
 async function init(){
+  const debugTitle = document.querySelector('.login-box h2');
+  if(debugTitle) debugTitle.textContent = 'ระบบลงเวลาเรียน (Init Started)';
+  
   const savedUser = sessionStorage.getItem('stlouis_user');
   if(savedUser) {
     currentUser = JSON.parse(savedUser);
@@ -1793,6 +1800,10 @@ async function init(){
       el.textContent = 'เวลาปัจจุบัน: ' + now.toLocaleTimeString('th-TH');
     }
   }, 1000);
+  
+  // Debug: indicate init finished successfully
+  const debugTitle = document.querySelector('.login-box h2');
+  if(debugTitle) debugTitle.textContent = 'ระบบลงเวลาเรียน (Ready)';
 }
 
 init();
