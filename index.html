@@ -871,8 +871,9 @@ async function renderRoll(){
     let badgeHtml = '<span style="font-size:13.5px; color:var(--ink-soft);">ยังไม่เช็คชื่อ</span>';
     if (status && statusStyleMap[status]) {
       const conf = statusStyleMap[status];
+      const timeStr = time ? '(' + time + ')' : '';
       badgeHtml = `<span style="display:inline-block; padding: 6px 14px; border-radius: 999px; font-weight: 600; font-size: 14.5px; background: ${conf.bg}; color: ${conf.color}; border: 1.5px solid ${conf.color};">
-        ${conf.text} ${time ? `(${time})` : ''}
+        ${conf.text} ${timeStr}
       </span>`;
     }
 
