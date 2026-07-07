@@ -761,15 +761,23 @@ function renderStudentList(){
   } else {
     let thead = `<tr>
       <th style="width:50px; text-align:center;">ที่</th>
-      <th style="width:120px;">รหัสนักเรียน</th>
-      <th>ชื่อ-นามสกุล</th>
+      <th style="width:100px;">รหัส</th>
+      <th style="width:120px;">นักบุญ</th>
+      <th>ชื่อ</th>
+      <th>นามสกุล</th>
+      <th style="width:80px;">ชื่อเล่น</th>
+      <th style="width:100px;">QR Code</th>
       <th style="width:60px;"></th>
     </tr>`;
     let tbody = students.map((s, i) => `
       <tr>
         <td style="text-align:center; color:var(--ink-soft);">${String(i+1).padStart(2,'0')}</td>
-        <td>${s.id}</td>
-        <td class="name">${s.name}</td>
+        <td style="font-family:'IBM Plex Mono', monospace;">${s.id}</td>
+        <td>${s.saint || '-'}</td>
+        <td class="name">${s.firstName || '-'}</td>
+        <td class="name">${s.lastName || '-'}</td>
+        <td>${s.nickname || '-'}</td>
+        <td>${s.qrCode || '-'}</td>
         <td><button class="btn-danger del-stu" data-id="${s.id}">ลบ</button></td>
       </tr>
     `).join('');
