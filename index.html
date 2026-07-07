@@ -396,7 +396,7 @@
 <div class="wrap" id="appWrap" style="display:none;">
   <header style="justify-content:space-between; flex-wrap:wrap; gap:10px;">
     <div>
-      <h1>📖 สมุดเช็คชื่อ เซนต์หลุยส์</h1>
+      <h1>📖 RCIA St. Louis 2026</h1>
       <span class="stamp-mini" id="todayLabel"></span>
     </div>
     <div class="user-info">
@@ -436,7 +436,7 @@
     <div class="card" style="text-align:center;">
       <h2>📍 เช็คชื่อด้วยพิกัด GPS</h2>
       <p style="color:var(--ink-soft); font-size:14px; margin-bottom:20px;">
-        ฟีเจอร์นี้สำหรับนักเรียนที่อยู่ภายในบริเวณ <b>วัดเซนต์หลุยส์ (ไม่เกิน 100 เมตร)</b><br>
+        ฟีเจอร์นี้สำหรับนักเรียนที่อยู่ภายในบริเวณ <b>วัดเซนต์หลุยส์ (ไม่เกิน 50 เมตร)</b><br>
         กรุณาอนุญาตการเข้าถึงตำแหน่งที่ตั้ง (Location) ก่อนใช้งาน
       </p>
       
@@ -586,7 +586,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
 window.onerror = function(msg, url, lineNo, columnNo, error) {
   alert('Error: ' + msg + '\nLine: ' + lineNo + '\nCol: ' + columnNo);
@@ -598,12 +598,12 @@ const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx2AiTrBPLfv4dWsgl0
 
 // --- API Client: เชื่อมต่อ Google Apps Script ---
 const api = {
-  async req(action, payload = {}) {
-    showGlobalLoading();
+  async req(action, payload = {}, quiet = false) {
+    if(!quiet) showGlobalLoading();
     try {
       if(!WEB_APP_URL) {
         alert('กรุณาใส่ WEB_APP_URL ในโค้ดก่อนใช้งาน');
-        hideGlobalLoading();
+        if(!quiet) hideGlobalLoading();
         return null;
       }
       let url = WEB_APP_URL;
@@ -619,10 +619,10 @@ const api = {
       }
       const res = await fetch(url, opts);
       const data = await res.json();
-      hideGlobalLoading();
+      if(!quiet) hideGlobalLoading();
       return data;
     } catch(e) {
-      hideGlobalLoading();
+      if(!quiet) hideGlobalLoading();
       console.error('API Error:', e);
       return null;
     }
@@ -733,9 +733,9 @@ async function saveStudents(){
 async function loadRoll(date){
   return allAttendance[date] || {};
 }
-async function saveRollData(date, data){
+async function saveRollData(date, data, quiet = false){
   allAttendance[date] = data; // Update cache
-  const res = await api.req('saveRoll', { date: date, roll: data });
+  const res = await api.req('saveRoll', { date: date, roll: data }, quiet);
   const el = $('#saveStatus');
   if(el){ el.textContent = res && res.success ? '✓ บันทึกแล้ว' : '❌ ผิดพลาด'; setTimeout(() => el.textContent='', 1500); }
 }
@@ -856,11 +856,6 @@ async function renderRoll(){
     return d === currentDate;
   });
 
-  if (todayClasses.length === 0) {
-    box.innerHTML = '<div class="empty">ไม่มีการเรียนการสอนในวันนี้ (อ้างอิงจากตารางเรียน)</div>';
-    return;
-  }
-
   const statusStyleMap = {
     'present': { text: 'มา', bg: 'var(--present-bg)', color: 'var(--present)' },
     'late': { text: 'สาย', bg: '#fff3cd', color: '#856404' },
@@ -874,7 +869,7 @@ async function renderRoll(){
     const status = getRecordStatus(rec);
     const time = getRecordTime(rec);
     
-    let badgeHtml = '<span style="font-size:13.5px; color:var(--ink-soft);">ยังไม่เช็คชื่อ</span>';
+    let badgeHtml = '<span style="font-size:13.5px; color:var(--ink-soft);">ยังไม่บันทึก</span>';
     if (status && statusStyleMap[status]) {
       const conf = statusStyleMap[status];
       const timeStr = time ? '(' + time + ')' : '';
@@ -1262,7 +1257,6 @@ function exportPdf(){
 }
 
 // ---------- QR SCANNING ----------
-let scanStream = null;
 let scanLoopId = null;
 let scanCanvas = document.createElement('canvas');
 let scanCtx = scanCanvas.getContext('2d', { willReadFrequently: true });
@@ -1333,15 +1327,17 @@ async function handleScannedId(rawId){
     }
   }
 
-  const roll = await loadRoll(scanDate);
-  roll[student.id] = { status, time };
-  await saveRollData(scanDate, roll);
-
+  // Visual & Audio Feedback FIRST for rapid scanning
   flashScan(`✅ ${student.name}\n${STATUS_LABEL[status]} • ${time}`, false);
   beep(true);
   addFeedItem(student.name, time);
 
+  // Background save (quiet mode so it doesn't block UI)
+  const roll = await loadRoll(scanDate);
+  roll[student.id] = { status, time };
   if(scanDate === currentDate) currentRoll = roll;
+  
+  await saveRollData(scanDate, roll, true);
 }
 
 function scanTick(){
@@ -1572,8 +1568,6 @@ async function handleGpsCheckIn(){
 
 // ---------- LOGIN ----------
 async function doLogin(){
-  // Debug: show alert so we know the button works
-  alert('doLogin triggered!');
   let user = $('#loginUser').value.trim();
   const pass = $('#loginPass').value.trim();
   const errEl = $('#loginError');
@@ -1619,7 +1613,11 @@ function applyRoleUI(){
   $('#loginOverlay').style.display = 'none';
   $('#appWrap').style.display = 'block';
   
-  const roleName = currentUser.role === 'admin' ? '👤 ครู (Admin)' : '🎓 นักเรียน';
+  let roleName = currentUser.role === 'admin' ? '👤 ครู (Admin)' : '🎓 นักเรียน';
+  if (currentUser.role === 'student' && currentUser.refId) {
+    const st = students.find(s => s.id === currentUser.refId);
+    if (st) roleName = `🎓 ${st.name}`;
+  }
   $('#loggedInRole').textContent = roleName;
   
   $$('.tab-btn').forEach(btn => {
@@ -1708,9 +1706,6 @@ async function renderHistory() {
 
 // ---------- INIT ----------
 async function init(){
-  const debugTitle = document.querySelector('.login-box h2');
-  if(debugTitle) debugTitle.textContent = 'ระบบลงเวลาเรียน (Init Started)';
-  
   const savedUser = sessionStorage.getItem('stlouis_user');
   if(savedUser) {
     currentUser = JSON.parse(savedUser);
@@ -1800,10 +1795,6 @@ async function init(){
       el.textContent = 'เวลาปัจจุบัน: ' + now.toLocaleTimeString('th-TH');
     }
   }, 1000);
-  
-  // Debug: indicate init finished successfully
-  const debugTitle = document.querySelector('.login-box h2');
-  if(debugTitle) debugTitle.textContent = 'ระบบลงเวลาเรียน (Ready)';
 }
 
 init();
