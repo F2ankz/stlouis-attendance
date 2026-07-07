@@ -588,6 +588,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.js"></script>
 <script>
+window.onerror = function(msg, url, lineNo, columnNo, error) {
+  alert('Error: ' + msg + '\nLine: ' + lineNo + '\nCol: ' + columnNo);
+  return false;
+};
 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx2AiTrBPLfv4dWsgl0lpkUMydr9lrciA-XXHvXAVqV4WnNMtBID5kXoZIuNagtaF6E/exec'; // <-- นำ Web App URL ที่ได้จาก Google Apps Script มาใส่ตรงนี้
 
 // --- API Client: เชื่อมต่อ Google Apps Script ---
