@@ -424,15 +424,10 @@
       <div class="row" style="margin-bottom:14px;">
         <label style="font-size:14.5px; color:var(--ink-soft);">วันที่:</label>
         <input type="date" id="rollDate">
-        <button class="btn-ghost" id="markAllPresent">✓ มาทั้งหมด (เวลานี้)</button>
       </div>
       <div id="liveClock" style="font-size: 16px; font-weight: bold; color: var(--primary); text-align: right; margin-bottom: 10px;"></div>
       <div class="today-schedule no-print" id="todayScheduleBox" style="display:none;"></div>
       <div id="rollList"></div>
-      <div class="export-row">
-        <button class="btn-primary" id="saveRoll">บันทึกการเช็คชื่อ</button>
-        <span id="saveStatus" style="align-self:center; font-size:13.5px; color:var(--present); font-weight:600;"></span>
-      </div>
     </div>
   </section>
 
@@ -841,49 +836,55 @@ async function renderRoll(){
     box.innerHTML = '<div class="empty">เพิ่มรายชื่อนักเรียนก่อนในแท็บ "จัดการรายชื่อ"</div>';
     return;
   }
+  
+  const todayClasses = scheduleData.periods.filter(p => {
+    let d = String(p.date || '');
+    if (d.includes('GMT')) {
+      const tDate = new Date(d);
+      if (!isNaN(tDate)) {
+        const m = tDate.getMonth() + 1;
+        const day = tDate.getDate();
+        d = tDate.getFullYear() + '-' + (m < 10 ? '0'+m : m) + '-' + (day < 10 ? '0'+day : day);
+      }
+    }
+    return d === currentDate;
+  });
+
+  if (todayClasses.length === 0) {
+    box.innerHTML = '<div class="empty">ไม่มีการเรียนการสอนในวันนี้ (อ้างอิงจากตารางเรียน)</div>';
+    return;
+  }
+
+  const statusStyleMap = {
+    'present': { text: 'มา', bg: 'var(--present-bg)', color: 'var(--present)' },
+    'late': { text: 'สาย', bg: '#fff3cd', color: '#856404' },
+    'absent': { text: 'ขาดเรียน', bg: 'var(--absent-bg)', color: 'var(--absent)' }
+  };
+
   students.forEach((s, i) => {
     const item = document.createElement('div');
     item.className = 'roll-item';
     const rec = currentRoll[s.id];
     const status = getRecordStatus(rec);
     const time = getRecordTime(rec);
+    
+    let badgeHtml = '<span style="font-size:13.5px; color:var(--ink-soft);">ยังไม่เช็คชื่อ</span>';
+    if (status && statusStyleMap[status]) {
+      const conf = statusStyleMap[status];
+      badgeHtml = `<span style="display:inline-block; padding: 6px 14px; border-radius: 999px; font-weight: 600; font-size: 14.5px; background: ${conf.bg}; color: ${conf.color}; border: 1.5px solid ${conf.color};">
+        ${conf.text} ${time ? `(${time})` : ''}
+      </span>`;
+    }
+
     item.innerHTML = `
       <div class="roll-name">
         <span class="idx">${String(i+1).padStart(2,'0')}</span>${s.name}
-        <div class="time-display" style="font-size:13px; color:var(--primary); font-weight:600; margin-top: 4px;">
-          ${status ? `เวลาเช็คชื่อ: ${time || '-'}` : ''}
-        </div>
       </div>
       <div class="stamps">
-        <button class="stamp-btn" data-s="present" data-id="${s.id}">มา</button>
-        <button class="stamp-btn" data-s="late" data-id="${s.id}">สาย</button>
-        <button class="stamp-btn" data-s="absent" data-id="${s.id}">ขาด</button>
-        <input type="time" class="time-input" value="${time}" style="${status ? '' : 'display:none;'}">
+        ${badgeHtml}
       </div>
     `;
     box.appendChild(item);
-    const timeInput = $('.time-input', item);
-    const timeDisplay = $('.time-display', item);
-    $$('.stamp-btn', item).forEach(btn => {
-      if(btn.dataset.s === status) btn.classList.add('active');
-      btn.onclick = () => {
-        const existing = currentRoll[s.id];
-        const existingTime = getRecordTime(existing);
-        currentRoll[s.id] = { status: btn.dataset.s, time: existingTime || nowTimeValue() };
-        $$('.stamp-btn', item).forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        timeInput.value = currentRoll[s.id].time;
-        timeInput.style.display = '';
-        if(timeDisplay) timeDisplay.textContent = `เวลาเช็คชื่อ: ${currentRoll[s.id].time}`;
-      };
-    });
-    timeInput.onchange = () => {
-      if(currentRoll[s.id]){
-        const st = getRecordStatus(currentRoll[s.id]);
-        currentRoll[s.id] = { status: st, time: timeInput.value };
-        if(timeDisplay) timeDisplay.textContent = `เวลาเช็คชื่อ: ${timeInput.value}`;
-      }
-    };
   });
 }
 
@@ -1756,19 +1757,6 @@ async function init(){
     await renderRoll();
   };
   $('#scanDate').onchange = () => { refreshScanFeed(); };
-
-  $('#markAllPresent').onclick = () => {
-    const t = nowTimeValue();
-    students.forEach(s => currentRoll[s.id] = { status: 'present', time: t });
-    renderRoll();
-  };
-
-  $('#saveRoll').onclick = async () => {
-    await saveRollData(currentDate, currentRoll);
-    const el = $('#saveStatus');
-    el.textContent = '✓ บันทึกแล้ว';
-    setTimeout(() => el.textContent = '', 2000);
-  };
 
   $('#addPeriodBtn').onclick = () => {
     const dates = scheduleData.periods.map(p => p.date).filter(Boolean).sort();
