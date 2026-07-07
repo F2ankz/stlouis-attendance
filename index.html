@@ -758,7 +758,7 @@ function renderStudentList(){
   } else {
     students.forEach((s, i) => {
       const li = document.createElement('li');
-      li.innerHTML = `<span><span class="idx">${String(i+1).padStart(2,'0')}</span>${s.name}</span>`;
+      li.innerHTML = `<span><span class="idx">${String(i+1).padStart(2,'0')}</span>${s.name} <span style="font-size: 13px; color: var(--ink-soft); margin-left: 8px;">(รหัส: ${s.id})</span></span>`;
       const delBtn = document.createElement('button');
       delBtn.className = 'btn-danger';
       delBtn.textContent = 'ลบ';
