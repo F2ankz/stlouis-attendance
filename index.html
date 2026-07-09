@@ -1464,8 +1464,8 @@ async function refreshScanFeed(){
 
 // ---------- TABS ----------
 function switchTab(name){
-  if(currentUser && currentUser.role === 'student' && !['gps','qrcodes','history'].includes(name)){
-    name = 'history'; // Force student to allowed tabs
+  if(currentUser && currentUser.role === 'student' && !['qrcodes','history'].includes(name)){
+    name = 'qrcodes'; // Force student to allowed tabs
   }
   
   ['roll','scan','students','qrcodes','schedule','absence','stats','gps','history'].forEach(t => {
@@ -1623,7 +1623,7 @@ function applyRoleUI(){
   $$('.tab-btn').forEach(btn => {
     const tab = btn.dataset.tab;
     if(currentUser.role === 'student'){
-      if(['gps', 'qrcodes', 'history'].includes(tab)) btn.style.display = 'inline-block';
+      if(['qrcodes', 'history'].includes(tab)) btn.style.display = 'inline-block';
       else btn.style.display = 'none';
     } else {
       if(tab === 'history') btn.style.display = 'none';
@@ -1633,7 +1633,7 @@ function applyRoleUI(){
   
   renderStudentList(); // Re-render dropdowns
   renderQrGrid(); // Re-render QR to show only own QR
-  switchTab(currentUser.role === 'admin' ? 'roll' : 'history');
+  switchTab(currentUser.role === 'admin' ? 'roll' : 'qrcodes');
 }
 
 async function renderHistory() {
