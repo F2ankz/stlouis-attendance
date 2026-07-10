@@ -1205,7 +1205,7 @@ function renderQrGrid(){
     card.innerHTML = `
       <div class="qrbox" id="qrbox-${s.id}"></div>
       <div class="name">${s.name}</div>
-      <div class="idx">เลขที่ ${String(i+1).padStart(2,'0')}</div>
+      <div class="idx">ID: ${s.id}</div>
     `;
     grid.appendChild(card);
     new QRCode(card.querySelector('.qrbox'), {
