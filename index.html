@@ -1204,8 +1204,10 @@ function renderQrGrid(){
     card.className = 'qr-card';
     card.innerHTML = `
       <div class="qrbox" id="qrbox-${s.id}"></div>
-      <div class="name">${s.name}</div>
-      <div class="idx">ID: ${s.id}</div>
+      <div style="font-size:13px; font-weight:bold; color:var(--primary); margin-top:8px;">${s.saint || ''}</div>
+      <div style="font-size:15px; font-weight:bold; color:var(--ink); margin-top:2px;">${s.firstName || ''} ${s.lastName || ''}</div>
+      <div style="font-size:13px; color:var(--ink-soft); margin-top:2px;">${s.nickname ? '('+s.nickname+')' : ''}</div>
+      <div class="idx" style="margin-top:6px;">รหัส: ${s.id}</div>
     `;
     grid.appendChild(card);
     new QRCode(card.querySelector('.qrbox'), {
