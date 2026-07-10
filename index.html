@@ -33,7 +33,7 @@
     min-height:100vh;
     padding: 28px 18px 60px;
   }
-  .wrap{ max-width: 1060px; margin: 0 auto; }
+  .wrap{ max-width: 1400px; margin: 0 auto; }
 
   header{
     display:flex;
@@ -51,22 +51,36 @@
     margin:0;
     letter-spacing: 0.3px;
   }
-  header .stamp-mini{
+  .stamp-mini{
     font-family:'IBM Plex Mono', monospace;
     font-size: 12px;
     border: 1.5px solid var(--gold);
     color: var(--gold);
     border-radius: 999px;
     padding: 4px 12px;
+    display: inline-block;
+    text-align: center;
+  }
+  header .stamp-mini{
     transform: rotate(-2deg);
   }
+  .stamp-mini.present{ border-color: var(--present); color: var(--present); background: var(--present-bg); }
+  .stamp-mini.late{ border-color: var(--late); color: var(--late); background: var(--late-bg); }
+  .stamp-mini.absent{ border-color: var(--absent); color: var(--absent); background: var(--absent-bg); }
+  .stamp-mini.leave{ border-color: #6B7280; color: #4B5563; background: #F3F4F6; }
 
   .tabs{
     display:flex;
     gap: 6px;
     margin-bottom: 18px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px; /* for scrollbar */
   }
+  .tabs::-webkit-scrollbar { height: 4px; }
+  .tabs::-webkit-scrollbar-thumb { background: var(--paper-line); border-radius: 4px; }
+  .tab-btn { white-space: nowrap; }
   .tab-btn{
     font-family:'Bitter', serif;
     font-weight: 600;
@@ -219,6 +233,10 @@
     border-bottom: 1px dashed var(--paper-line);
     font-family:'IBM Plex Mono', monospace;
   }
+  #studentTable th, #studentTable td { border-right: 1px dashed var(--paper-line); padding: 8px 10px; white-space: nowrap; }
+  #studentTable th:last-child, #studentTable td:last-child { border-right: none; }
+  #leaveApproveTable th, #leaveApproveTable td { border-right: 1px dashed var(--paper-line); padding: 8px 10px; }
+  #leaveApproveTable th:last-child, #leaveApproveTable td:last-child { border-right: none; }
   tbody td.name{ font-family:'Sarabun', sans-serif; font-weight:500; }
   .pct-bar{
     display:inline-block; height:6px; border-radius:3px; background: var(--present);
@@ -422,6 +440,34 @@
   </div>
 </div>
 
+<div id="addStudentOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center;">
+  <div class="login-box">
+    <h2>เพิ่มรายชื่อ</h2>
+    <input type="text" id="newStudentId" placeholder="รหัสประจำตัว (StudentID)">
+    <input type="text" id="newStudentFirst" placeholder="ชื่อ">
+    <input type="text" id="newStudentLast" placeholder="นามสกุล">
+    <input type="text" id="newStudentNick" placeholder="ชื่อเล่น">
+    <input type="text" id="newStudentSaint" placeholder="นักบุญ">
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button class="btn-ghost" id="addStuCancelBtn" style="flex:1;">ยกเลิก</button>
+      <button class="btn-primary" id="addStudentBtn" style="flex:1;">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<div id="editLeaveOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center;">
+  <div class="login-box">
+    <h2>แก้ไขใบลา</h2>
+    <input type="hidden" id="editLeaveId">
+    <select id="editLeaveDate" style="width:100%; padding:10px; margin-bottom:12px; font-size:15px; border-radius:8px; border:2px solid var(--paper-line);"></select>
+    <input type="text" id="editLeaveReason" placeholder="เหตุผลการลา">
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button class="btn-ghost" id="editLeaveCancelBtn" style="flex:1;">ยกเลิก</button>
+      <button class="btn-primary" id="editLeaveSaveBtn" style="flex:1;">บันทึก</button>
+    </div>
+  </div>
+</div>
+
 <div class="wrap" id="appWrap" style="display:none;">
   <header style="justify-content:space-between; flex-wrap:wrap; gap:10px;">
     <div>
@@ -445,6 +491,8 @@
     <button class="tab-btn" data-tab="absence">🚩 ใครขาดบ้าง</button>
     <button class="tab-btn" data-tab="stats">สรุปสถิติ</button>
     <button class="tab-btn" data-tab="history" style="display:none;">📅 ประวัติของฉัน</button>
+    <button class="tab-btn" data-tab="leave" style="display:none;">📝 ยื่นใบลา</button>
+    <button class="tab-btn" data-tab="leaveApprove" style="display:none;">✅ อนุมัติการลา</button>
   </div>
 
   <!-- ROLL CALL TAB -->
@@ -526,13 +574,8 @@
   <section id="tab-students" style="display:none;">
     <div class="card">
       <h2>รายชื่อนักเรียน</h2>
-      <div class="row" style="flex-wrap:wrap; gap:6px;">
-        <input type="text" id="newStudentId" placeholder="StudentID" style="width:100px;">
-        <input type="text" id="newStudentFirst" placeholder="ชื่อ" style="width:120px;">
-        <input type="text" id="newStudentLast" placeholder="นามสกุล" style="width:120px;">
-        <input type="text" id="newStudentNick" placeholder="ชื่อเล่น" style="width:80px;">
-        <input type="text" id="newStudentSaint" placeholder="นักบุญ" style="width:120px;">
-        <button class="btn-primary" id="addStudentBtn">+ เพิ่มรายชื่อ</button>
+      <div class="row" style="margin-bottom:16px;">
+        <button class="btn-primary" id="openAddStudentModalBtn">+ เพิ่มรายชื่อใหม่</button>
       </div>
       <div style="overflow-x:auto; margin-top: 16px;">
         <table id="studentTable"></table>
@@ -607,7 +650,47 @@
   <section id="tab-history" style="display:none;">
     <div class="card">
       <h2>📅 ประวัติการเข้าเรียนของฉัน</h2>
+      <div id="historySummary" style="background:rgba(0,0,0,0.02); padding:14px; border-radius:8px; border:1px solid var(--paper-line); margin-bottom:16px; display:none;"></div>
       <div id="historyList"></div>
+    </div>
+  </section>
+
+  <!-- LEAVE REQUEST TAB -->
+  <section id="tab-leave" style="display:none;">
+    <div class="card">
+      <h2>📝 ยื่นใบลาเรียน</h2>
+      <p class="hint">กรุณาระบุวันที่ต้องการลา และเหตุผล (เช่น ลาป่วย, ติดธุระด่วน)</p>
+      <div class="row" style="margin-bottom:16px;">
+        <label style="font-size:14.5px; color:var(--ink-soft);">วันที่ขอลา:</label>
+        <select id="leaveReqDate" style="flex:1; max-width:150px;"></select>
+        <label style="font-size:14.5px; color:var(--ink-soft); margin-left:10px;">เหตุผล:</label>
+        <input type="text" id="leaveReqReason" placeholder="เหตุผลการลา..." style="flex:1; min-width:200px;">
+        <button class="btn-primary" id="leaveReqBtn">ส่งคำร้อง</button>
+      </div>
+      <h3 style="font-family:'Bitter', serif; font-size:16px; margin: 24px 0 10px; border-bottom: 1px solid var(--paper-line); padding-bottom: 8px;">ประวัติการลาของฉัน</h3>
+      <div id="myLeaveList"></div>
+    </div>
+  </section>
+
+  <!-- LEAVE APPROVE TAB -->
+  <section id="tab-leaveApprove" style="display:none;">
+    <div class="card">
+      <h2>✅ อนุมัติการลาเรียน</h2>
+      <p class="hint">ตรวจสอบคำร้องขอลาเรียน และกดอนุมัติเพื่อบันทึกเป็นสถานะ "ลา" ในวันนั้นอัตโนมัติ</p>
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse: collapse;" id="leaveApproveTable">
+          <thead>
+            <tr>
+              <th style="width:120px;">วันที่ลา</th>
+              <th style="width:35%;">ชื่อ</th>
+              <th style="width:35%;">เหตุผล</th>
+              <th style="width:120px;">สถานะ</th>
+              <th style="width:140px; text-align:center;">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="leaveApproveTbody"></tbody>
+        </table>
+      </div>
     </div>
   </section>
 
@@ -684,7 +767,7 @@ function hideGlobalLoading() {
 const $ = (sel, root=document) => root.querySelector(sel);
 const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
-const STATUS_LABEL = { present: 'มา', late: 'สาย', absent: 'ขาด' };
+const STATUS_LABEL = { present: 'มา', late: 'สาย', absent: 'ขาด', leave: 'ลา' };
 const QR_PREFIX = 'qr-checkin:';
 const DAY_KEYS = ['sun','mon','tue','wed','thu','fri','sat'];
 const DAY_LABELS_TH = { sun:'อาทิตย์', mon:'จันทร์', tue:'อังคาร', wed:'พุธ', thu:'พฤหัสบดี', fri:'ศุกร์', sat:'เสาร์' };
@@ -705,6 +788,7 @@ let students = [];
 let adminList = [];
 let scheduleData = { periods: [] }; // { id, date, topic, special, start, end }
 let allAttendance = {}; // { date: { studentId: { time, status } } }
+let leaveRequests = [];
 let scanStream = null;
 let currentRoll = {}; 
 let currentDate = new Date().toISOString().slice(0, 10);
@@ -753,6 +837,7 @@ async function loadAllData(){
     adminList = rawStudents.filter(s => /[a-zA-Z]{2}$/.test(s.id));
     scheduleData.periods = res.data.schedule || [];
     allAttendance = res.data.attendance || {};
+    leaveRequests = res.data.leaveRequests || [];
     // เพิ่ม property name ใช้งานฝั่ง UI
     students.forEach(s => s.name = `${s.firstName} ${s.lastName} ${s.nickname?`(${s.nickname})`:''}`.trim());
     adminList.forEach(s => s.name = `${s.firstName} ${s.lastName} ${s.nickname?`(${s.nickname})`:''}`.trim());
@@ -796,25 +881,23 @@ function renderStudentList(){
     tbl.innerHTML = '<tr><td><div class="empty">ยังไม่มีรายชื่อนักเรียน เพิ่มรายชื่อด้านบนได้เลย</div></td></tr>';
   } else {
     let thead = `<tr>
-      <th style="width:50px; text-align:center;">ที่</th>
-      <th style="width:100px;">รหัส</th>
-      <th style="width:120px;">นักบุญ</th>
+      <th style="width:90px;">รหัส</th>
+      <th style="width:140px;">นักบุญ</th>
       <th>ชื่อ</th>
       <th>นามสกุล</th>
       <th style="width:80px;">ชื่อเล่น</th>
-      <th style="width:100px;">QR Code</th>
-      <th style="width:60px;"></th>
+      <th style="width:70px; text-align:center;">QR Code</th>
+      <th style="width:120px; text-align:center;">จัดการ</th>
     </tr>`;
     let tbody = students.map((s, i) => `
       <tr>
-        <td style="text-align:center; color:var(--ink-soft);">${String(i+1).padStart(2,'0')}</td>
         <td style="font-family:'IBM Plex Mono', monospace;">${s.id}</td>
         <td>${s.saint || '-'}</td>
         <td class="name">${s.firstName || '-'}</td>
         <td class="name">${s.lastName || '-'}</td>
         <td>${s.nickname || '-'}</td>
-        <td><div class="mini-qr" id="mini-qr-${s.id}"></div></td>
-        <td><button class="btn-ghost edit-stu" data-id="${s.id}" style="margin-right:4px;">แก้ไข</button><button class="btn-danger del-stu" data-id="${s.id}">ลบ</button></td>
+        <td style="text-align:center;"><div class="mini-qr" id="mini-qr-${s.id}" style="display:inline-block;"></div></td>
+        <td style="text-align:center; white-space:nowrap;"><button class="btn-ghost edit-stu" data-id="${s.id}" style="padding:6px 10px; font-size:13px; margin-right:4px;">แก้ไข</button><button class="btn-danger del-stu" data-id="${s.id}">ลบ</button></td>
       </tr>
     `).join('');
     tbl.innerHTML = thead + tbody;
@@ -1015,7 +1098,7 @@ function renderTodaySchedule(){
 async function renderStats(){
   const all = await loadAllAttendance();
   const totals = {};
-  students.forEach(s => totals[s.id] = { present:0, late:0, absent:0 });
+  students.forEach(s => totals[s.id] = { present:0, late:0, absent:0, leave:0 });
 
   let daysCounted = 0;
   const dates = Object.keys(all);
@@ -1023,7 +1106,7 @@ async function renderStats(){
     const dayRecord = all[date];
     if(Object.keys(dayRecord).length === 0) return;
     daysCounted++;
-    getRealStudents().forEach(s => {
+    students.forEach(s => {
       const rec = dayRecord[s.id];
       const status = rec ? getRecordStatus(rec) : 'absent';
       if(totals[s.id] && status){
@@ -1032,10 +1115,13 @@ async function renderStats(){
     });
   });
 
+  const sessionDates = classSessionDates();
+  const totalSessionDays = sessionDates.length;
+
   let statsRows = students.map(s => {
     const t = totals[s.id];
-    const total = t.present + t.late + t.absent;
-    const pct = total > 0 ? Math.round(((t.present + t.late) / total) * 100) : 0;
+    const totalAttended = t.present + t.late;
+    const pct = totalSessionDays > 0 ? Math.round((totalAttended / totalSessionDays) * 100) : 0;
     return { s, t, pct };
   });
 
@@ -1059,8 +1145,9 @@ async function renderStats(){
       <th style="cursor:pointer; user-select:none;" data-sort="name">ชื่อ${getArrow('name')}</th>
       <th style="cursor:pointer; user-select:none;" data-sort="present">มา${getArrow('present')}</th>
       <th style="cursor:pointer; user-select:none;" data-sort="late">สาย${getArrow('late')}</th>
+      <th style="cursor:pointer; user-select:none;" data-sort="leave">ลา${getArrow('leave')}</th>
       <th style="cursor:pointer; user-select:none;" data-sort="absent">ขาด${getArrow('absent')}</th>
-      <th style="cursor:pointer; user-select:none;" data-sort="pct">% เข้าเรียน${getArrow('pct')}</th>
+      <th style="cursor:pointer; user-select:none;" data-sort="pct">%เข้าเรียน${getArrow('pct')}</th>
     </tr>`;
     $$('th', thead).forEach(th => {
       th.onclick = () => {
@@ -1072,7 +1159,7 @@ async function renderStats(){
     });
   }
 
-  let sumP=0,sumL=0,sumA=0;
+  let sumP=0,sumL=0,sumA=0,sumLeave=0;
   const tbody = $('#statsBody');
   tbody.innerHTML = '';
   if(statsRows.length === 0){
@@ -1080,12 +1167,13 @@ async function renderStats(){
   }
   statsRows.forEach(row => {
     const { s, t, pct } = row;
-    sumP += t.present; sumL += t.late; sumA += t.absent;
+    sumP += t.present; sumL += t.late; sumA += t.absent; sumLeave += t.leave;
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="name">${s.name}</td>
       <td style="color:var(--present); font-weight:600;">${t.present}</td>
       <td style="color:var(--late); font-weight:600;">${t.late}</td>
+      <td style="color:var(--ink-soft); font-weight:600;">${t.leave}</td>
       <td style="color:var(--absent); font-weight:600;">${t.absent}</td>
       <td><span class="pct-bar" style="width:${Math.max(pct,4)}px; background:${pct>=80?'var(--present)':pct>=50?'var(--late)':'var(--absent)'}"></span>${pct}%</td>
     `;
@@ -1110,7 +1198,18 @@ function shortThaiDate(dateStr){
 function classSessionDates(){
   // วันเรียนจากตารางเรียน เฉพาะที่ถึงวัน (<= วันนี้) แล้ว
   const today = new Date().toISOString().slice(0,10);
-  const set = new Set(scheduleData.periods.map(p => p.date).filter(Boolean));
+  const set = new Set(scheduleData.periods.map(p => {
+    let rawDate = String(p.date || '');
+    if (rawDate.includes('GMT')) {
+       const tDate = new Date(rawDate);
+       if (!isNaN(tDate)) {
+         const m = tDate.getMonth() + 1;
+         const day = tDate.getDate();
+         rawDate = tDate.getFullYear() + '-' + (m < 10 ? '0'+m : m) + '-' + (day < 10 ? '0'+day : day);
+       }
+    }
+    return rawDate;
+  }).filter(Boolean));
   return Array.from(set).filter(d => d <= today).sort();
 }
 async function computeAbsence(){
@@ -1298,12 +1397,15 @@ async function exportExcel(){
   const { all, totals } = await renderStats();
   const wb = XLSX.utils.book_new();
 
-  const summaryRows = [['ชื่อ','มา','สาย','ขาด','% เข้าเรียน']];
+  const summaryRows = [['ชื่อ','มา','สาย','ลา','ขาด','%เข้าเรียน']];
+  const sessionDates = classSessionDates();
+  const totalSessionDays = sessionDates.length;
+
   students.forEach(s => {
     const t = totals[s.id];
-    const total = t.present + t.late + t.absent;
-    const pct = total > 0 ? Math.round(((t.present + t.late) / total) * 100) : 0;
-    summaryRows.push([s.name, t.present, t.late, t.absent, pct + '%']);
+    const totalAttended = t.present + t.late;
+    const pct = totalSessionDays > 0 ? Math.round((totalAttended / totalSessionDays) * 100) : 0;
+    summaryRows.push([s.name, t.present, t.late, t.leave, t.absent, pct + '%']);
   });
   const ws1 = XLSX.utils.aoa_to_sheet(summaryRows);
   XLSX.utils.book_append_sheet(wb, ws1, 'สรุปสถิติ');
@@ -1336,13 +1438,14 @@ async function exportExcel(){
   });
   const ws3 = XLSX.utils.aoa_to_sheet(logRows);
   XLSX.utils.book_append_sheet(wb, ws3, 'บันทึกเวลาเข้าเรียน');
-
   XLSX.writeFile(wb, 'รายงานการเช็คชื่อ.xlsx');
 }
 
 function exportPdf(){
   window.print();
 }
+
+
 
 // ---------- QR SCANNING ----------
 let scanLoopId = null;
@@ -1379,6 +1482,16 @@ function addFeedItem(name, timeStr){
   li.innerHTML = `<span>${name}</span><span class="t">${timeStr}</span>`;
   list.prepend(li);
   $('#feedCount').textContent = list.children.length;
+}
+
+async function resolveLeaveOnCheckIn(sId, date) {
+  const existingLeave = leaveRequests.find(l => l.studentId === sId && l.date === date);
+  if (existingLeave) {
+    await api.req('deleteLeaveRequest', { leaveId: existingLeave.id }, true);
+    leaveRequests = leaveRequests.filter(l => l.id !== existingLeave.id);
+    if ($('#myLeaveList')) renderLeaveRequest();
+    if ($('#leaveApproveTbody')) renderLeaveApprove();
+  }
 }
 
 async function handleScannedId(rawId){
@@ -1419,6 +1532,9 @@ async function handleScannedId(rawId){
   flashScan(`✅ ${student.name}\n${STATUS_LABEL[status]} • ${time}`, false);
   beep(true);
   addFeedItem(student.name, time);
+
+  // Handle leave replacement
+  await resolveLeaveOnCheckIn(student.id, scanDate);
 
   // Background save (quiet mode so it doesn't block UI)
   const roll = await loadRoll(scanDate);
@@ -1552,11 +1668,11 @@ async function refreshScanFeed(){
 
 // ---------- TABS ----------
 function switchTab(name){
-  if(currentUser && currentUser.role === 'student' && !['qrcodes','history'].includes(name)){
+  if(currentUser && currentUser.role === 'student' && !['qrcodes','history','leave'].includes(name)){
     name = 'qrcodes'; // Force student to allowed tabs
   }
   
-  ['roll','scan','students','qrcodes','schedule','absence','stats','gps','history'].forEach(t => {
+  ['roll','scan','students','qrcodes','schedule','absence','stats','gps','history','leave','leaveApprove'].forEach(t => {
     $('#tab-' + t).style.display = (t === name) ? 'block' : 'none';
   });
   $$('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
@@ -1566,6 +1682,8 @@ function switchTab(name){
   if(name === 'schedule') renderSchedule();
   if(name === 'absence') renderAbsence();
   if(name === 'history') renderHistory();
+  if(name === 'leave') renderLeaveRequest();
+  if(name === 'leaveApprove') renderLeaveApprove();
   if(name === 'scan'){ $('#scanFeedList').innerHTML=''; refreshScanFeed(); }
   else { stopScan(); }
 }
@@ -1639,6 +1757,8 @@ async function handleGpsCheckIn(){
         }
       }
     }
+
+    await resolveLeaveOnCheckIn(stId, scanDate);
 
     const roll = await loadRoll(scanDate);
     roll[stId] = { status, time, scannedBy: currentUser ? currentUser.username : '' };
@@ -1756,10 +1876,10 @@ function applyRoleUI(){
   $$('.tab-btn').forEach(btn => {
     const tab = btn.dataset.tab;
     if(currentUser.role === 'student'){
-      if(['qrcodes', 'history'].includes(tab)) btn.style.display = 'inline-block';
+      if(['qrcodes', 'history', 'leave'].includes(tab)) btn.style.display = 'inline-block';
       else btn.style.display = 'none';
     } else {
-      if(tab === 'history') btn.style.display = 'none';
+      if(['history', 'leave'].includes(tab)) btn.style.display = 'none';
       else btn.style.display = 'inline-block';
     }
   });
@@ -1789,6 +1909,9 @@ async function renderHistory() {
   }).filter(p => p.parsedDate)
     .sort((a,b) => a.parsedDate.localeCompare(b.parsedDate));
   
+  let counts = { present: 0, late: 0, leave: 0, absent: 0 };
+  let totalValidDays = 0;
+  
   if(periods.length === 0){
     list.innerHTML = '<div class="empty">ยังไม่มีตารางเรียนหรือประวัติการเข้าเรียน</div>';
     return;
@@ -1799,10 +1922,24 @@ async function renderHistory() {
     
     let status = '';
     let time = '';
+    const todayStr = new Date().toISOString().slice(0,10);
+    
     if (allAttendance[rawDate] && allAttendance[rawDate][currentUser.refId]) {
       const rec = allAttendance[rawDate][currentUser.refId];
       status = getRecordStatus(rec);
       time = getRecordTime(rec);
+    } else {
+      // พิจารณาว่า ขาดเรียน หรือยังไม่ถึงเวลาเรียน
+      // - ถ้าย้อนหลัง (rawDate < today) ถือว่าขาด
+      // - ถ้าเป็นวันนี้ (rawDate == today) และมีการเริ่มเช็คชื่อใครสักคนแล้ว (มี allAttendance[rawDate]) ถือว่าขาด
+      if (rawDate < todayStr || (rawDate === todayStr && allAttendance[rawDate] && Object.keys(allAttendance[rawDate]).length > 0)) {
+        status = 'absent';
+      }
+    }
+    
+    if (status) {
+      if (counts[status] !== undefined) counts[status]++;
+      totalValidDays++;
     }
     
     const item = document.createElement('div');
@@ -1835,7 +1972,220 @@ async function renderHistory() {
     `;
     list.appendChild(item);
   });
+  
+  const sumList = $('#historySummary');
+  if(sumList) {
+    const sessionDates = classSessionDates();
+    const totalSessionDays = sessionDates.length;
+    
+    if(totalSessionDays > 0) {
+      const totalAttended = counts.present + counts.late;
+      const pct = Math.round((totalAttended / totalSessionDays) * 100);
+      sumList.innerHTML = `
+        <div style="width:100%; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <div style="display:flex; gap:16px; flex-wrap:wrap; font-family:'IBM Plex Mono', monospace; font-size:14px;">
+             <span><b style="color:var(--present);">มาเรียน:</b> ${totalAttended} ครั้ง <span style="font-size:12px;color:var(--ink-soft);">(มา ${counts.present}, สาย ${counts.late})</span></span>
+             <span><b style="color:var(--absent);">ขาดเรียน:</b> ${counts.leave + counts.absent} ครั้ง <span style="font-size:12px;color:var(--ink-soft);">(ลา ${counts.leave}, ขาด ${counts.absent})</span></span>
+          </div>
+          <div style="font-size:15px; font-weight:bold;">
+            %เข้าเรียน: <span style="color:${pct >= 80 ? 'var(--present)' : pct >= 50 ? 'var(--late)' : 'var(--absent)'}; font-size:17px;">${pct}%</span>
+          </div>
+        </div>
+        <div style="width:100%; height:6px; background:#ddd; border-radius:3px; margin-top:10px; overflow:hidden;">
+          <div style="width:${pct}%; height:100%; background:${pct >= 80 ? 'var(--present)' : pct >= 50 ? 'var(--late)' : 'var(--absent)'};"></div>
+        </div>
+      `;
+      sumList.style.display = 'block';
+    } else {
+      sumList.style.display = 'none';
+    }
+  }
 }
+
+// ---------- LEAVE SYSTEM ----------
+function renderLeaveRequest() {
+  const list = $('#myLeaveList');
+  if(!list) return;
+  list.innerHTML = '';
+  
+  if(!currentUser || currentUser.role !== 'student') return;
+  
+  const dateSelect = $('#leaveReqDate');
+  if(dateSelect) {
+    dateSelect.innerHTML = '<option value="">-- เลือกวันที่ --</option>';
+    const dates = [...new Set(scheduleData.periods.map(p => {
+       let rawDate = String(p.date || '');
+       if (rawDate.includes('GMT')) {
+          const tDate = new Date(rawDate);
+          if (!isNaN(tDate)) {
+            const m = tDate.getMonth() + 1;
+            const day = tDate.getDate();
+            rawDate = tDate.getFullYear() + '-' + (m < 10 ? '0'+m : m) + '-' + (day < 10 ? '0'+day : day);
+          }
+       }
+       return rawDate;
+    }).filter(Boolean))].sort();
+    
+    dates.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d;
+      opt.textContent = d;
+      dateSelect.appendChild(opt);
+    });
+  }
+  
+  const myLeaves = leaveRequests.filter(l => String(l.studentId) === String(currentUser.refId) || (!isNaN(l.studentId) && Number(l.studentId) === Number(currentUser.refId))).sort((a,b) => b.timestamp.localeCompare(a.timestamp));
+  if(myLeaves.length === 0) {
+    list.innerHTML = '<div class="empty">ยังไม่มีประวัติการขอลา</div>';
+    return;
+  }
+  
+  const statusColor = { pending: '#B9791E', approved: 'var(--present)', rejected: 'var(--absent)' };
+  const statusLabel = { pending: 'รออนุมัติ', approved: 'อนุมัติแล้ว', rejected: 'ไม่อนุมัติ' };
+  
+  myLeaves.forEach(l => {
+    const div = document.createElement('div');
+    div.className = 'roll-item';
+    div.style.alignItems = 'flex-start';
+    div.innerHTML = `
+      <div style="flex:1;">
+        <div style="font-weight:bold; font-size:15px;">📅 ${l.date}</div>
+        <div style="font-size:14px; color:var(--ink-soft); margin-top:4px;">เหตุผล: ${l.reason || '-'}</div>
+        <div style="font-size:12px; color:var(--ink-soft); margin-top:2px;">ส่งเมื่อ: ${l.timestamp}</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        <span style="font-size:13px; font-weight:bold; padding:4px 10px; border-radius:999px; border:1px solid ${statusColor[l.status]}; color:${statusColor[l.status]}; background:#fff; white-space:nowrap;">${statusLabel[l.status] || l.status}</span>
+        ${l.status === 'pending' ? `<button class="btn-ghost" style="padding:4px 8px; font-size:12px; border-radius:6px; cursor:pointer; white-space:nowrap;" onclick="openEditLeave('${l.id}')">แก้ไข</button>` : ''}
+        <button class="btn-danger" style="padding:4px 8px; font-size:12px; border-radius:6px; cursor:pointer; white-space:nowrap;" onclick="deleteMyLeave('${l.id}')">ลบ</button>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function renderLeaveApprove() {
+  const tbody = $('#leaveApproveTbody');
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  
+  if(leaveRequests.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty">ไม่มีคำร้องขอลาเรียน</div></td></tr>';
+    return;
+  }
+  
+  const sorted = leaveRequests.slice().sort((a,b) => b.timestamp.localeCompare(a.timestamp));
+  const statusColor = { pending: '#B9791E', approved: 'var(--present)', rejected: 'var(--absent)' };
+  const statusLabel = { pending: 'รออนุมัติ', approved: 'อนุมัติ', rejected: 'ไม่อนุมัติ' };
+  
+  sorted.forEach(l => {
+    const st = students.find(s => s.id === l.studentId) || adminList.find(s => s.id === l.studentId) || { name: 'Unknown' };
+    const tr = document.createElement('tr');
+    tr.style.borderBottom = '1px dashed var(--paper-line)';
+    
+    let actionHtml = '';
+    if (l.status === 'pending') {
+      actionHtml = `
+        <button class="btn-primary" style="padding:4px 8px; font-size:12px;" onclick="updateLeave('${l.id}', 'approved')">อนุมัติ</button>
+        <button class="btn-danger" style="padding:4px 8px; font-size:12px;" onclick="updateLeave('${l.id}', 'rejected')">ไม่อนุมัติ</button>
+      `;
+    } else {
+      actionHtml = `<div style="font-size:12px; color:var(--ink-soft);">-จัดการแล้ว-</div>
+                    <div style="font-size:11px; color:var(--ink-soft); margin-top:4px;">โดย: ${l.approvedBy || '-'}</div>
+                    <div style="font-size:11px; color:var(--ink-soft);">เมื่อ: ${l.approvedAt || '-'}</div>`;
+    }
+    
+    tr.innerHTML = `
+      <td style="padding:8px 4px; font-family:'IBM Plex Mono',monospace; font-size:13.5px;">${l.date}</td>
+      <td style="padding:8px 4px; font-size:14px; font-weight:bold;">${st.name}</td>
+      <td style="padding:8px 4px; font-size:14px; color:var(--ink-soft);">${l.reason || '-'}</td>
+      <td style="padding:8px 4px;">
+        <span style="font-size:12px; font-weight:bold; color:${statusColor[l.status]};">${statusLabel[l.status]}</span>
+      </td>
+      <td style="padding:8px 4px; text-align:center;">${actionHtml}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+window.updateLeave = async function(leaveId, status) {
+  if(!confirm(`ยืนยันการทำรายการ (${status === 'approved' ? 'อนุมัติ' : 'ไม่อนุมัติ'}) คำร้องนี้?`)) return;
+  
+  let approverName = currentUser.name || currentUser.username;
+  if(currentUser.refId) {
+    let st = adminList.find(s => s.id === currentUser.refId);
+    if(st) approverName = st.name;
+  }
+  
+  const res = await api.req('updateLeaveStatus', { leaveId, status, approvedBy: approverName });
+  if(res && res.success) {
+    alert('บันทึกเรียบร้อย');
+    await loadAllData();
+    renderLeaveApprove();
+  } else {
+    alert('เกิดข้อผิดพลาด: ' + (res ? res.error : ''));
+  }
+};
+
+window.deleteMyLeave = async function(leaveId) {
+  const lv = leaveRequests.find(l => l.id === leaveId);
+  if(!lv) return;
+  if(!confirm(`ยืนยันการลบใบลาวันที่ ${lv.date} ใช่หรือไม่?\n(หากมีสถานะการลาในวันนั้นอยู่ สถานะนั้นจะถูกลบไปด้วย)`)) return;
+  
+  const res = await api.req('deleteLeaveRequest', { leaveId: leaveId });
+  if (res && res.success) {
+    leaveRequests = leaveRequests.filter(l => l.id !== leaveId);
+    
+    // Remove from attendance sheet cache if it exists
+    if (allAttendance[lv.date]) {
+      const matchId = Object.keys(allAttendance[lv.date]).find(k => String(k) === String(lv.studentId) || (!isNaN(k) && Number(k) === Number(lv.studentId)));
+      if (matchId) {
+        const rec = allAttendance[lv.date][matchId];
+        if (rec.status === 'leave') {
+          delete allAttendance[lv.date][matchId];
+          await saveRollData(lv.date, allAttendance[lv.date], true);
+        }
+      }
+    }
+    
+    alert('ลบข้อมูลใบลาเรียบร้อยแล้ว');
+    renderLeaveRequest();
+    renderLeaveApprove();
+  } else {
+    alert('เกิดข้อผิดพลาด: ' + (res ? res.error : ''));
+  }
+};
+
+window.openEditLeave = function(id) {
+  const lv = leaveRequests.find(l => l.id === id);
+  if(!lv) return;
+  $('#editLeaveId').value = id;
+  
+  const dateSelect = $('#editLeaveDate');
+  dateSelect.innerHTML = '';
+  const dates = [...new Set(scheduleData.periods.map(p => {
+     let rawDate = String(p.date || '');
+     if (rawDate.includes('GMT')) {
+        const tDate = new Date(rawDate);
+        if (!isNaN(tDate)) {
+          const m = tDate.getMonth() + 1;
+          const day = tDate.getDate();
+          rawDate = tDate.getFullYear() + '-' + (m < 10 ? '0'+m : m) + '-' + (day < 10 ? '0'+day : day);
+        }
+     }
+     return rawDate;
+  }).filter(Boolean))].sort();
+  
+  dates.forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d;
+    opt.textContent = d;
+    dateSelect.appendChild(opt);
+  });
+  
+  dateSelect.value = lv.date;
+  $('#editLeaveReason').value = lv.reason;
+  $('#editLeaveOverlay').style.display = 'flex';
+};
 
 // ---------- INIT ----------
 async function init(){
@@ -1847,6 +2197,34 @@ async function init(){
   $('#loginBtn').onclick = doLogin;
   $('#logoutBtn').onclick = doLogout;
   $('#loginPass').onkeypress = (e) => { if(e.key === 'Enter') doLogin(); };
+
+  $('#editLeaveCancelBtn').onclick = () => {
+    $('#editLeaveOverlay').style.display = 'none';
+  };
+
+  $('#editLeaveSaveBtn').onclick = async () => {
+    const id = $('#editLeaveId').value;
+    const date = $('#editLeaveDate').value;
+    const reason = $('#editLeaveReason').value.trim();
+    
+    if(!date || !reason) { alert('กรุณาระบุข้อมูลให้ครบถ้วน'); return; }
+    
+    const res = await api.req('editLeaveRequest', { leaveId: id, date: date, reason: reason });
+    if (res && res.success) {
+      const lv = leaveRequests.find(l => l.id === id);
+      if(lv) {
+        lv.date = date;
+        lv.reason = reason;
+      }
+      $('#editLeaveOverlay').style.display = 'none';
+      alert('บันทึกการแก้ไขเรียบร้อยแล้ว');
+      renderLeaveRequest();
+      if ($('#leaveApproveTbody')) renderLeaveApprove();
+      loadAllData();
+    } else {
+      alert('เกิดข้อผิดพลาด: ' + (res ? res.error : ''));
+    }
+  };
 
   $('#changePasswordBtn').onclick = () => {
     $('#changePasswordOverlay').style.display = 'flex';
@@ -1872,6 +2250,22 @@ async function init(){
   
   $$('.tab-btn').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
 
+  const openAddBtn = $('#openAddStudentModalBtn');
+  if(openAddBtn) {
+    openAddBtn.onclick = () => {
+      $('#newStudentId').value = '';
+      $('#newStudentFirst').value = '';
+      $('#newStudentLast').value = '';
+      $('#newStudentNick').value = '';
+      $('#newStudentSaint').value = '';
+      $('#addStudentOverlay').style.display = 'flex';
+    };
+  }
+  const cancelAddBtn = $('#addStuCancelBtn');
+  if(cancelAddBtn) {
+    cancelAddBtn.onclick = () => $('#addStudentOverlay').style.display = 'none';
+  }
+
   $('#addStudentBtn').onclick = async () => {
     const stId = $('#newStudentId').value.trim();
     const first = $('#newStudentFirst').value.trim();
@@ -1892,11 +2286,7 @@ async function init(){
     });
     
     await saveStudents();
-    $('#newStudentId').value = '';
-    $('#newStudentFirst').value = '';
-    $('#newStudentLast').value = '';
-    $('#newStudentNick').value = '';
-    $('#newStudentSaint').value = '';
+    $('#addStudentOverlay').style.display = 'none';
     
     renderStudentList();
     renderRoll();
@@ -1921,6 +2311,38 @@ async function init(){
 
   $('#exportExcel').onclick = exportExcel;
   $('#exportPdf').onclick = exportPdf;
+  $('#leaveReqBtn').onclick = async () => {
+    const date = $('#leaveReqDate').value;
+    const reason = $('#leaveReqReason').value.trim();
+    if(!date) { alert('กรุณาระบุวันที่ขอลา'); return; }
+    if(!reason) { alert('กรุณาระบุเหตุผลการลา'); return; }
+    if(!confirm(`ต้องการส่งคำร้องขอลาวันที่ ${date} หรือไม่?`)) return;
+    
+    const res = await api.req('saveLeaveRequest', { studentId: currentUser.refId, date, reason });
+    if(res && res.success) {
+      const now = new Date();
+      const ts = String(now.getDate()).padStart(2,'0') + '/' + String(now.getMonth()+1).padStart(2,'0') + '/' + now.getFullYear() + ' ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0') + ':' + String(now.getSeconds()).padStart(2,'0');
+      
+      leaveRequests.push({
+        id: res.leaveId,
+        studentId: currentUser.refId,
+        date: date,
+        reason: reason,
+        status: 'pending',
+        timestamp: ts
+      });
+      
+      $('#leaveReqReason').value = '';
+      renderLeaveRequest();
+      alert('ส่งคำร้องขอลาเรียบร้อยแล้ว');
+      
+      // Sync in background without blocking UI
+      loadAllData();
+    } else {
+      alert('เกิดข้อผิดพลาด: ' + (res ? res.error : ''));
+    }
+  };
+
   $('#exportAbsence').onclick = exportAbsence;
   $('#absOnlyMissing').onchange = renderAbsence;
   $('#printQrBtn').onclick = () => window.print();
