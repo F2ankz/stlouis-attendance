@@ -407,6 +407,21 @@
   </div>
 </div>
 
+<div id="editStudentOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center;">
+  <div class="login-box">
+    <h2>แก้ไขข้อมูล</h2>
+    <input type="hidden" id="editStuId">
+    <input type="text" id="editStuFirst" placeholder="ชื่อ">
+    <input type="text" id="editStuLast" placeholder="นามสกุล">
+    <input type="text" id="editStuNick" placeholder="ชื่อเล่น">
+    <input type="text" id="editStuSaint" placeholder="นักบุญ">
+    <div class="row" style="justify-content:center; gap:10px; margin-top: 15px;">
+      <button class="btn-ghost" id="editStuCancelBtn" style="flex:1;">ยกเลิก</button>
+      <button class="btn-primary" id="editStuSaveBtn" style="flex:1;">บันทึก</button>
+    </div>
+  </div>
+</div>
+
 <div class="wrap" id="appWrap" style="display:none;">
   <header style="justify-content:space-between; flex-wrap:wrap; gap:10px;">
     <div>
@@ -799,7 +814,7 @@ function renderStudentList(){
         <td class="name">${s.lastName || '-'}</td>
         <td>${s.nickname || '-'}</td>
         <td><div class="mini-qr" id="mini-qr-${s.id}"></div></td>
-        <td><button class="btn-danger del-stu" data-id="${s.id}">ลบ</button></td>
+        <td><button class="btn-ghost edit-stu" data-id="${s.id}" style="margin-right:4px;">แก้ไข</button><button class="btn-danger del-stu" data-id="${s.id}">ลบ</button></td>
       </tr>
     `).join('');
     tbl.innerHTML = thead + tbody;
@@ -819,7 +834,57 @@ function renderStudentList(){
       }
     });
     
-    $$('.del-stu', tbl).forEach(btn => {
+
+    // Edit Student Handlers
+    $('.edit-stu', tbl).forEach(btn => {
+      btn.onclick = () => {
+        const sId = btn.dataset.id;
+        const s = students.find(x => x.id === sId) || adminList.find(x => x.id === sId);
+        if(s){
+          document.getElementById('editStuId').value = s.id;
+          document.getElementById('editStuFirst').value = s.firstName || '';
+          document.getElementById('editStuLast').value = s.lastName || '';
+          document.getElementById('editStuNick').value = s.nickname || '';
+          document.getElementById('editStuSaint').value = s.saint || '';
+          document.getElementById('editStudentOverlay').style.display = 'flex';
+        }
+      };
+    });
+    
+    // Add global save handler only once if not exist
+    if(!document.getElementById('editStuCancelBtn').onclick) {
+      document.getElementById('editStuCancelBtn').onclick = () => {
+        document.getElementById('editStudentOverlay').style.display = 'none';
+      };
+      
+      document.getElementById('editStuSaveBtn').onclick = async () => {
+        const sId = document.getElementById('editStuId').value;
+        const s = students.find(x => x.id === sId) || adminList.find(x => x.id === sId);
+        if(s){
+          s.firstName = document.getElementById('editStuFirst').value.trim();
+          s.lastName = document.getElementById('editStuLast').value.trim();
+          s.nickname = document.getElementById('editStuNick').value.trim();
+          s.saint = document.getElementById('editStuSaint').value.trim();
+          s.name = `${s.firstName} ${s.lastName} ${s.nickname ? '('+s.nickname+')' : ''}`.trim();
+          
+          const sbtn = document.getElementById('editStuSaveBtn');
+          sbtn.textContent = 'กำลังบันทึก...';
+          sbtn.disabled = true;
+          
+          await saveStudents();
+          
+          sbtn.textContent = 'บันทึก';
+          sbtn.disabled = false;
+          document.getElementById('editStudentOverlay').style.display = 'none';
+          
+          renderStudentList();
+          renderRoll();
+          renderQrGrid();
+        }
+      };
+    }
+
+    $('.del-stu', tbl).forEach(btn => {
       btn.onclick = async () => {
         const s = students.find(x => x.id === btn.dataset.id);
         if(s && confirm(`ลบ "${s.name}" ออกจากรายชื่อ?`)){
@@ -953,16 +1018,18 @@ async function renderStats(){
   students.forEach(s => totals[s.id] = { present:0, late:0, absent:0 });
 
   let daysCounted = 0;
-  Object.values(all).forEach(dayRecord => {
-    let hasAny = false;
-    Object.entries(dayRecord).forEach(([sid, rec]) => {
-      const status = getRecordStatus(rec);
-      if(totals[sid] && status){
-        totals[sid][status] = (totals[sid][status]||0) + 1;
-        hasAny = true;
+  const dates = Object.keys(all);
+  dates.forEach(date => {
+    const dayRecord = all[date];
+    if(Object.keys(dayRecord).length === 0) return;
+    daysCounted++;
+    getRealStudents().forEach(s => {
+      const rec = dayRecord[s.id];
+      const status = rec ? getRecordStatus(rec) : 'absent';
+      if(totals[s.id] && status){
+        totals[s.id][status] = (totals[s.id][status]||0) + 1;
       }
     });
-    if(hasAny) daysCounted++;
   });
 
   let statsRows = students.map(s => {
@@ -1246,7 +1313,7 @@ async function exportExcel(){
     const row = [s.name];
     dates.forEach(d => {
       const rec = all[d][s.id];
-      const status = getRecordStatus(rec);
+      const status = rec ? getRecordStatus(rec) : 'absent';
       const time = getRecordTime(rec);
       row.push(status ? (STATUS_LABEL[status] + (time ? ' (' + time + ')' : '')) : '-');
     });
