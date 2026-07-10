@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>เธชเธกเธธเธ”เน€เธเนเธเธเธทเนเธญ เน€เธเธเธ•เนเธซเธฅเธธเธขเธชเน 2026</title>
+<title>สมุดเช็คชื่อ เซนต์หลุยส์ 2026</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Bitter:wght@500;600;700&family=Sarabun:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
 
@@ -385,24 +385,24 @@
 <body>
 <div id="loginOverlay">
   <div class="login-box">
-    <h2>เธฃเธฐเธเธเธฅเธเน€เธงเธฅเธฒเน€เธฃเธตเธขเธ</h2>
+    <h2>ระบบลงเวลาเรียน</h2>
     <div id="loginError" class="login-error"></div>
     <input type="text" id="loginUser" placeholder="Username" autocomplete="off">
     <input type="password" id="loginPass" placeholder="Password">
-    <button class="btn-primary" id="loginBtn">เน€เธเนเธฒเธชเธนเนเธฃเธฐเธเธ</button>
+    <button class="btn-primary" id="loginBtn">เข้าสู่ระบบ</button>
   </div>
 </div>
 
 <div id="changePasswordOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center;">
   <div class="login-box">
-    <h2>เน€เธเธฅเธตเนเธขเธเธฃเธซเธฑเธชเธเนเธฒเธ</h2>
+    <h2>เปลี่ยนรหัสผ่าน</h2>
     <div id="cpwError" class="login-error"></div>
-    <div id="cpwSuccess" style="color:var(--present); font-size:14px; font-weight:bold; margin-bottom:10px; display:none;">เน€เธเธฅเธตเนเธขเธเธฃเธซเธฑเธชเธเนเธฒเธเธชเธณเน€เธฃเนเธ</div>
-    <input type="password" id="cpwOld" placeholder="เธฃเธซเธฑเธชเธเนเธฒเธเน€เธ”เธดเธก">
-    <input type="password" id="cpwNew" placeholder="เธฃเธซเธฑเธชเธเนเธฒเธเนเธซเธกเน">
+    <div id="cpwSuccess" style="color:var(--present); font-size:14px; font-weight:bold; margin-bottom:10px; display:none;">เปลี่ยนรหัสผ่านสำเร็จ</div>
+    <input type="password" id="cpwOld" placeholder="รหัสผ่านเดิม">
+    <input type="password" id="cpwNew" placeholder="รหัสผ่านใหม่">
     <div class="row" style="justify-content:center; gap:10px; margin-top: 15px;">
-      <button class="btn-ghost" id="cpwCancelBtn" style="flex:1;">เธขเธเน€เธฅเธดเธ</button>
-      <button class="btn-primary" id="cpwSaveBtn" style="flex:1;">เธเธฑเธเธ—เธถเธ</button>
+      <button class="btn-ghost" id="cpwCancelBtn" style="flex:1;">ยกเลิก</button>
+      <button class="btn-primary" id="cpwSaveBtn" style="flex:1;">บันทึก</button>
     </div>
   </div>
 </div>
@@ -410,34 +410,34 @@
 <div class="wrap" id="appWrap" style="display:none;">
   <header style="justify-content:space-between; flex-wrap:wrap; gap:10px;">
     <div>
-      <h1>๐“– RCIA St. Louis 2026</h1>
+      <h1>📖 RCIA St. Louis 2026</h1>
       <span class="stamp-mini" id="todayLabel"></span>
     </div>
     <div class="user-info">
       <span id="loggedInRole"></span>
-      <button id="changePasswordBtn" style="display:none; color:var(--present);">เน€เธเธฅเธตเนเธขเธเธฃเธซเธฑเธชเธเนเธฒเธ</button>
-      <button id="logoutBtn">เธญเธญเธเธเธฒเธเธฃเธฐเธเธ</button>
+      <button id="changePasswordBtn" style="display:none; color:var(--present);">เปลี่ยนรหัสผ่าน</button>
+      <button id="logoutBtn">ออกจากระบบ</button>
     </div>
   </header>
 
   <div class="tabs no-print">
-    <button class="tab-btn active" data-tab="roll">เน€เธเนเธเธเธทเนเธญเธงเธฑเธเธเธตเน</button>
-    <button class="tab-btn" data-tab="scan">เธชเนเธเธ QR เธซเธเนเธฒเธซเนเธญเธ</button>
-    <button class="tab-btn" data-tab="gps">๐“ เน€เธเนเธเธเธทเนเธญเธเธฑเธเน€เธฃเธตเธขเธ (GPS)</button>
-    <button class="tab-btn" data-tab="students">เธเธฑเธ”เธเธฒเธฃเธฃเธฒเธขเธเธทเนเธญ</button>
-    <button class="tab-btn" data-tab="qrcodes">QR เธเธฑเธเน€เธฃเธตเธขเธ</button>
-    <button class="tab-btn" data-tab="schedule">เธ•เธฒเธฃเธฒเธเน€เธฃเธตเธขเธ</button>
-    <button class="tab-btn" data-tab="absence">๐ฉ เนเธเธฃเธเธฒเธ”เธเนเธฒเธ</button>
-    <button class="tab-btn" data-tab="stats">เธชเธฃเธธเธเธชเธ–เธดเธ•เธด</button>
-    <button class="tab-btn" data-tab="history" style="display:none;">๐“… เธเธฃเธฐเธงเธฑเธ•เธดเธเธญเธเธเธฑเธ</button>
+    <button class="tab-btn active" data-tab="roll">เช็คชื่อวันนี้</button>
+    <button class="tab-btn" data-tab="scan">สแกน QR หน้าห้อง</button>
+    <button class="tab-btn" data-tab="gps">📍 เช็คชื่อนักเรียน (GPS)</button>
+    <button class="tab-btn" data-tab="students">จัดการรายชื่อ</button>
+    <button class="tab-btn" data-tab="qrcodes">QR นักเรียน</button>
+    <button class="tab-btn" data-tab="schedule">ตารางเรียน</button>
+    <button class="tab-btn" data-tab="absence">🚩 ใครขาดบ้าง</button>
+    <button class="tab-btn" data-tab="stats">สรุปสถิติ</button>
+    <button class="tab-btn" data-tab="history" style="display:none;">📅 ประวัติของฉัน</button>
   </div>
 
   <!-- ROLL CALL TAB -->
   <section id="tab-roll">
     <div class="card">
-      <h2>เน€เธเนเธเธเธทเนเธญ</h2>
+      <h2>เช็คชื่อ</h2>
       <div class="row" style="margin-bottom:14px;">
-        <label style="font-size:14.5px; color:var(--ink-soft);">เธงเธฑเธเธ—เธตเน:</label>
+        <label style="font-size:14.5px; color:var(--ink-soft);">วันที่:</label>
         <input type="date" id="rollDate">
       </div>
       <div id="liveClock" style="font-size: 16px; font-weight: bold; color: var(--primary); text-align: right; margin-bottom: 10px;"></div>
@@ -449,19 +449,19 @@
   <!-- GPS TAB -->
   <section id="tab-gps" style="display:none;">
     <div class="card" style="text-align:center;">
-      <h2>๐“ เน€เธเนเธเธเธทเนเธญเธ”เนเธงเธขเธเธดเธเธฑเธ” GPS</h2>
+      <h2>📍 เช็คชื่อด้วยพิกัด GPS</h2>
       <p style="color:var(--ink-soft); font-size:14px; margin-bottom:20px;">
-        เธเธตเน€เธเธญเธฃเนเธเธตเนเธชเธณเธซเธฃเธฑเธเธเธฑเธเน€เธฃเธตเธขเธเธ—เธตเนเธญเธขเธนเนเธ เธฒเธขเนเธเธเธฃเธดเน€เธงเธ“ <b>เธงเธฑเธ”เน€เธเธเธ•เนเธซเธฅเธธเธขเธชเน (เนเธกเนเน€เธเธดเธ 50 เน€เธกเธ•เธฃ)</b><br>
-        เธเธฃเธธเธ“เธฒเธญเธเธธเธเธฒเธ•เธเธฒเธฃเน€เธเนเธฒเธ–เธถเธเธ•เธณเนเธซเธเนเธเธ—เธตเนเธ•เธฑเนเธ (Location) เธเนเธญเธเนเธเนเธเธฒเธ
+        ฟีเจอร์นี้สำหรับนักเรียนที่อยู่ภายในบริเวณ <b>วัดเซนต์หลุยส์ (ไม่เกิน 50 เมตร)</b><br>
+        กรุณาอนุญาตการเข้าถึงตำแหน่งที่ตั้ง (Location) ก่อนใช้งาน
       </p>
       
       <div style="margin-bottom:20px;">
         <select id="gpsStudentSelect" style="width:100%; max-width:400px; padding:10px; font-size:15px; border-radius:8px; border:2px solid var(--paper-line);">
-          <option value="">-- เน€เธฅเธทเธญเธเธเธทเนเธญเธเธญเธเธ•เธเน€เธญเธ --</option>
+          <option value="">-- เลือกชื่อของตนเอง --</option>
         </select>
       </div>
       
-      <button class="btn-primary" id="gpsCheckInBtn" style="font-size:16px; padding:12px 24px;">๐“ เธเธ”เน€เธเธทเนเธญเน€เธเนเธเธเธทเนเธญเน€เธเนเธฒเน€เธฃเธตเธขเธ</button>
+      <button class="btn-primary" id="gpsCheckInBtn" style="font-size:16px; padding:12px 24px;">📍 กดเพื่อเช็คชื่อเข้าเรียน</button>
       
       <div id="gpsStatusMsg" style="margin-top:20px; font-size:15px; font-weight:600; white-space:pre-line;"></div>
     </div>
@@ -470,18 +470,18 @@
   <!-- SCAN TAB -->
   <section id="tab-scan" style="display:none;">
     <div class="card">
-      <h2>เธชเนเธเธ QR เธซเธเนเธฒเธซเนเธญเธ</h2>
-      <p class="hint">เนเธซเนเธเธฑเธเน€เธฃเธตเธขเธเธเธณ QR เนเธเนเธ”เธเธญเธเธ•เธฑเธงเน€เธญเธ (เนเธ—เนเธ "QR เธเธฑเธเน€เธฃเธตเธขเธ") เธกเธฒเธชเนเธเธเธ—เธตเนเธเธฅเนเธญเธเธเธตเน เธฃเธฐเธเธเธเธฐเน€เธเนเธเธเธทเนเธญเธเธฃเนเธญเธกเธเธฑเธเธ—เธถเธเน€เธงเธฅเธฒเนเธซเนเธญเธฑเธ•เนเธเธกเธฑเธ•เธด</p>
+      <h2>สแกน QR หน้าห้อง</h2>
+      <p class="hint">ให้นักเรียนนำ QR โค้ดของตัวเอง (แท็บ "QR นักเรียน") มาสแกนที่กล้องนี้ ระบบจะเช็คชื่อพร้อมบันทึกเวลาให้อัตโนมัติ</p>
       <div class="scan-warning">
-        โ ๏ธ เธ–เนเธฒเธเธฅเนเธญเธเน€เธเธดเธ”เนเธกเนเนเธ”เนเนเธเธซเธเนเธฒเธ•เนเธฒเธเธเธตเน เนเธซเนเธฅเธญเธเน€เธเธดเธ”เนเธเธฅเนเธเธตเนเนเธเนเธ—เนเธเน€เธเธฃเธฒเธงเนเน€เธเธญเธฃเนเนเธขเธเธ•เนเธฒเธเธซเธฒเธ (เนเธกเนเนเธเนเนเธเธเธฃเธญเธเนเธเธ—) เนเธฅเนเธงเธญเธเธธเธเธฒเธ•เธเธฒเธฃเนเธเนเธเธฅเนเธญเธ เน€เธเธฃเธฒเธงเนเน€เธเธญเธฃเนเธเธฒเธเธ•เธฑเธงเธเธฅเนเธญเธเธเธฅเนเธญเธเน€เธกเธทเนเธญเธเธฑเธเธญเธขเธนเนเนเธเธซเธเนเธฒเธญเธทเนเธ
+        ⚠️ ถ้ากล้องเปิดไม่ได้ในหน้าต่างนี้ ให้ลองเปิดไฟล์นี้ในแท็บเบราว์เซอร์แยกต่างหาก (ไม่ใช่ในกรอบแชท) แล้วอนุญาตการใช้กล้อง เบราว์เซอร์บางตัวบล็อกกล้องเมื่อฝังอยู่ในหน้าอื่น
       </div>
       <div class="row" style="margin-bottom:16px;">
-        <label style="font-size:14.5px; color:var(--ink-soft);">เธงเธฑเธเธ—เธตเนเน€เธเนเธเธเธทเนเธญ:</label>
+        <label style="font-size:14.5px; color:var(--ink-soft);">วันที่เช็คชื่อ:</label>
         <input type="date" id="scanDate">
-        <label style="font-size:14.5px; color:var(--ink-soft); margin-left:10px;">เธชเธ–เธฒเธเธฐเน€เธกเธทเนเธญเธชเนเธเธ:</label>
+        <label style="font-size:14.5px; color:var(--ink-soft); margin-left:10px;">สถานะเมื่อสแกน:</label>
         <select id="scanStatus">
-          <option value="present">เธกเธฒ</option>
-          <option value="late">เธชเธฒเธข</option>
+          <option value="present">มา</option>
+          <option value="late">สาย</option>
         </select>
       </div>
       <div class="scan-stage">
@@ -491,17 +491,17 @@
           <div class="scan-flash" id="scanFlash"></div>
         </div>
         <div class="scan-feed">
-          <h3>เน€เธเนเธเธเธทเนเธญเนเธฅเนเธงเธงเธฑเธเธเธตเน (<span id="feedCount">0</span>)</h3>
+          <h3>เช็คชื่อแล้ววันนี้ (<span id="feedCount">0</span>)</h3>
           <ul class="scan-feed-list" id="scanFeedList"></ul>
         </div>
       </div>
       <div class="row" style="margin-top:14px; margin-bottom:4px;">
-        <label style="font-size:14.5px; color:var(--ink-soft);">เน€เธฅเธทเธญเธเธเธฅเนเธญเธ:</label>
-        <select id="cameraSelect"><option value="">(เธเธฅเนเธญเธเน€เธฃเธดเนเธกเธ•เนเธ)</option></select>
+        <label style="font-size:14.5px; color:var(--ink-soft);">เลือกกล้อง:</label>
+        <select id="cameraSelect"><option value="">(กล้องเริ่มต้น)</option></select>
       </div>
       <div class="export-row">
-        <button class="btn-primary" id="startScanBtn">โ–ถ เน€เธฃเธดเนเธกเธชเนเธเธ</button>
-        <button class="btn-stop" id="stopScanBtn" style="display:none;">โ–  เธซเธขเธธเธ”เธชเนเธเธ</button>
+        <button class="btn-primary" id="startScanBtn">▶ เริ่มสแกน</button>
+        <button class="btn-stop" id="stopScanBtn" style="display:none;">■ หยุดสแกน</button>
         <span id="scanMsg" style="align-self:center; font-size:13px; color:var(--ink-soft);"></span>
       </div>
     </div>
@@ -510,14 +510,14 @@
   <!-- STUDENTS TAB -->
   <section id="tab-students" style="display:none;">
     <div class="card">
-      <h2>เธฃเธฒเธขเธเธทเนเธญเธเธฑเธเน€เธฃเธตเธขเธ</h2>
+      <h2>รายชื่อนักเรียน</h2>
       <div class="row" style="flex-wrap:wrap; gap:6px;">
         <input type="text" id="newStudentId" placeholder="StudentID" style="width:100px;">
-        <input type="text" id="newStudentFirst" placeholder="เธเธทเนเธญ" style="width:120px;">
-        <input type="text" id="newStudentLast" placeholder="เธเธฒเธกเธชเธเธธเธฅ" style="width:120px;">
-        <input type="text" id="newStudentNick" placeholder="เธเธทเนเธญเน€เธฅเนเธ" style="width:80px;">
-        <input type="text" id="newStudentSaint" placeholder="เธเธฑเธเธเธธเธ" style="width:120px;">
-        <button class="btn-primary" id="addStudentBtn">+ เน€เธเธดเนเธกเธฃเธฒเธขเธเธทเนเธญ</button>
+        <input type="text" id="newStudentFirst" placeholder="ชื่อ" style="width:120px;">
+        <input type="text" id="newStudentLast" placeholder="นามสกุล" style="width:120px;">
+        <input type="text" id="newStudentNick" placeholder="ชื่อเล่น" style="width:80px;">
+        <input type="text" id="newStudentSaint" placeholder="นักบุญ" style="width:120px;">
+        <button class="btn-primary" id="addStudentBtn">+ เพิ่มรายชื่อ</button>
       </div>
       <div style="overflow-x:auto; margin-top: 16px;">
         <table id="studentTable"></table>
@@ -528,11 +528,11 @@
   <!-- QR CODES TAB -->
   <section id="tab-qrcodes" style="display:none;">
     <div class="card">
-      <h2>QR เนเธเนเธ”เธเธฑเธเน€เธฃเธตเธขเธ</h2>
-      <p class="hint">เธเธดเธกเธเนเธซเธเนเธฒเธเธตเนเนเธฅเนเธงเธ•เธฑเธ”เนเธเธเธเธฑเธเน€เธฃเธตเธขเธเนเธ•เนเธฅเธฐเธเธ เธซเธฃเธทเธญเนเธซเนเธเธฑเธเน€เธฃเธตเธขเธเธ–เนเธฒเธขเธ เธฒเธเธซเธเนเธฒเธเธญ QR เธเธญเธเธ•เธฑเธงเน€เธญเธเน€เธเนเธเนเธงเนเธชเนเธเธเธซเธเนเธฒเธซเนเธญเธ</p>
+      <h2>QR โค้ดนักเรียน</h2>
+      <p class="hint">พิมพ์หน้านี้แล้วตัดแจกนักเรียนแต่ละคน หรือให้นักเรียนถ่ายภาพหน้าจอ QR ของตัวเองเก็บไว้สแกนหน้าห้อง</p>
       <div class="qr-grid" id="qrGrid"></div>
       <div class="export-row no-print">
-        <button class="btn-ghost" id="printQrBtn">๐–จ เธเธดเธกเธเนเธเธฑเธ•เธฃ QR เธ—เธฑเนเธเธซเธกเธ”</button>
+        <button class="btn-ghost" id="printQrBtn">🖨 พิมพ์บัตร QR ทั้งหมด</button>
       </div>
     </div>
   </section>
@@ -540,13 +540,13 @@
   <!-- SCHEDULE TAB -->
   <section id="tab-schedule" style="display:none;">
     <div class="card">
-      <h2>เธ•เธฒเธฃเธฒเธเน€เธฃเธตเธขเธ</h2>
-      <p class="hint">เธเธณเธซเธเธ”เธเธฒเธเน€เธฃเธตเธขเธเนเธฅเธฐเธงเธดเธเธฒเนเธเนเธ•เนเธฅเธฐเธงเธฑเธ เธฃเธฐเธเธเธเธฐเธเธฑเธเธ—เธถเธเนเธซเนเธญเธฑเธ•เนเธเธกเธฑเธ•เธด เนเธฅเธฐเนเธชเธ”เธเธ•เธฒเธฃเธฒเธเธเธญเธเธงเธฑเธเธเธฑเนเธเนเธเธซเธเนเธฒเน€เธเนเธเธเธทเนเธญ</p>
+      <h2>ตารางเรียน</h2>
+      <p class="hint">กำหนดคาบเรียนและวิชาในแต่ละวัน ระบบจะบันทึกให้อัตโนมัติ และแสดงตารางของวันนั้นในหน้าเช็คชื่อ</p>
       <div style="overflow-x:auto;">
         <table class="sched-table" id="schedTable"></table>
       </div>
       <div class="export-row no-print">
-        <button class="btn-ghost" id="addPeriodBtn">+ เน€เธเธดเนเธกเธเธฒเธเน€เธฃเธตเธขเธ</button>
+        <button class="btn-ghost" id="addPeriodBtn">+ เพิ่มคาบเรียน</button>
         <span id="schedSaveStatus" style="align-self:center; font-size:13.5px; color:var(--present); font-weight:600;"></span>
       </div>
     </div>
@@ -555,17 +555,17 @@
   <!-- ABSENCE TAB -->
   <section id="tab-absence" style="display:none;">
     <div class="card">
-      <h2>เนเธเธฃเธเธฒเธ”เธซเธเนเธฒเนเธซเธเธเนเธฒเธ</h2>
-      <p class="hint">เธฃเธฐเธเธเน€เธ—เธตเธขเธ "เธงเธฑเธเธ—เธตเนเธกเธตเน€เธฃเธตเธขเธ" (เธเธฒเธเนเธ—เนเธเธ•เธฒเธฃเธฒเธเน€เธฃเธตเธขเธ เธ—เธตเนเธ–เธถเธเธงเธฑเธเนเธฅเนเธง) เธเธฑเธเธเธฒเธฃเน€เธเนเธเธเธทเนเธญ เธเธฑเธเน€เธฃเธตเธขเธเธ—เธตเนเธขเธฑเธเนเธกเนเธ–เธนเธเน€เธเนเธ เธซเธฃเธทเธญเธ–เธนเธเธ—เธณเน€เธเธฃเธทเนเธญเธเธซเธกเธฒเธข "เธเธฒเธ”" เธเธฐเธ–เธทเธญเธงเนเธฒเธเธฒเธ”เนเธเธเธฃเธฑเนเธเธเธฑเนเธ</p>
+      <h2>ใครขาดหน้าไหนบ้าง</h2>
+      <p class="hint">ระบบเทียบ "วันที่มีเรียน" (จากแท็บตารางเรียน ที่ถึงวันแล้ว) กับการเช็คชื่อ นักเรียนที่ยังไม่ถูกเช็ค หรือถูกทำเครื่องหมาย "ขาด" จะถือว่าขาดในครั้งนั้น</p>
       <div class="summary-bar" id="absenceSummary"></div>
       <div class="row no-print" style="margin-bottom:6px;">
         <label style="font-size:14px; color:var(--ink-soft); display:flex; align-items:center; gap:6px; cursor:pointer;">
-          <input type="checkbox" id="absOnlyMissing"> เนเธชเธ”เธเน€เธเธเธฒเธฐเธเธเธ—เธตเนเธกเธตเธเธฒเธ”
+          <input type="checkbox" id="absOnlyMissing"> แสดงเฉพาะคนที่มีขาด
         </label>
       </div>
       <div id="absenceList"></div>
       <div class="export-row no-print">
-        <button class="btn-ghost" id="exportAbsence">โฌ เธชเนเธเธญเธญเธเธฃเธฒเธขเธเธทเนเธญเธเธเธเธฒเธ” (Excel)</button>
+        <button class="btn-ghost" id="exportAbsence">⬇ ส่งออกรายชื่อคนขาด (Excel)</button>
       </div>
     </div>
   </section>
@@ -573,7 +573,7 @@
   <!-- STATS TAB -->
   <section id="tab-stats" style="display:none;">
     <div class="card">
-      <h2>เธชเธฃเธธเธเธชเธ–เธดเธ•เธดเธเธฒเธฃเธกเธฒเน€เธฃเธตเธขเธ</h2>
+      <h2>สรุปสถิติการมาเรียน</h2>
       <div class="summary-bar" id="overallSummary"></div>
       <div style="overflow-x:auto;">
         <table>
@@ -582,8 +582,8 @@
         </table>
       </div>
       <div class="export-row no-print">
-        <button class="btn-ghost" id="exportExcel">โฌ เธชเนเธเธญเธญเธ Excel</button>
-        <button class="btn-ghost" id="exportPdf">๐–จ เธชเนเธเธญเธญเธ PDF</button>
+        <button class="btn-ghost" id="exportExcel">⬇ ส่งออก Excel</button>
+        <button class="btn-ghost" id="exportPdf">🖨 ส่งออก PDF</button>
       </div>
     </div>
   </section>
@@ -591,12 +591,12 @@
   <!-- HISTORY TAB (For Students) -->
   <section id="tab-history" style="display:none;">
     <div class="card">
-      <h2>๐“… เธเธฃเธฐเธงเธฑเธ•เธดเธเธฒเธฃเน€เธเนเธฒเน€เธฃเธตเธขเธเธเธญเธเธเธฑเธ</h2>
+      <h2>📅 ประวัติการเข้าเรียนของฉัน</h2>
       <div id="historyList"></div>
     </div>
   </section>
 
-  <footer>เธเนเธญเธกเธนเธฅเธ–เธนเธเธเธฑเธเธ—เธถเธเนเธงเนเนเธเน€เธเธฃเธฒเธงเนเน€เธเธญเธฃเนเธเธญเธเธเธฑเธเธเธตเธเธตเนเน€เธ—เนเธฒเธเธฑเนเธ <span id="app-version" style="opacity:0.3; margin-left: 10px;">(v2.1)</span></footer>
+  <footer>ข้อมูลถูกบันทึกไว้ในเบราว์เซอร์ของบัญชีนี้เท่านั้น <span id="app-version" style="opacity:0.3; margin-left: 10px;">(v2.1)</span></footer>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -609,15 +609,15 @@ window.onerror = function(msg, url, lineNo, columnNo, error) {
 };
 </script>
 <script>
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx2AiTrBPLfv4dWsgl0lpkUMydr9lrciA-XXHvXAVqV4WnNMtBID5kXoZIuNagtaF6E/exec'; // <-- เธเธณ Web App URL เธ—เธตเนเนเธ”เนเธเธฒเธ Google Apps Script เธกเธฒเนเธชเนเธ•เธฃเธเธเธตเน
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx2AiTrBPLfv4dWsgl0lpkUMydr9lrciA-XXHvXAVqV4WnNMtBID5kXoZIuNagtaF6E/exec'; // <-- นำ Web App URL ที่ได้จาก Google Apps Script มาใส่ตรงนี้
 
-// --- API Client: เน€เธเธทเนเธญเธกเธ•เนเธญ Google Apps Script ---
+// --- API Client: เชื่อมต่อ Google Apps Script ---
 const api = {
   async req(action, payload = {}, quiet = false) {
     if(!quiet) showGlobalLoading();
     try {
       if(!WEB_APP_URL) {
-        alert('เธเธฃเธธเธ“เธฒเนเธชเน WEB_APP_URL เนเธเนเธเนเธ”เธเนเธญเธเนเธเนเธเธฒเธ');
+        alert('กรุณาใส่ WEB_APP_URL ในโค้ดก่อนใช้งาน');
         if(!quiet) hideGlobalLoading();
         return null;
       }
@@ -650,7 +650,7 @@ function showGlobalLoading() {
   if(!el) {
     el = document.createElement('div');
     el.id = 'global-loading';
-    el.innerHTML = '<div style="background:var(--ink);color:white;padding:10px 20px;border-radius:999px;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,0.15);">เธเธณเธฅเธฑเธเนเธซเธฅเธ”เธเนเธญเธกเธนเธฅ / เธเธฑเธเธ—เธถเธ... โ๏ธ</div>';
+    el.innerHTML = '<div style="background:var(--ink);color:white;padding:10px 20px;border-radius:999px;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,0.15);">กำลังโหลดข้อมูล / บันทึก... ☁️</div>';
     el.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;transition:opacity 0.2s;';
     document.body.appendChild(el);
   }
@@ -669,10 +669,10 @@ function hideGlobalLoading() {
 const $ = (sel, root=document) => root.querySelector(sel);
 const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
-const STATUS_LABEL = { present: 'เธกเธฒ', late: 'เธชเธฒเธข', absent: 'เธเธฒเธ”' };
+const STATUS_LABEL = { present: 'มา', late: 'สาย', absent: 'ขาด' };
 const QR_PREFIX = 'qr-checkin:';
 const DAY_KEYS = ['sun','mon','tue','wed','thu','fri','sat'];
-const DAY_LABELS_TH = { sun:'เธญเธฒเธ—เธดเธ•เธขเน', mon:'เธเธฑเธเธ—เธฃเน', tue:'เธญเธฑเธเธเธฒเธฃ', wed:'เธเธธเธ', thu:'เธเธคเธซเธฑเธชเธเธ”เธต', fri:'เธจเธธเธเธฃเน', sat:'เน€เธชเธฒเธฃเน' };
+const DAY_LABELS_TH = { sun:'อาทิตย์', mon:'จันทร์', tue:'อังคาร', wed:'พุธ', thu:'พฤหัสบดี', fri:'ศุกร์', sat:'เสาร์' };
 const SCHOOL_DAYS = ['sun'];
 
 // GPS Helper Functions
@@ -738,7 +738,7 @@ async function loadAllData(){
     adminList = rawStudents.filter(s => /[a-zA-Z]{2}$/.test(s.id));
     scheduleData.periods = res.data.schedule || [];
     allAttendance = res.data.attendance || {};
-    // เน€เธเธดเนเธก property name เนเธเนเธเธฒเธเธเธฑเนเธ UI
+    // เพิ่ม property name ใช้งานฝั่ง UI
     students.forEach(s => s.name = `${s.firstName} ${s.lastName} ${s.nickname?`(${s.nickname})`:''}`.trim());
     adminList.forEach(s => s.name = `${s.firstName} ${s.lastName} ${s.nickname?`(${s.nickname})`:''}`.trim());
   }
@@ -756,7 +756,7 @@ async function saveRollData(date, data, quiet = false){
   allAttendance[date] = data; // Update cache
   const res = await api.req('saveRoll', { date: date, roll: data }, quiet);
   const el = $('#saveStatus');
-  if(el){ el.textContent = res && res.success ? 'โ“ เธเธฑเธเธ—เธถเธเนเธฅเนเธง' : 'โ เธเธดเธ”เธเธฅเธฒเธ”'; setTimeout(() => el.textContent='', 1500); }
+  if(el){ el.textContent = res && res.success ? '✓ บันทึกแล้ว' : '❌ ผิดพลาด'; setTimeout(() => el.textContent='', 1500); }
 }
 
 async function loadAllAttendance(){
@@ -767,7 +767,7 @@ async function loadSchedule(){ /* Included in loadAllData */ }
 async function saveSchedule(){
   await api.req('saveSchedule', { periods: scheduleData.periods });
   const el = $('#schedSaveStatus');
-  if(el){ el.textContent = 'โ“ เธเธฑเธเธ—เธถเธเนเธฅเนเธง'; setTimeout(() => el.textContent='', 1500); }
+  if(el){ el.textContent = '✓ บันทึกแล้ว'; setTimeout(() => el.textContent='', 1500); }
 }
 
 function uid(){ return 's_' + Math.random().toString(36).slice(2,9); }
@@ -778,15 +778,15 @@ function renderStudentList(){
   if(!tbl) return;
   tbl.innerHTML = '';
   if(students.length === 0){
-    tbl.innerHTML = '<tr><td><div class="empty">เธขเธฑเธเนเธกเนเธกเธตเธฃเธฒเธขเธเธทเนเธญเธเธฑเธเน€เธฃเธตเธขเธ เน€เธเธดเนเธกเธฃเธฒเธขเธเธทเนเธญเธ”เนเธฒเธเธเธเนเธ”เนเน€เธฅเธข</div></td></tr>';
+    tbl.innerHTML = '<tr><td><div class="empty">ยังไม่มีรายชื่อนักเรียน เพิ่มรายชื่อด้านบนได้เลย</div></td></tr>';
   } else {
     let thead = `<tr>
-      <th style="width:50px; text-align:center;">เธ—เธตเน</th>
-      <th style="width:100px;">เธฃเธซเธฑเธช</th>
-      <th style="width:120px;">เธเธฑเธเธเธธเธ</th>
-      <th>เธเธทเนเธญ</th>
-      <th>เธเธฒเธกเธชเธเธธเธฅ</th>
-      <th style="width:80px;">เธเธทเนเธญเน€เธฅเนเธ</th>
+      <th style="width:50px; text-align:center;">ที่</th>
+      <th style="width:100px;">รหัส</th>
+      <th style="width:120px;">นักบุญ</th>
+      <th>ชื่อ</th>
+      <th>นามสกุล</th>
+      <th style="width:80px;">ชื่อเล่น</th>
       <th style="width:100px;">QR Code</th>
       <th style="width:60px;"></th>
     </tr>`;
@@ -799,7 +799,7 @@ function renderStudentList(){
         <td class="name">${s.lastName || '-'}</td>
         <td>${s.nickname || '-'}</td>
         <td><div class="mini-qr" id="mini-qr-${s.id}"></div></td>
-        <td><button class="btn-danger del-stu" data-id="${s.id}">เธฅเธ</button></td>
+        <td><button class="btn-danger del-stu" data-id="${s.id}">ลบ</button></td>
       </tr>
     `).join('');
     tbl.innerHTML = thead + tbody;
@@ -822,7 +822,7 @@ function renderStudentList(){
     $$('.del-stu', tbl).forEach(btn => {
       btn.onclick = async () => {
         const s = students.find(x => x.id === btn.dataset.id);
-        if(s && confirm(`เธฅเธ "${s.name}" เธญเธญเธเธเธฒเธเธฃเธฒเธขเธเธทเนเธญ?`)){
+        if(s && confirm(`ลบ "${s.name}" ออกจากรายชื่อ?`)){
           students = students.filter(x => x.id !== s.id);
           await saveStudents();
           renderStudentList();
@@ -844,7 +844,7 @@ function renderStudentList(){
       }
     } else {
       const curVal = gpsSel.value;
-      gpsSel.innerHTML = '<option value="">-- เน€เธฅเธทเธญเธเธเธทเนเธญเธเธญเธเธ•เธเน€เธญเธ --</option>' + 
+      gpsSel.innerHTML = '<option value="">-- เลือกชื่อของตนเอง --</option>' + 
         students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
       if(curVal) gpsSel.value = curVal;
       gpsSel.disabled = false;
@@ -858,7 +858,7 @@ async function renderRoll(){
   const box = $('#rollList');
   box.innerHTML = '';
   if(students.length === 0){
-    box.innerHTML = '<div class="empty">เน€เธเธดเนเธกเธฃเธฒเธขเธเธทเนเธญเธเธฑเธเน€เธฃเธตเธขเธเธเนเธญเธเนเธเนเธ—เนเธ "เธเธฑเธ”เธเธฒเธฃเธฃเธฒเธขเธเธทเนเธญ"</div>';
+    box.innerHTML = '<div class="empty">เพิ่มรายชื่อนักเรียนก่อนในแท็บ "จัดการรายชื่อ"</div>';
     return;
   }
   
@@ -876,9 +876,9 @@ async function renderRoll(){
   });
 
   const statusStyleMap = {
-    'present': { text: 'เธกเธฒ', bg: 'var(--present-bg)', color: 'var(--present)' },
-    'late': { text: 'เธชเธฒเธข', bg: '#fff3cd', color: '#856404' },
-    'absent': { text: 'เธเธฒเธ”เน€เธฃเธตเธขเธ', bg: 'var(--absent-bg)', color: 'var(--absent)' }
+    'present': { text: 'มา', bg: 'var(--present-bg)', color: 'var(--present)' },
+    'late': { text: 'สาย', bg: '#fff3cd', color: '#856404' },
+    'absent': { text: 'ขาดเรียน', bg: 'var(--absent-bg)', color: 'var(--absent)' }
   };
 
   students.forEach((s, i) => {
@@ -888,7 +888,7 @@ async function renderRoll(){
     const status = getRecordStatus(rec);
     const time = getRecordTime(rec);
     
-    let badgeHtml = '<span style="font-size:13.5px; color:var(--ink-soft);">เธขเธฑเธเนเธกเนเธเธฑเธเธ—เธถเธ</span>';
+    let badgeHtml = '<span style="font-size:13.5px; color:var(--ink-soft);">ยังไม่บันทึก</span>';
     if (status && statusStyleMap[status]) {
       const conf = statusStyleMap[status];
       const timeStr = time ? '(' + time + ')' : '';
@@ -940,11 +940,11 @@ function renderTodaySchedule(){
          const tDate = new Date(endStr);
          if(!isNaN(tDate)) endStr = String(tDate.getHours()).padStart(2,'0') + ':' + String(tDate.getMinutes()).padStart(2,'0');
        }
-       return `<b>${startStr}-${endStr}</b> ${p.topic || '(เนเธกเนเธกเธตเธซเธฑเธงเธเนเธญ)'} ${p.special ? `<span style="color:var(--ink-soft);font-size:0.9em;">[${p.special}]</span>` : ''}`;
+       return `<b>${startStr}-${endStr}</b> ${p.topic || '(ไม่มีหัวข้อ)'} ${p.special ? `<span style="color:var(--ink-soft);font-size:0.9em;">[${p.special}]</span>` : ''}`;
     });
   if(items.length === 0){ box.style.display = 'none'; return; }
   box.style.display = 'block';
-  box.innerHTML = `๐“… <b>เน€เธฃเธตเธขเธเธงเธฑเธเธเธตเน:</b> ${items.join(' &nbsp;โ€ข&nbsp; ')}`;
+  box.innerHTML = `📅 <b>เรียนวันนี้:</b> ${items.join(' &nbsp;•&nbsp; ')}`;
 }
 
 async function renderStats(){
@@ -985,15 +985,15 @@ async function renderStats(){
     return 0;
   });
 
-  const getArrow = (col) => statsSortCol === col ? (statsSortAsc ? ' โ–ฒ' : ' โ–ผ') : '';
+  const getArrow = (col) => statsSortCol === col ? (statsSortAsc ? ' ▲' : ' ▼') : '';
   const thead = $('#statsHead');
   if(thead) {
     thead.innerHTML = `<tr>
-      <th style="cursor:pointer; user-select:none;" data-sort="name">เธเธทเนเธญ${getArrow('name')}</th>
-      <th style="cursor:pointer; user-select:none;" data-sort="present">เธกเธฒ${getArrow('present')}</th>
-      <th style="cursor:pointer; user-select:none;" data-sort="late">เธชเธฒเธข${getArrow('late')}</th>
-      <th style="cursor:pointer; user-select:none;" data-sort="absent">เธเธฒเธ”${getArrow('absent')}</th>
-      <th style="cursor:pointer; user-select:none;" data-sort="pct">% เน€เธเนเธฒเน€เธฃเธตเธขเธ${getArrow('pct')}</th>
+      <th style="cursor:pointer; user-select:none;" data-sort="name">ชื่อ${getArrow('name')}</th>
+      <th style="cursor:pointer; user-select:none;" data-sort="present">มา${getArrow('present')}</th>
+      <th style="cursor:pointer; user-select:none;" data-sort="late">สาย${getArrow('late')}</th>
+      <th style="cursor:pointer; user-select:none;" data-sort="absent">ขาด${getArrow('absent')}</th>
+      <th style="cursor:pointer; user-select:none;" data-sort="pct">% เข้าเรียน${getArrow('pct')}</th>
     </tr>`;
     $$('th', thead).forEach(th => {
       th.onclick = () => {
@@ -1009,7 +1009,7 @@ async function renderStats(){
   const tbody = $('#statsBody');
   tbody.innerHTML = '';
   if(statsRows.length === 0){
-    tbody.innerHTML = '<tr><td colspan="5" style="font-family:Sarabun,sans-serif;">เธขเธฑเธเนเธกเนเธกเธตเธเธฑเธเน€เธฃเธตเธขเธ</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="font-family:Sarabun,sans-serif;">ยังไม่มีนักเรียน</td></tr>';
   }
   statsRows.forEach(row => {
     const { s, t, pct } = row;
@@ -1026,22 +1026,22 @@ async function renderStats(){
   });
 
   $('#overallSummary').innerHTML = `
-    <span>เธเธณเธเธงเธเธงเธฑเธเธ—เธตเนเน€เธเนเธเธเธทเนเธญเนเธฅเนเธง: <b>${daysCounted}</b> เธงเธฑเธ</span>
-    <span class="p">เธกเธฒเธฃเธงเธก: <b>${sumP}</b></span>
-    <span class="l">เธชเธฒเธขเธฃเธงเธก: <b>${sumL}</b></span>
-    <span class="a">เธเธฒเธ”เธฃเธงเธก: <b>${sumA}</b></span>
+    <span>จำนวนวันที่เช็คชื่อแล้ว: <b>${daysCounted}</b> วัน</span>
+    <span class="p">มารวม: <b>${sumP}</b></span>
+    <span class="l">สายรวม: <b>${sumL}</b></span>
+    <span class="a">ขาดรวม: <b>${sumA}</b></span>
   `;
 
   return { all, totals };
 }
 
-// ---------- ABSENCE (เนเธเธฃเธเธฒเธ”เธซเธเนเธฒเนเธซเธเธเนเธฒเธ) ----------
+// ---------- ABSENCE (ใครขาดหน้าไหนบ้าง) ----------
 function shortThaiDate(dateStr){
   const d = new Date(dateStr + 'T00:00:00');
   return d.toLocaleDateString('th-TH', { day:'numeric', month:'short' });
 }
 function classSessionDates(){
-  // เธงเธฑเธเน€เธฃเธตเธขเธเธเธฒเธเธ•เธฒเธฃเธฒเธเน€เธฃเธตเธขเธ เน€เธเธเธฒเธฐเธ—เธตเนเธ–เธถเธเธงเธฑเธ (<= เธงเธฑเธเธเธตเน) เนเธฅเนเธง
+  // วันเรียนจากตารางเรียน เฉพาะที่ถึงวัน (<= วันนี้) แล้ว
   const today = new Date().toISOString().slice(0,10);
   const set = new Set(scheduleData.periods.map(p => p.date).filter(Boolean));
   return Array.from(set).filter(d => d <= today).sort();
@@ -1053,7 +1053,7 @@ async function computeAbsence(){
     const missed = dates.filter(d => {
       const rec = all[d] ? all[d][s.id] : null;
       const st = getRecordStatus(rec);
-      return !(st === 'present' || st === 'late'); // เธเธฒเธ” เธซเธฃเธทเธญ เธขเธฑเธเนเธกเนเธ–เธนเธเน€เธเนเธ = เธ–เธทเธญเธงเนเธฒเธเธฒเธ”
+      return !(st === 'present' || st === 'late'); // ขาด หรือ ยังไม่ถูกเช็ค = ถือว่าขาด
     });
     return { student: s, missed };
   });
@@ -1067,21 +1067,21 @@ async function renderAbsence(){
 
   if(students.length === 0){
     summary.innerHTML = '';
-    box.innerHTML = '<div class="empty">เธขเธฑเธเนเธกเนเธกเธตเธฃเธฒเธขเธเธทเนเธญเธเธฑเธเน€เธฃเธตเธขเธ เน€เธเธดเนเธกเธเนเธญเธเนเธเนเธ—เนเธ "เธเธฑเธ”เธเธฒเธฃเธฃเธฒเธขเธเธทเนเธญ"</div>';
+    box.innerHTML = '<div class="empty">ยังไม่มีรายชื่อนักเรียน เพิ่มก่อนในแท็บ "จัดการรายชื่อ"</div>';
     return;
   }
   if(dates.length === 0){
     summary.innerHTML = '';
-    box.innerHTML = '<div class="empty">เธขเธฑเธเนเธกเนเธกเธตเธงเธฑเธเน€เธฃเธตเธขเธเธ—เธตเนเธ–เธถเธเธเธณเธซเธเธ” เธเธณเธซเธเธ”เธงเธฑเธเน€เธฃเธตเธขเธเนเธเนเธ—เนเธ "เธ•เธฒเธฃเธฒเธเน€เธฃเธตเธขเธ" เธเนเธญเธ</div>';
+    box.innerHTML = '<div class="empty">ยังไม่มีวันเรียนที่ถึงกำหนด กำหนดวันเรียนในแท็บ "ตารางเรียน" ก่อน</div>';
     return;
   }
 
   const withMissing = rows.filter(r => r.missed.length > 0).length;
   const perfect = rows.length - withMissing;
   summary.innerHTML = `
-    <span>เธงเธฑเธเน€เธฃเธตเธขเธเธ—เธฑเนเธเธซเธกเธ”: <b>${dates.length}</b> เธเธฃเธฑเนเธ</span>
-    <span class="a">เธกเธตเธเธฒเธ”: <b>${withMissing}</b> เธเธ</span>
-    <span class="p">เธกเธฒเธเธฃเธ: <b>${perfect}</b> เธเธ</span>
+    <span>วันเรียนทั้งหมด: <b>${dates.length}</b> ครั้ง</span>
+    <span class="a">มีขาด: <b>${withMissing}</b> คน</span>
+    <span class="p">มาครบ: <b>${perfect}</b> คน</span>
   `;
 
   const sorted = rows.slice().sort((a,b) => b.missed.length - a.missed.length);
@@ -1093,10 +1093,10 @@ async function renderAbsence(){
     const div = document.createElement('div');
     div.className = 'abs-row';
     const cntClass = r.missed.length ? 'some' : 'none';
-    const cntText = r.missed.length ? `เธเธฒเธ” ${r.missed.length}/${dates.length}` : `เธกเธฒเธเธฃเธ (${dates.length})`;
+    const cntText = r.missed.length ? `ขาด ${r.missed.length}/${dates.length}` : `มาครบ (${dates.length})`;
     const chips = r.missed.length
       ? r.missed.map(d => `<span class="abs-chip">${shortThaiDate(d)}</span>`).join('')
-      : `<span class="abs-chip ok">โ“ เธเธฃเธเธ—เธธเธเธเธฃเธฑเนเธ</span>`;
+      : `<span class="abs-chip ok">✓ ครบทุกครั้ง</span>`;
     div.innerHTML = `
       <div class="abs-name"><span class="idx">${String(students.indexOf(r.student)+1).padStart(2,'0')}</span>${r.student.name}</div>
       <span class="abs-count ${cntClass}">${cntText}</span>
@@ -1105,27 +1105,27 @@ async function renderAbsence(){
     box.appendChild(div);
   });
   if(shown === 0){
-    box.innerHTML = '<div class="empty">๐ เธ—เธธเธเธเธเธกเธฒเธเธฃเธเธ—เธธเธเธเธฃเธฑเนเธ</div>';
+    box.innerHTML = '<div class="empty">🎉 ทุกคนมาครบทุกครั้ง</div>';
   }
 }
 async function exportAbsence(){
   const { dates, rows } = await computeAbsence();
-  if(dates.length === 0){ alert('เธขเธฑเธเนเธกเนเธกเธตเธงเธฑเธเน€เธฃเธตเธขเธเธ—เธตเนเธ–เธถเธเธเธณเธซเธเธ”'); return; }
+  if(dates.length === 0){ alert('ยังไม่มีวันเรียนที่ถึงกำหนด'); return; }
   const wb = XLSX.utils.book_new();
-  const aoa = [['เธเธทเนเธญ', 'เธเธณเธเธงเธเธเธฃเธฑเนเธเธ—เธตเนเธเธฒเธ”', 'เธเธฒเธเธ—เธฑเนเธเธซเธกเธ” (เธเธฃเธฑเนเธ)', 'เธงเธฑเธเธ—เธตเนเธเธฒเธ”']];
+  const aoa = [['ชื่อ', 'จำนวนครั้งที่ขาด', 'จากทั้งหมด (ครั้ง)', 'วันที่ขาด']];
   rows.slice().sort((a,b) => b.missed.length - a.missed.length).forEach(r => {
     aoa.push([r.student.name, r.missed.length, dates.length, r.missed.join(', ') || '-']);
   });
   const ws = XLSX.utils.aoa_to_sheet(aoa);
-  XLSX.utils.book_append_sheet(wb, ws, 'เธเธเธเธฒเธ”');
-  XLSX.writeFile(wb, 'เธฃเธฒเธขเธเธทเนเธญเธเธเธเธฒเธ”-เน€เธเธเธ•เนเธซเธฅเธธเธขเธชเน.xlsx');
+  XLSX.utils.book_append_sheet(wb, ws, 'คนขาด');
+  XLSX.writeFile(wb, 'รายชื่อคนขาด-เซนต์หลุยส์.xlsx');
 }
 
 function renderQrGrid(){
   const grid = $('#qrGrid');
   grid.innerHTML = '';
   if(students.length === 0){
-    grid.innerHTML = '<div class="empty">เธขเธฑเธเนเธกเนเธกเธตเธฃเธฒเธขเธเธทเนเธญเธเธฑเธเน€เธฃเธตเธขเธ เน€เธเธดเนเธกเธเนเธญเธเนเธเนเธ—เนเธ "เธเธฑเธ”เธเธฒเธฃเธฃเธฒเธขเธเธทเนเธญ"</div>';
+    grid.innerHTML = '<div class="empty">ยังไม่มีรายชื่อนักเรียน เพิ่มก่อนในแท็บ "จัดการรายชื่อ"</div>';
     return;
   }
   let listToRender = students;
@@ -1138,7 +1138,7 @@ function renderQrGrid(){
     card.innerHTML = `
       <div class="qrbox" id="qrbox-${s.id}"></div>
       <div class="name">${s.name}</div>
-      <div class="idx">เน€เธฅเธเธ—เธตเน ${String(i+1).padStart(2,'0')}</div>
+      <div class="idx">เลขที่ ${String(i+1).padStart(2,'0')}</div>
     `;
     grid.appendChild(card);
     new QRCode(card.querySelector('.qrbox'), {
@@ -1159,12 +1159,12 @@ function renderSchedule(){
     table.innerHTML = '';
     const wrap = document.createElement('div');
     wrap.className = 'empty';
-    wrap.textContent = 'เธขเธฑเธเนเธกเนเธกเธตเธเธฒเธเน€เธฃเธตเธขเธ เธเธ” "+ เน€เธเธดเนเธกเธเธฒเธเน€เธฃเธตเธขเธ" เธ”เนเธฒเธเธฅเนเธฒเธเน€เธเธทเนเธญเน€เธฃเธดเนเธกเธชเธฃเนเธฒเธเธ•เธฒเธฃเธฒเธ';
+    wrap.textContent = 'ยังไม่มีคาบเรียน กด "+ เพิ่มคาบเรียน" ด้านล่างเพื่อเริ่มสร้างตาราง';
     table.replaceWith(wrap);
     wrap.id = 'schedTable';
     return;
   }
-  let thead = `<tr><th>เธงเธฑเธเธ—เธตเน/เน€เธงเธฅเธฒ</th><th>เธซเธฑเธงเธเนเธญ</th><th>เธเธดเธเธเธฃเธฃเธกเธเธดเน€เธจเธฉ</th><th></th></tr>`;
+  let thead = `<tr><th>วันที่/เวลา</th><th>หัวข้อ</th><th>กิจกรรมพิเศษ</th><th></th></tr>`;
   
   // Parse ugly GMT string if present to prevent empty time inputs
   let periods = scheduleData.periods.map(p => {
@@ -1194,9 +1194,9 @@ function renderSchedule(){
             <input type="time" data-pid="${p.id}" data-field="end" value="${p.end||''}">
           </div>
         </td>
-        <td><input type="text" class="sched-subject" data-pid="${p.id}" data-field="topic" value="${p.topic||''}" placeholder="เธซเธฑเธงเธเนเธญ"></td>
-        <td><input type="text" class="sched-subject" data-pid="${p.id}" data-field="special" value="${p.special||''}" placeholder="เธเธดเธเธเธฃเธฃเธกเธเธดเน€เธจเธฉ"></td>
-        <td><button class="btn-danger sched-del" data-pid="${p.id}">เธฅเธ</button></td>
+        <td><input type="text" class="sched-subject" data-pid="${p.id}" data-field="topic" value="${p.topic||''}" placeholder="หัวข้อ"></td>
+        <td><input type="text" class="sched-subject" data-pid="${p.id}" data-field="special" value="${p.special||''}" placeholder="กิจกรรมพิเศษ"></td>
+        <td><button class="btn-danger sched-del" data-pid="${p.id}">ลบ</button></td>
       </tr>
     `).join('');
   const newTable = document.createElement('table');
@@ -1229,7 +1229,7 @@ async function exportExcel(){
   const { all, totals } = await renderStats();
   const wb = XLSX.utils.book_new();
 
-  const summaryRows = [['เธเธทเนเธญ','เธกเธฒ','เธชเธฒเธข','เธเธฒเธ”','% เน€เธเนเธฒเน€เธฃเธตเธขเธ']];
+  const summaryRows = [['ชื่อ','มา','สาย','ขาด','% เข้าเรียน']];
   students.forEach(s => {
     const t = totals[s.id];
     const total = t.present + t.late + t.absent;
@@ -1237,10 +1237,10 @@ async function exportExcel(){
     summaryRows.push([s.name, t.present, t.late, t.absent, pct + '%']);
   });
   const ws1 = XLSX.utils.aoa_to_sheet(summaryRows);
-  XLSX.utils.book_append_sheet(wb, ws1, 'เธชเธฃเธธเธเธชเธ–เธดเธ•เธด');
+  XLSX.utils.book_append_sheet(wb, ws1, 'สรุปสถิติ');
 
   const dates = Object.keys(all).sort();
-  const detailHeader = ['เธเธทเนเธญ', ...dates];
+  const detailHeader = ['ชื่อ', ...dates];
   const detailRows = [detailHeader];
   students.forEach(s => {
     const row = [s.name];
@@ -1253,9 +1253,9 @@ async function exportExcel(){
     detailRows.push(row);
   });
   const ws2 = XLSX.utils.aoa_to_sheet(detailRows);
-  XLSX.utils.book_append_sheet(wb, ws2, 'เธฃเธฒเธขเธฅเธฐเน€เธญเธตเธขเธ”เธฃเธฒเธขเธงเธฑเธ');
+  XLSX.utils.book_append_sheet(wb, ws2, 'รายละเอียดรายวัน');
 
-  const logRows = [['เธงเธฑเธเธ—เธตเน','เน€เธงเธฅเธฒ','เธเธทเนเธญ','เธชเธ–เธฒเธเธฐ']];
+  const logRows = [['วันที่','เวลา','ชื่อ','สถานะ']];
   dates.forEach(d => {
     students.forEach(s => {
       const rec = all[d][s.id];
@@ -1266,9 +1266,9 @@ async function exportExcel(){
     });
   });
   const ws3 = XLSX.utils.aoa_to_sheet(logRows);
-  XLSX.utils.book_append_sheet(wb, ws3, 'เธเธฑเธเธ—เธถเธเน€เธงเธฅเธฒเน€เธเนเธฒเน€เธฃเธตเธขเธ');
+  XLSX.utils.book_append_sheet(wb, ws3, 'บันทึกเวลาเข้าเรียน');
 
-  XLSX.writeFile(wb, 'เธฃเธฒเธขเธเธฒเธเธเธฒเธฃเน€เธเนเธเธเธทเนเธญ.xlsx');
+  XLSX.writeFile(wb, 'รายงานการเช็คชื่อ.xlsx');
 }
 
 function exportPdf(){
@@ -1319,7 +1319,7 @@ async function handleScannedId(rawId){
 
   const student = students.find(s => s.id === rawId);
   if(!student){
-    flashScan('เนเธกเนเธเธเธฃเธฒเธขเธเธทเนเธญเธเธตเนเนเธเธฃเธฐเธเธ', true);
+    flashScan('ไม่พบรายชื่อนี้ในระบบ', true);
     beep(false);
     return;
   }
@@ -1347,7 +1347,7 @@ async function handleScannedId(rawId){
   }
 
   // Visual & Audio Feedback FIRST for rapid scanning
-  flashScan(`โ… ${student.name}\n${STATUS_LABEL[status]} โ€ข ${time}`, false);
+  flashScan(`✅ ${student.name}\n${STATUS_LABEL[status]} • ${time}`, false);
   beep(true);
   addFeedItem(student.name, time);
 
@@ -1377,7 +1377,7 @@ function scanTick(){
         const now = Date.now();
         if(!lastScanTime['invalid'] || (now - lastScanTime['invalid']) > 3000) {
           lastScanTime['invalid'] = now;
-          flashScan(`QR เนเธกเนเนเธเนเธเธญเธเธฃเธฐเธเธเธเธตเน (${code.data.substring(0,10)}...)`, true);
+          flashScan(`QR ไม่ใช่ของระบบนี้ (${code.data.substring(0,10)}...)`, true);
           beep(false);
         }
       }
@@ -1400,8 +1400,8 @@ async function populateCameras(){
     const sel = $('#cameraSelect');
     if(!sel) return;
     const cur = sel.value;
-    sel.innerHTML = '<option value="">(เธเธฅเนเธญเธเน€เธฃเธดเนเธกเธ•เนเธ)</option>' +
-      cams.map((d, i) => `<option value="${d.deviceId}">${d.label || ('เธเธฅเนเธญเธ ' + (i + 1))}</option>`).join('');
+    sel.innerHTML = '<option value="">(กล้องเริ่มต้น)</option>' +
+      cams.map((d, i) => `<option value="${d.deviceId}">${d.label || ('กล้อง ' + (i + 1))}</option>`).join('');
     if(cur) sel.value = cur;
   }catch(e){}
 }
@@ -1411,10 +1411,10 @@ async function getCameraStream(){
   const deviceId = sel && sel.value;
   if(deviceId){
     try{ return await navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: deviceId } } }); }
-    catch(e){ /* เธเธฅเนเธญเธเธ—เธตเนเน€เธฅเธทเธญเธเนเธเนเนเธกเนเนเธ”เน เธฅเธญเธเธเนเธฒเน€เธฃเธดเนเธกเธ•เนเธ */ }
+    catch(e){ /* กล้องที่เลือกใช้ไม่ได้ ลองค่าเริ่มต้น */ }
   }
   try{
-    // เน€เธฅเธทเธญเธเธเธฅเนเธญเธเธซเธฅเธฑเธ (เธ–เนเธฒเธกเธต) เนเธ•เนเนเธกเนเธเธฑเธเธเธฑเธ เน€เธเธทเนเธญเนเธซเนเนเธเนเธ•เธเธธเนเธเธ—เธตเนเธกเธตเนเธ•เนเธเธฅเนเธญเธเธซเธเนเธฒเธเนเธขเธฑเธเนเธเนเนเธ”เน
+    // เลือกกล้องหลัง (ถ้ามี) แต่ไม่บังคับ เพื่อให้โน้ตบุ๊กที่มีแต่กล้องหน้าก็ยังใช้ได้
     return await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
   }catch(e){
     return await navigator.mediaDevices.getUserMedia({ video: true });
@@ -1424,10 +1424,10 @@ async function getCameraStream(){
 async function startScan(){
   const video = $('#scanVideo');
   if(!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    scanMsg('เน€เธเธฃเธฒเธงเนเน€เธเธญเธฃเนเน€เธเธดเธ”เธเธฅเนเธญเธเนเธกเนเนเธ”เน เธ•เนเธญเธเน€เธเธดเธ”เธเนเธฒเธ https:// เธซเธฃเธทเธญ localhost (เธญเธขเนเธฒเน€เธเธดเธ”เธเธฒเธเนเธเธฅเน file:// เธซเธฃเธทเธญเนเธเธเธฃเธญเธเนเธเธ—)', 'err');
+    scanMsg('เบราว์เซอร์เปิดกล้องไม่ได้ ต้องเปิดผ่าน https:// หรือ localhost (อย่าเปิดจากไฟล์ file:// หรือในกรอบแชท)', 'err');
     return;
   }
-  scanMsg('เธเธณเธฅเธฑเธเธเธญเธชเธดเธ—เธเธดเนเนเธเนเธเธฅเนเธญเธโ€ฆ เธ–เนเธฒเธกเธตเธเนเธญเธเธญเธฑเธเนเธซเนเธเธ” "เธญเธเธธเธเธฒเธ•"');
+  scanMsg('กำลังขอสิทธิ์ใช้กล้อง… ถ้ามีป๊อปอัปให้กด "อนุญาต"');
   try{
     scanStream = await getCameraStream();
     video.srcObject = scanStream;
@@ -1436,22 +1436,22 @@ async function startScan(){
     scanLoopId = requestAnimationFrame(scanTick);
     $('#startScanBtn').style.display = 'none';
     $('#stopScanBtn').style.display = 'inline-block';
-    scanMsg('โ… เธเธฅเนเธญเธเธ—เธณเธเธฒเธเนเธฅเนเธง เน€เธฅเนเธ QR เนเธซเนเธญเธขเธนเนเนเธเธเธฃเธญเธ', 'ok');
+    scanMsg('✅ กล้องทำงานแล้ว เล็ง QR ให้อยู่ในกรอบ', 'ok');
   }catch(e){
     let msg;
     switch(e.name){
       case 'NotAllowedError':
       case 'SecurityError':
-        msg = 'เธขเธฑเธเนเธกเนเนเธ”เนเธญเธเธธเธเธฒเธ•เนเธซเนเนเธเนเธเธฅเนเธญเธ โ€” เธเธ”เนเธญเธเธญเธเธเธฅเนเธญเธ ๐“ท เธ—เธตเนเนเธ–เธ URL เนเธฅเนเธงเน€เธฅเธทเธญเธ "เธญเธเธธเธเธฒเธ•" เธเธฒเธเธเธฑเนเธเธเธ”เน€เธฃเธดเนเธกเธชเนเธเธเนเธซเธกเน'; break;
+        msg = 'ยังไม่ได้อนุญาตให้ใช้กล้อง — กดไอคอนกล้อง 📷 ที่แถบ URL แล้วเลือก "อนุญาต" จากนั้นกดเริ่มสแกนใหม่'; break;
       case 'NotFoundError':
       case 'OverconstrainedError':
-        msg = 'เนเธกเนเธเธเธเธฅเนเธญเธเธ—เธตเนเนเธเนเนเธ”เน เธฅเธญเธเน€เธฅเธทเธญเธเธเธฅเนเธญเธเธญเธทเนเธเธเธฒเธเธเนเธญเธ "เน€เธฅเธทเธญเธเธเธฅเนเธญเธ"'; break;
+        msg = 'ไม่พบกล้องที่ใช้ได้ ลองเลือกกล้องอื่นจากช่อง "เลือกกล้อง"'; break;
       case 'NotReadableError':
-        msg = 'เธเธฅเนเธญเธเธ–เธนเธเนเธเนเธเธฒเธเนเธ”เธขเนเธญเธเธญเธทเนเธเธญเธขเธนเน (เน€เธเนเธ Zoom/เธเธฅเนเธญเธ/Meet) เธเธดเธ”เนเธญเธเธเธฑเนเธเธเนเธญเธเนเธฅเนเธงเธฅเธญเธเนเธซเธกเน'; break;
+        msg = 'กล้องถูกใช้งานโดยแอปอื่นอยู่ (เช่น Zoom/กล้อง/Meet) ปิดแอปนั้นก่อนแล้วลองใหม่'; break;
       default:
         msg = (e && e.message) ? e.message : String(e);
     }
-    scanMsg('เน€เธเธดเธ”เธเธฅเนเธญเธเนเธกเนเธชเธณเน€เธฃเนเธ: ' + msg, 'err');
+    scanMsg('เปิดกล้องไม่สำเร็จ: ' + msg, 'err');
     if(scanStream){ scanStream.getTracks().forEach(t => t.stop()); scanStream = null; }
   }
 }
@@ -1518,18 +1518,18 @@ async function handleGpsCheckIn(){
   const msgEl = $('#gpsStatusMsg');
   const stId = $('#gpsStudentSelect').value;
   if(!stId){
-    msgEl.textContent = 'โ เธเธฃเธธเธ“เธฒเน€เธฅเธทเธญเธเธเธทเนเธญเธเธญเธเธ•เธเน€เธญเธเธเนเธญเธ';
+    msgEl.textContent = '❌ กรุณาเลือกชื่อของตนเองก่อน';
     msgEl.style.color = 'var(--absent)';
     return;
   }
   
   if (!navigator.geolocation) {
-    msgEl.textContent = 'โ เน€เธเธฃเธฒเธงเนเน€เธเธญเธฃเนเธเธญเธเธเธธเธ“เนเธกเนเธฃเธญเธเธฃเธฑเธเธฃเธฐเธเธเธเธดเธเธฑเธ”เธ•เธณเนเธซเธเนเธ (GPS)';
+    msgEl.textContent = '❌ เบราว์เซอร์ของคุณไม่รองรับระบบพิกัดตำแหน่ง (GPS)';
     msgEl.style.color = 'var(--absent)';
     return;
   }
 
-  msgEl.textContent = 'เธเธณเธฅเธฑเธเธ•เธฃเธงเธเธชเธญเธเธเธดเธเธฑเธ”เธเธญเธเธเธธเธ“... ๐“ก';
+  msgEl.textContent = 'กำลังตรวจสอบพิกัดของคุณ... 📡';
   msgEl.style.color = 'var(--ink-soft)';
   
   navigator.geolocation.getCurrentPosition(async (position) => {
@@ -1542,12 +1542,12 @@ async function handleGpsCheckIn(){
     
     const distance = getDistanceFromLatLonInMeters(lat, lon, TARGET_LAT, TARGET_LNG);
     if(distance > MAX_DISTANCE_METERS) {
-      msgEl.innerHTML = `โ เธเธธเธ“เธญเธขเธนเนเธเธญเธเธฃเธฐเธขเธฐเธ—เธตเนเธเธณเธซเธเธ”<br><span style="font-size:13px;font-weight:400;">(เธฃเธฐเธขเธฐเธซเนเธฒเธ: ${Math.round(distance)} เน€เธกเธ•เธฃ เธเธฒเธเนเธฃเธเน€เธฃเธตเธขเธเน€เธเธเธ•เนเธซเธฅเธธเธขเธชเนเธจเธถเธเธฉเธฒ)</span>`;
+      msgEl.innerHTML = `❌ คุณอยู่นอกระยะที่กำหนด<br><span style="font-size:13px;font-weight:400;">(ระยะห่าง: ${Math.round(distance)} เมตร จากโรงเรียนเซนต์หลุยส์ศึกษา)</span>`;
       msgEl.style.color = 'var(--absent)';
       return;
     }
     
-    msgEl.textContent = 'เธเธณเธฅเธฑเธเธเธฑเธเธ—เธถเธเธเนเธญเธกเธนเธฅ... โณ';
+    msgEl.textContent = 'กำลังบันทึกข้อมูล... ⏳';
     
     // Auto-calculate status exactly like handleScannedId
     const student = students.find(s => s.id === stId);
@@ -1576,11 +1576,11 @@ async function handleGpsCheckIn(){
     await saveRollData(scanDate, roll);
     if(scanDate === currentDate) currentRoll = roll;
     
-    msgEl.innerHTML = `โ… เน€เธเนเธเธเธทเนเธญเธชเธณเน€เธฃเนเธ!\n${student.name}\n${STATUS_LABEL[status]} โ€ข ${time}`;
+    msgEl.innerHTML = `✅ เช็คชื่อสำเร็จ!\n${student.name}\n${STATUS_LABEL[status]} • ${time}`;
     msgEl.style.color = 'var(--present)';
     
   }, (err) => {
-    msgEl.textContent = 'โ เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธ”เธถเธเธ•เธณเนเธซเธเนเธเนเธ”เน เธเธฃเธธเธ“เธฒเธญเธเธธเธเธฒเธ• Location เนเธเธเธฒเธฃเธ•เธฑเนเธเธเนเธฒเน€เธเธฃเธฒเธงเนเน€เธเธญเธฃเน';
+    msgEl.textContent = '❌ ไม่สามารถดึงตำแหน่งได้ กรุณาอนุญาต Location ในการตั้งค่าเบราว์เซอร์';
     msgEl.style.color = 'var(--absent)';
   }, { enableHighAccuracy: true, timeout: 10000 });
 }
@@ -1593,20 +1593,20 @@ async function doLogin(){
   const btn = $('#loginBtn');
   
   if(!user || !pass) {
-    errEl.textContent = 'เธเธฃเธธเธ“เธฒเธเธฃเธญเธ Username เนเธฅเธฐ Password';
+    errEl.textContent = 'กรุณากรอก Username และ Password';
     errEl.style.display = 'block';
     return;
   }
   
-  // เธเธฑเธเธเธฑเธเธเธดเธกเธเนเน€เธฅเนเธเธ—เธฑเนเธเธซเธกเธ”เน€เธเธทเนเธญเธกเธทเธญเธ–เธทเธญเธเธดเธกเธเนเนเธซเธเนเธ•เธฑเธงเนเธฃเธเนเธซเนเธญเธฑเธ•เนเธเธกเธฑเธ•เธด
+  // บังคับพิมพ์เล็กทั้งหมดเผื่อมือถือพิมพ์ใหญ่ตัวแรกให้อัตโนมัติ
   user = user.toLowerCase();
   
-  btn.textContent = 'เธเธณเธฅเธฑเธเธ•เธฃเธงเธเธชเธญเธ...';
+  btn.textContent = 'กำลังตรวจสอบ...';
   btn.disabled = true;
   errEl.style.display = 'none';
   
   const res = await api.req('login', { username: user, password: pass });
-  btn.textContent = 'เน€เธเนเธฒเธชเธนเนเธฃเธฐเธเธ';
+  btn.textContent = 'เข้าสู่ระบบ';
   btn.disabled = false;
   
   if(res && res.success) {
@@ -1614,7 +1614,7 @@ async function doLogin(){
     sessionStorage.setItem('stlouis_user', JSON.stringify(currentUser));
     applyRoleUI();
   } else {
-    errEl.textContent = res ? res.error : 'เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เน€เธเธทเนเธญเธกเธ•เนเธญเน€เธเธดเธฃเนเธเน€เธงเธญเธฃเนเนเธ”เน';
+    errEl.textContent = res ? res.error : 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้';
     errEl.style.display = 'block';
   }
 }
@@ -1635,19 +1635,19 @@ async function doChangePassword() {
   const succEl = $('#cpwSuccess');
   
   if(!oldPass || !newPass) {
-    errEl.textContent = 'เธเธฃเธธเธ“เธฒเธเธฃเธญเธเธฃเธซเธฑเธชเธเนเธฒเธเนเธซเนเธเธฃเธเธ–เนเธงเธ';
+    errEl.textContent = 'กรุณากรอกรหัสผ่านให้ครบถ้วน';
     errEl.style.display = 'block';
     succEl.style.display = 'none';
     return;
   }
   
-  $('#cpwSaveBtn').textContent = 'เธเธณเธฅเธฑเธเธเธฑเธเธ—เธถเธ...';
+  $('#cpwSaveBtn').textContent = 'กำลังบันทึก...';
   $('#cpwSaveBtn').disabled = true;
   errEl.style.display = 'none';
   succEl.style.display = 'none';
   
   const res = await api.req('changePassword', { username: currentUser.username, oldPass, newPass });
-  $('#cpwSaveBtn').textContent = 'เธเธฑเธเธ—เธถเธ';
+  $('#cpwSaveBtn').textContent = 'บันทึก';
   $('#cpwSaveBtn').disabled = false;
   
   if(res && res.success) {
@@ -1659,7 +1659,7 @@ async function doChangePassword() {
       succEl.style.display = 'none';
     }, 1500);
   } else {
-    errEl.textContent = res ? res.error : 'เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เน€เธเธฅเธตเนเธขเธเธฃเธซเธฑเธชเธเนเธฒเธเนเธ”เน';
+    errEl.textContent = res ? res.error : 'ไม่สามารถเปลี่ยนรหัสผ่านได้';
     errEl.style.display = 'block';
   }
 }
@@ -1668,20 +1668,20 @@ function applyRoleUI(){
   $('#loginOverlay').style.display = 'none';
   $('#appWrap').style.display = 'block';
   
-  let roleName = currentUser.role === 'admin' ? '๐‘ค เธเธฃเธน (Admin)' : '๐“ เธเธฑเธเน€เธฃเธตเธขเธ';
+  let roleName = currentUser.role === 'admin' ? '👤 ครู (Admin)' : '🎓 นักเรียน';
   if (currentUser.refId) {
     let st = students.find(s => s.id === currentUser.refId);
     if (!st) st = adminList.find(s => s.id === currentUser.refId);
     if (st) {
-      roleName = currentUser.role === 'admin' ? `๐‘ค ${st.name}` : `๐“ ${st.name}`;
+      roleName = currentUser.role === 'admin' ? `👤 ${st.name}` : `🎓 ${st.name}`;
     }
   } else if (currentUser.role === 'admin' && currentUser.name) {
     // Fallback if returned from backend directly
-    roleName = `๐‘ค ${currentUser.name}`;
+    roleName = `👤 ${currentUser.name}`;
   }
   $('#loggedInRole').textContent = roleName;
   
-  // เนเธซเนเธเธธเนเธกเน€เธเธฅเธตเนเธขเธเธฃเธซเธฑเธชเธเนเธฒเธเนเธชเธ”เธเธชเธณเธซเธฃเธฑเธเธ—เธธเธเธเธ
+  // ให้ปุ่มเปลี่ยนรหัสผ่านแสดงสำหรับทุกคน
   $('#changePasswordBtn').style.display = 'inline-block';
   
   $$('.tab-btn').forEach(btn => {
@@ -1721,7 +1721,7 @@ async function renderHistory() {
     .sort((a,b) => a.parsedDate.localeCompare(b.parsedDate));
   
   if(periods.length === 0){
-    list.innerHTML = '<div class="empty">เธขเธฑเธเนเธกเนเธกเธตเธ•เธฒเธฃเธฒเธเน€เธฃเธตเธขเธเธซเธฃเธทเธญเธเธฃเธฐเธงเธฑเธ•เธดเธเธฒเธฃเน€เธเนเธฒเน€เธฃเธตเธขเธ</div>';
+    list.innerHTML = '<div class="empty">ยังไม่มีตารางเรียนหรือประวัติการเข้าเรียน</div>';
     return;
   }
   
@@ -1740,7 +1740,7 @@ async function renderHistory() {
     item.className = 'roll-item';
     item.style.alignItems = 'center';
     
-    const topicStr = p.topic || '(เนเธกเนเธกเธตเธซเธฑเธงเธเนเธญ)';
+    const topicStr = p.topic || '(ไม่มีหัวข้อ)';
     
     let startStr = String(p.start || '?');
     let endStr = String(p.end || '?');
@@ -1756,12 +1756,12 @@ async function renderHistory() {
     
     item.innerHTML = `
       <div class="roll-name" style="flex: 1;">
-        ๐“… ${rawDate} <span style="font-size:13px; color:var(--ink-soft); font-weight:normal; margin-left:6px;">(${timeStr})</span>
+        📅 ${rawDate} <span style="font-size:13px; color:var(--ink-soft); font-weight:normal; margin-left:6px;">(${timeStr})</span>
         <div style="font-size:13px; color:var(--ink-soft); font-weight:normal; margin-top:4px;">${topicStr} ${p.special ? `<span style="color:var(--primary);">[${p.special}]</span>` : ''}</div>
       </div>
       <div class="stamps">
-        ${status ? `<span class="stamp-mini ${status}">${STATUS_LABEL[status]} ${time ? '<br><span style="font-size:0.9em;font-weight:normal;">เน€เธงเธฅเธฒ ' + time + '</span>' : ''}</span>` 
-                 : `<span style="font-size:13px; color:var(--ink-soft);">เธขเธฑเธเนเธกเนเธกเธตเธเธฑเธเธ—เธถเธ</span>`}
+        ${status ? `<span class="stamp-mini ${status}">${STATUS_LABEL[status]} ${time ? '<br><span style="font-size:0.9em;font-weight:normal;">เวลา ' + time + '</span>' : ''}</span>` 
+                 : `<span style="font-size:13px; color:var(--ink-soft);">ยังไม่มีบันทึก</span>`}
       </div>
     `;
     list.appendChild(item);
@@ -1810,7 +1810,7 @@ async function init(){
     const nick = $('#newStudentNick').value.trim();
     const saint = $('#newStudentSaint').value.trim();
     
-    if(!stId || !first) { alert('เธเธฃเธธเธ“เธฒเธเธฃเธญเธ StudentID เนเธฅเธฐเธเธทเนเธญ'); return; }
+    if(!stId || !first) { alert('กรุณากรอก StudentID และชื่อ'); return; }
     
     students.push({
       id: stId,
@@ -1868,7 +1868,7 @@ async function init(){
     const el = document.getElementById('liveClock');
     if(el) {
       const now = new Date();
-      el.textContent = 'เน€เธงเธฅเธฒเธเธฑเธเธเธธเธเธฑเธ: ' + now.toLocaleTimeString('th-TH');
+      el.textContent = 'เวลาปัจจุบัน: ' + now.toLocaleTimeString('th-TH');
     }
   }, 1000);
 }
