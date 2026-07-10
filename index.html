@@ -1665,10 +1665,13 @@ function applyRoleUI(){
   $('#appWrap').style.display = 'block';
   
   let roleName = currentUser.role === 'admin' ? '👤 ครู (Admin)' : '🎓 นักเรียน';
-  if (currentUser.role === 'student' && currentUser.refId) {
+  if (currentUser.refId) {
     const st = students.find(s => s.id === currentUser.refId);
-    if (st) roleName = `🎓 ${st.name}`;
+    if (st) {
+      roleName = currentUser.role === 'admin' ? `👤 ${st.name}` : `🎓 ${st.name}`;
+    }
   } else if (currentUser.role === 'admin' && currentUser.name) {
+    // Fallback if returned from backend directly
     roleName = `👤 ${currentUser.name}`;
   }
   $('#loggedInRole').textContent = roleName;
