@@ -393,6 +393,20 @@
   </div>
 </div>
 
+<div id="changePasswordOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center;">
+  <div class="login-box">
+    <h2>เปลี่ยนรหัสผ่าน</h2>
+    <div id="cpwError" class="login-error"></div>
+    <div id="cpwSuccess" style="color:var(--present); font-size:14px; font-weight:bold; margin-bottom:10px; display:none;">เปลี่ยนรหัสผ่านสำเร็จ</div>
+    <input type="password" id="cpwOld" placeholder="รหัสผ่านเดิม">
+    <input type="password" id="cpwNew" placeholder="รหัสผ่านใหม่">
+    <div class="row" style="justify-content:center; gap:10px; margin-top: 15px;">
+      <button class="btn-ghost" id="cpwCancelBtn" style="flex:1;">ยกเลิก</button>
+      <button class="btn-primary" id="cpwSaveBtn" style="flex:1;">บันทึก</button>
+    </div>
+  </div>
+</div>
+
 <div class="wrap" id="appWrap" style="display:none;">
   <header style="justify-content:space-between; flex-wrap:wrap; gap:10px;">
     <div>
@@ -401,6 +415,7 @@
     </div>
     <div class="user-info">
       <span id="loggedInRole"></span>
+      <button id="changePasswordBtn" style="display:none; color:var(--present);">เปลี่ยนรหัสผ่าน</button>
       <button id="logoutBtn">ออกจากระบบ</button>
     </div>
   </header>
@@ -1334,7 +1349,7 @@ async function handleScannedId(rawId){
 
   // Background save (quiet mode so it doesn't block UI)
   const roll = await loadRoll(scanDate);
-  roll[student.id] = { status, time };
+  roll[student.id] = { status, time, scannedBy: currentUser ? currentUser.username : '' };
   if(scanDate === currentDate) currentRoll = roll;
   
   await saveRollData(scanDate, roll, true);
@@ -1553,7 +1568,7 @@ async function handleGpsCheckIn(){
     }
 
     const roll = await loadRoll(scanDate);
-    roll[stId] = { status, time };
+    roll[stId] = { status, time, scannedBy: currentUser ? currentUser.username : '' };
     await saveRollData(scanDate, roll);
     if(scanDate === currentDate) currentRoll = roll;
     
@@ -1591,7 +1606,7 @@ async function doLogin(){
   btn.disabled = false;
   
   if(res && res.success) {
-    currentUser = { role: res.role, refId: res.refId || '' };
+    currentUser = { role: res.role, refId: res.refId || '', username: user };
     sessionStorage.setItem('stlouis_user', JSON.stringify(currentUser));
     applyRoleUI();
   } else {
@@ -1609,6 +1624,42 @@ function doLogout(){
   $('#appWrap').style.display = 'none';
 }
 
+async function doChangePassword() {
+  const oldPass = $('#cpwOld').value.trim();
+  const newPass = $('#cpwNew').value.trim();
+  const errEl = $('#cpwError');
+  const succEl = $('#cpwSuccess');
+  
+  if(!oldPass || !newPass) {
+    errEl.textContent = 'กรุณากรอกรหัสผ่านให้ครบถ้วน';
+    errEl.style.display = 'block';
+    succEl.style.display = 'none';
+    return;
+  }
+  
+  $('#cpwSaveBtn').textContent = 'กำลังบันทึก...';
+  $('#cpwSaveBtn').disabled = true;
+  errEl.style.display = 'none';
+  succEl.style.display = 'none';
+  
+  const res = await api.req('changePassword', { username: currentUser.username, oldPass, newPass });
+  $('#cpwSaveBtn').textContent = 'บันทึก';
+  $('#cpwSaveBtn').disabled = false;
+  
+  if(res && res.success) {
+    succEl.style.display = 'block';
+    setTimeout(() => {
+      $('#changePasswordOverlay').style.display = 'none';
+      $('#cpwOld').value = '';
+      $('#cpwNew').value = '';
+      succEl.style.display = 'none';
+    }, 1500);
+  } else {
+    errEl.textContent = res ? res.error : 'ไม่สามารถเปลี่ยนรหัสผ่านได้';
+    errEl.style.display = 'block';
+  }
+}
+
 function applyRoleUI(){
   $('#loginOverlay').style.display = 'none';
   $('#appWrap').style.display = 'block';
@@ -1619,6 +1670,11 @@ function applyRoleUI(){
     if (st) roleName = `🎓 ${st.name}`;
   }
   $('#loggedInRole').textContent = roleName;
+  if(currentUser.role === 'student'){
+    $('#changePasswordBtn').style.display = 'inline-block';
+  } else {
+    $('#changePasswordBtn').style.display = 'none';
+  }
   
   $$('.tab-btn').forEach(btn => {
     const tab = btn.dataset.tab;
@@ -1714,6 +1770,18 @@ async function init(){
   $('#loginBtn').onclick = doLogin;
   $('#logoutBtn').onclick = doLogout;
   $('#loginPass').onkeypress = (e) => { if(e.key === 'Enter') doLogin(); };
+
+  $('#changePasswordBtn').onclick = () => {
+    $('#changePasswordOverlay').style.display = 'flex';
+    $('#cpwError').style.display = 'none';
+    $('#cpwSuccess').style.display = 'none';
+  };
+  $('#cpwCancelBtn').onclick = () => {
+    $('#changePasswordOverlay').style.display = 'none';
+    $('#cpwOld').value = '';
+    $('#cpwNew').value = '';
+  };
+  $('#cpwSaveBtn').onclick = doChangePassword;
 
   $('#todayLabel').textContent = todayThaiLabel();
   $('#rollDate').value = currentDate;
