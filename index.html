@@ -1606,7 +1606,7 @@ async function doLogin(){
   btn.disabled = false;
   
   if(res && res.success) {
-    currentUser = { role: res.role, refId: res.refId || '', username: user };
+    currentUser = { role: res.role, refId: res.refId || '', username: user, name: res.name || '' };
     sessionStorage.setItem('stlouis_user', JSON.stringify(currentUser));
     applyRoleUI();
   } else {
@@ -1668,13 +1668,13 @@ function applyRoleUI(){
   if (currentUser.role === 'student' && currentUser.refId) {
     const st = students.find(s => s.id === currentUser.refId);
     if (st) roleName = `🎓 ${st.name}`;
+  } else if (currentUser.role === 'admin' && currentUser.name) {
+    roleName = `👤 ${currentUser.name}`;
   }
   $('#loggedInRole').textContent = roleName;
-  if(currentUser.role === 'student'){
-    $('#changePasswordBtn').style.display = 'inline-block';
-  } else {
-    $('#changePasswordBtn').style.display = 'none';
-  }
+  
+  // ให้ปุ่มเปลี่ยนรหัสผ่านแสดงสำหรับทุกคน
+  $('#changePasswordBtn').style.display = 'inline-block';
   
   $$('.tab-btn').forEach(btn => {
     const tab = btn.dataset.tab;
