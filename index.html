@@ -836,7 +836,7 @@ function renderStudentList(){
     
 
     // Edit Student Handlers
-    $('.edit-stu', tbl).forEach(btn => {
+    $$('.edit-stu', tbl).forEach(btn => {
       btn.onclick = () => {
         const sId = btn.dataset.id;
         const s = students.find(x => x.id === sId) || adminList.find(x => x.id === sId);
@@ -884,7 +884,7 @@ function renderStudentList(){
       };
     }
 
-    $('.del-stu', tbl).forEach(btn => {
+    $$('.del-stu', tbl).forEach(btn => {
       btn.onclick = async () => {
         const s = students.find(x => x.id === btn.dataset.id);
         if(s && confirm(`ลบ "${s.name}" ออกจากรายชื่อ?`)){
