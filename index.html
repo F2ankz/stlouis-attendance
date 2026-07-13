@@ -468,6 +468,31 @@
   </div>
 </div>
 
+<div id="userModalOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center;">
+  <div class="login-box">
+    <h2 id="userModalTitle">เพิ่มผู้ใช้งาน</h2>
+    <input type="hidden" id="editOriginalUser">
+    <input type="text" id="editUsername" placeholder="Username">
+    <input type="password" id="editUserPass" placeholder="Password (เว้นว่างถ้าไม่เปลี่ยน)">
+    <select id="editUserRole" style="width:100%; padding:10px; margin-bottom:12px; font-size:15px; border-radius:8px; border:2px solid var(--paper-line);">
+      <option value="student">นักเรียน (student)</option>
+      <option value="admin">พี่เลี้ยง (admin)</option>
+      <option value="superadmin">ผู้ดูแล (superadmin)</option>
+    </select>
+    <select id="editUserRefId" style="width:100%; padding:10px; margin-bottom:12px; font-size:15px; border-radius:8px; border:2px solid var(--paper-line);">
+      <option value="">-- ไม่ระบุ (RefID) --</option>
+    </select>
+    <input type="text" id="editUserFName" placeholder="ชื่อ (E)">
+    <input type="text" id="editUserLName" placeholder="นามสกุล (F)">
+    <input type="text" id="editUserNName" placeholder="ชื่อเล่น (G)">
+    
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button class="btn-ghost" onclick="closeUserModal()" style="flex:1;">ยกเลิก</button>
+      <button class="btn-primary" onclick="saveUserModal()" style="flex:1;">บันทึก</button>
+    </div>
+  </div>
+</div>
+
 <div class="wrap" id="appWrap" style="display:none;">
   <header style="justify-content:space-between; flex-wrap:wrap; gap:10px;">
     <div>
@@ -493,12 +518,16 @@
     <button class="tab-btn" data-tab="history" style="display:none;">📅 ประวัติของฉัน</button>
     <button class="tab-btn" data-tab="leave" style="display:none;">📝 ยื่นใบลา</button>
     <button class="tab-btn" data-tab="leaveApprove" style="display:none;">✅ อนุมัติการลา</button>
+    <button class="tab-btn" data-tab="users" style="display:none;">⚙️ จัดการผู้ใช้งาน</button>
   </div>
 
   <!-- ROLL CALL TAB -->
   <section id="tab-roll">
     <div class="card">
-      <h2>เช็คชื่อ</h2>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2>เช็คชื่อ</h2>
+        <button class="btn-primary no-print" id="exportTodayBtn" style="font-size:13px; padding:6px 12px;">⬇️ โหลด Excel ของวันนี้</button>
+      </div>
       <div class="row" style="margin-bottom:14px;">
         <label style="font-size:14.5px; color:var(--ink-soft);">วันที่:</label>
         <input type="date" id="rollDate">
@@ -694,6 +723,29 @@
     </div>
   </section>
 
+  <!-- USERS TAB -->
+  <section id="tab-users" style="display:none;">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h2 style="margin:0;">ระบบจัดการผู้ใช้งาน</h2>
+        <button class="btn-primary" onclick="openUserModal()">+ เพิ่มผู้ใช้งาน</button>
+      </div>
+      <div class="table-container" style="max-height: 60vh; overflow-y:auto;">
+        <table style="width:100%;" id="usersTable">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Role</th>
+              <th>ชื่อ</th>
+              <th style="width:120px; text-align:center;">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
   <footer>ข้อมูลถูกบันทึกไว้ในเบราว์เซอร์ของบัญชีนี้เท่านั้น <span id="app-version" style="opacity:0.3; margin-left: 10px;">(v2.1)</span></footer>
 </div>
 
@@ -722,7 +774,7 @@ const api = {
       let url = WEB_APP_URL;
       let opts = {};
       if(action === 'readAll') {
-        url += '?action=readAll';
+        url += '?action=readAll&t=' + new Date().getTime();
       } else {
         opts = {
           method: 'POST',
@@ -786,6 +838,7 @@ function deg2rad(deg) { return deg * (Math.PI/180); }
 
 let students = [];
 let adminList = [];
+let usersList = [];
 let scheduleData = { periods: [] }; // { id, date, topic, special, start, end }
 let allAttendance = {}; // { date: { studentId: { time, status } } }
 let leaveRequests = [];
@@ -838,7 +891,8 @@ async function loadAllData(){
     scheduleData.periods = res.data.schedule || [];
     allAttendance = res.data.attendance || {};
     leaveRequests = res.data.leaveRequests || [];
-    // เพิ่ม property name ใช้งานฝั่ง UI
+    usersList = res.data.users || [];
+    // เซ็ต property name ให้กับ UIงานฝั่ง UI
     students.forEach(s => s.name = `${s.firstName} ${s.lastName} ${s.nickname?`(${s.nickname})`:''}`.trim());
     adminList.forEach(s => s.name = `${s.firstName} ${s.lastName} ${s.nickname?`(${s.nickname})`:''}`.trim());
   }
@@ -873,6 +927,13 @@ async function saveSchedule(){
 function uid(){ return 's_' + Math.random().toString(36).slice(2,9); }
 function pid(){ return 'p_' + Math.random().toString(36).slice(2,9); }
 
+function getVisibleStudents() {
+  if (currentUser && currentUser.role === 'superadmin') {
+    return students;
+  }
+  return students.filter(s => s.firstName.toLowerCase() !== 'test' && s.name.toLowerCase() !== 'test');
+}
+
 function renderStudentList(){
   const tbl = $('#studentTable');
   if(!tbl) return;
@@ -889,7 +950,7 @@ function renderStudentList(){
       <th style="width:70px; text-align:center;">QR Code</th>
       <th style="width:120px; text-align:center;">จัดการ</th>
     </tr>`;
-    let tbody = students.map((s, i) => `
+    let tbody = getVisibleStudents().map((s, i) => `
       <tr>
         <td style="font-family:'IBM Plex Mono', monospace;">${s.id}</td>
         <td>${s.saint || '-'}</td>
@@ -903,7 +964,7 @@ function renderStudentList(){
     tbl.innerHTML = thead + tbody;
     
     // Generate mini QR codes
-    students.forEach((s) => {
+  getVisibleStudents().forEach((s) => {
       const el = document.getElementById(`mini-qr-${s.id}`);
       if(el) {
         new QRCode(el, {
@@ -992,8 +1053,8 @@ function renderStudentList(){
       }
     } else {
       const curVal = gpsSel.value;
-      gpsSel.innerHTML = '<option value="">-- เลือกชื่อของตนเอง --</option>' + 
-        students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+      gpsSel.innerHTML = '<option value="">-- เลือกชื่อของน้อง --</option>' + 
+        getVisibleStudents().map(s => `<option value="${s.id}">${s.name}</option>`).join('');
       if(curVal) gpsSel.value = curVal;
       gpsSel.disabled = false;
     }
@@ -1026,15 +1087,41 @@ async function renderRoll(){
   const statusStyleMap = {
     'present': { text: 'มา', bg: 'var(--present-bg)', color: 'var(--present)' },
     'late': { text: 'สาย', bg: '#fff3cd', color: '#856404' },
+    'leave': { text: 'ลา', bg: '#e2e3e5', color: '#383d41' },
     'absent': { text: 'ขาดเรียน', bg: 'var(--absent-bg)', color: 'var(--absent)' }
   };
+  
+  const dLocal = new Date();
+  const mLocal = dLocal.getMonth() + 1;
+  const dayLocal = dLocal.getDate();
+  const todayStr = dLocal.getFullYear() + '-' + (mLocal < 10 ? '0'+mLocal : mLocal) + '-' + (dayLocal < 10 ? '0'+dayLocal : dayLocal);
+  let classEnded = false;
+  
+  if (currentDate < todayStr) {
+    classEnded = true;
+  } else if (currentDate === todayStr && todayClasses.length > 0) {
+    const endStr = todayClasses[0].end;
+    if (endStr && typeof endStr === 'string' && endStr.includes(':')) {
+      const parts = endStr.split(':');
+      const endTotalMins = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+      const now = new Date();
+      const currentTotalMins = now.getHours() * 60 + now.getMinutes();
+      if (currentTotalMins > endTotalMins) {
+        classEnded = true;
+      }
+    }
+  }
 
-  students.forEach((s, i) => {
+  getVisibleStudents().forEach((s, i) => {
     const item = document.createElement('div');
     item.className = 'roll-item';
     const rec = currentRoll[s.id];
-    const status = getRecordStatus(rec);
+    let status = getRecordStatus(rec);
     const time = getRecordTime(rec);
+    
+    if (!status && classEnded) {
+      status = 'absent';
+    }
     
     let badgeHtml = '<span style="font-size:13.5px; color:var(--ink-soft);">ยังไม่บันทึก</span>';
     if (status && statusStyleMap[status]) {
@@ -1047,7 +1134,7 @@ async function renderRoll(){
 
     item.innerHTML = `
       <div class="roll-name">
-        <span class="idx">${String(i+1).padStart(2,'0')}</span>${s.name}
+        <span class="idx" style="font-size:12px; font-family:'IBM Plex Mono',monospace; width:auto; padding:0 6px;">${s.id}</span> ${s.name}
       </div>
       <div class="stamps">
         ${badgeHtml}
@@ -1098,14 +1185,14 @@ function renderTodaySchedule(){
 async function renderStats(){
   const all = await loadAllAttendance();
   const totals = {};
-  students.forEach(s => totals[s.id] = { present:0, late:0, absent:0, leave:0 });
+  getVisibleStudents().forEach(s => totals[s.id] = { present:0, late:0, absent:0, leave:0 });
 
-  let daysCounted = 0;
-  const dates = Object.keys(all);
-  dates.forEach(date => {
-    const dayRecord = all[date];
-    if(Object.keys(dayRecord).length === 0) return;
-    daysCounted++;
+  const sessionDates = classSessionDates();
+  const totalSessionDays = sessionDates.length;
+  let daysCounted = totalSessionDays;
+
+  sessionDates.forEach(date => {
+    const dayRecord = all[date] || {};
     students.forEach(s => {
       const rec = dayRecord[s.id];
       const status = rec ? getRecordStatus(rec) : 'absent';
@@ -1115,10 +1202,7 @@ async function renderStats(){
     });
   });
 
-  const sessionDates = classSessionDates();
-  const totalSessionDays = sessionDates.length;
-
-  let statsRows = students.map(s => {
+  let statsRows = getVisibleStudents().map(s => {
     const t = totals[s.id];
     const totalAttended = t.present + t.late;
     const pct = totalSessionDays > 0 ? Math.round((totalAttended / totalSessionDays) * 100) : 0;
@@ -1215,7 +1299,7 @@ function classSessionDates(){
 async function computeAbsence(){
   const all = await loadAllAttendance();
   const dates = classSessionDates();
-  const rows = students.map(s => {
+  const rows = getVisibleStudents().map(s => {
     const missed = dates.filter(d => {
       const rec = all[d] ? all[d][s.id] : null;
       const st = getRecordStatus(rec);
@@ -1290,13 +1374,14 @@ async function exportAbsence(){
 function renderQrGrid(){
   const grid = $('#qrGrid');
   grid.innerHTML = '';
-  if(students.length === 0){
+  const visible = getVisibleStudents();
+  if(visible.length === 0){
     grid.innerHTML = '<div class="empty">ยังไม่มีรายชื่อนักเรียน เพิ่มก่อนในแท็บ "จัดการรายชื่อ"</div>';
     return;
   }
-  let listToRender = students;
+  let listToRender = visible;
   if(currentUser && currentUser.role === 'student'){
-    listToRender = students.filter(s => s.id === currentUser.refId);
+    listToRender = visible.filter(s => s.id === currentUser.refId);
   }
   listToRender.forEach((s, i) => {
     const card = document.createElement('div');
@@ -1349,10 +1434,19 @@ function renderSchedule(){
     return { ...p, start: startStr, end: endStr };
   });
 
+  const now = new Date();
   let rows = periods
     .slice()
     .sort((a,b) => (a.date||'').localeCompare(b.date||''))
-    .map(p => `
+    .map(p => {
+      let passedLabel = '';
+      if(p.date && p.end) {
+        const classEnd = new Date(p.date + 'T' + (p.end.length === 5 ? p.end + ':00' : p.end));
+        if(!isNaN(classEnd) && now > classEnd) {
+          passedLabel = '<span style="font-size:12px; color:var(--ink-soft); font-weight:600; margin-left:8px; padding:2px 8px; background:var(--paper-line); border-radius:12px;">✅ จบคลาสเรียน</span>';
+        }
+      }
+      return `
       <tr>
         <td>
           <div class="sched-time">
@@ -1360,13 +1454,15 @@ function renderSchedule(){
             <input type="time" data-pid="${p.id}" data-field="start" value="${p.start||''}">
             <span>-</span>
             <input type="time" data-pid="${p.id}" data-field="end" value="${p.end||''}">
+            ${passedLabel}
           </div>
         </td>
         <td><input type="text" class="sched-subject" data-pid="${p.id}" data-field="topic" value="${p.topic||''}" placeholder="หัวข้อ"></td>
         <td><input type="text" class="sched-subject" data-pid="${p.id}" data-field="special" value="${p.special||''}" placeholder="กิจกรรมพิเศษ"></td>
         <td><button class="btn-danger sched-del" data-pid="${p.id}">ลบ</button></td>
       </tr>
-    `).join('');
+    `;
+  }).join('');
   const newTable = document.createElement('table');
   newTable.className = 'sched-table';
   newTable.id = 'schedTable';
@@ -1393,6 +1489,74 @@ function renderSchedule(){
 }
 
 // ---------- EXPORT ----------
+async function exportTodayExcel() {
+  if (typeof XLSX === 'undefined') {
+    alert('กำลังโหลดไลบรารีส่งออก กรุณารอสักครู่แล้วลองใหม่...');
+    return;
+  }
+  
+  const todayClasses = scheduleData.periods.filter(p => {
+    let d = String(p.date || '');
+    if (d.includes('GMT')) {
+      const tDate = new Date(d);
+      if (!isNaN(tDate)) {
+        const m = tDate.getMonth() + 1;
+        const day = tDate.getDate();
+        d = tDate.getFullYear() + '-' + (m < 10 ? '0'+m : m) + '-' + (day < 10 ? '0'+day : day);
+      }
+    }
+    return d === currentDate;
+  });
+  
+  const dLocal = new Date();
+  const mLocal = dLocal.getMonth() + 1;
+  const dayLocal = dLocal.getDate();
+  const todayStr = dLocal.getFullYear() + '-' + (mLocal < 10 ? '0'+mLocal : mLocal) + '-' + (dayLocal < 10 ? '0'+dayLocal : dayLocal);
+  let classEnded = false;
+  
+  if (currentDate < todayStr) {
+    classEnded = true;
+  } else if (currentDate === todayStr && todayClasses.length > 0) {
+    const endStr = todayClasses[0].end;
+    if (endStr && typeof endStr === 'string' && endStr.includes(':')) {
+      const parts = endStr.split(':');
+      const endTotalMins = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+      const now = new Date();
+      const currentTotalMins = now.getHours() * 60 + now.getMinutes();
+      if (currentTotalMins > endTotalMins) {
+        classEnded = true;
+      }
+    }
+  }
+
+  const wb = XLSX.utils.book_new();
+  const rows = [['รหัสนักเรียน', 'ชื่อ-สกุล', 'สถานะ', 'เวลา']];
+  
+  getVisibleStudents().forEach((s, i) => {
+    const rec = currentRoll[s.id];
+    let status = getRecordStatus(rec);
+    const time = getRecordTime(rec);
+    if (!status && classEnded) status = 'absent';
+    
+    let statusText = 'ยังไม่บันทึก';
+    if (status && STATUS_LABEL[status]) statusText = STATUS_LABEL[status];
+    
+    rows.push([s.id, s.name, statusText, time || '-']);
+  });
+  
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  
+  ws['!cols'] = [
+    { wch: 8 },
+    { wch: 30 },
+    { wch: 15 },
+    { wch: 15 }
+  ];
+
+  XLSX.utils.book_append_sheet(wb, ws, `เช็คชื่อ-${currentDate}`);
+  XLSX.writeFile(wb, `RCIA_Attendance_${currentDate}.xlsx`);
+}
+
 async function exportExcel(){
   const { all, totals } = await renderStats();
   const wb = XLSX.utils.book_new();
@@ -1401,7 +1565,7 @@ async function exportExcel(){
   const sessionDates = classSessionDates();
   const totalSessionDays = sessionDates.length;
 
-  students.forEach(s => {
+  getVisibleStudents().forEach(s => {
     const t = totals[s.id];
     const totalAttended = t.present + t.late;
     const pct = totalSessionDays > 0 ? Math.round((totalAttended / totalSessionDays) * 100) : 0;
@@ -1410,13 +1574,13 @@ async function exportExcel(){
   const ws1 = XLSX.utils.aoa_to_sheet(summaryRows);
   XLSX.utils.book_append_sheet(wb, ws1, 'สรุปสถิติ');
 
-  const dates = Object.keys(all).sort();
+  const dates = classSessionDates();
   const detailHeader = ['ชื่อ', ...dates];
   const detailRows = [detailHeader];
-  students.forEach(s => {
+  getVisibleStudents().forEach(s => {
     const row = [s.name];
     dates.forEach(d => {
-      const rec = all[d][s.id];
+      const rec = all[d] ? all[d][s.id] : null;
       const status = rec ? getRecordStatus(rec) : 'absent';
       const time = getRecordTime(rec);
       row.push(status ? (STATUS_LABEL[status] + (time ? ' (' + time + ')' : '')) : '-');
@@ -1429,7 +1593,7 @@ async function exportExcel(){
   const logRows = [['วันที่','เวลา','ชื่อ','สถานะ']];
   dates.forEach(d => {
     students.forEach(s => {
-      const rec = all[d][s.id];
+      const rec = all[d] ? all[d][s.id] : null;
       const status = getRecordStatus(rec);
       if(status){
         logRows.push([d, getRecordTime(rec) || '-', s.name, STATUS_LABEL[status]]);
@@ -1672,7 +1836,7 @@ function switchTab(name){
     name = 'qrcodes'; // Force student to allowed tabs
   }
   
-  ['roll','scan','students','qrcodes','schedule','absence','stats','gps','history','leave','leaveApprove'].forEach(t => {
+  ['roll','scan','students','qrcodes','schedule','absence','stats','gps','history','leave','leaveApprove','users'].forEach(t => {
     $('#tab-' + t).style.display = (t === name) ? 'block' : 'none';
   });
   $$('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
@@ -1684,6 +1848,7 @@ function switchTab(name){
   if(name === 'history') renderHistory();
   if(name === 'leave') renderLeaveRequest();
   if(name === 'leaveApprove') renderLeaveApprove();
+  if(name === 'users') renderUsers();
   if(name === 'scan'){ $('#scanFeedList').innerHTML=''; refreshScanFeed(); }
   else { stopScan(); }
 }
@@ -1880,13 +2045,16 @@ function applyRoleUI(){
       else btn.style.display = 'none';
     } else {
       if(['history', 'leave'].includes(tab)) btn.style.display = 'none';
+      else if (tab === 'leaveApprove' || tab === 'users') {
+        btn.style.display = (currentUser.role === 'admin' || currentUser.role === 'superadmin') ? 'inline-block' : 'none';
+      }
       else btn.style.display = 'inline-block';
     }
   });
   
   renderStudentList(); // Re-render dropdowns
   renderQrGrid(); // Re-render QR to show only own QR
-  switchTab(currentUser.role === 'admin' ? 'roll' : 'qrcodes');
+  switchTab((currentUser.role === 'admin' || currentUser.role === 'superadmin') ? 'roll' : 'qrcodes');
 }
 
 async function renderHistory() {
@@ -2121,6 +2289,9 @@ window.updateLeave = async function(leaveId, status) {
     alert('บันทึกเรียบร้อย');
     await loadAllData();
     renderLeaveApprove();
+    renderRoll();
+    renderStats();
+    renderQrGrid();
   } else {
     alert('เกิดข้อผิดพลาด: ' + (res ? res.error : ''));
   }
@@ -2186,6 +2357,140 @@ window.openEditLeave = function(id) {
   $('#editLeaveReason').value = lv.reason;
   $('#editLeaveOverlay').style.display = 'flex';
 };
+
+// ---------- USER MANAGEMENT ----------
+function renderUsers() {
+  const tbody = document.querySelector('#usersTable tbody');
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  
+  if (usersList.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">ไม่พบข้อมูลผู้ใช้งาน</td></tr>';
+    return;
+  }
+  
+  usersList.forEach(u => {
+    let nameStr = '-';
+    if(u.refId) {
+      const st = students.find(s => String(s.id) === String(u.refId));
+      const adm = adminList.find(a => String(a.id) === String(u.refId));
+      if(st) nameStr = st.name;
+      else if(adm) nameStr = adm.name;
+      else nameStr = `${u.firstName || ''} ${u.lastName || ''} ${u.nickname ? '('+u.nickname+')' : ''}`.trim() || '-';
+    } else {
+      nameStr = `${u.firstName || ''} ${u.lastName || ''} ${u.nickname ? '('+u.nickname+')' : ''}`.trim() || '-';
+    }
+    
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="padding:8px; font-family:'IBM Plex Mono',monospace; font-size:14px;">${u.username}</td>
+      <td style="padding:8px; font-size:14px;">${u.role}</td>
+      <td style="padding:8px; font-size:14px; font-weight:bold;">${nameStr}</td>
+      <td style="padding:8px; text-align:center;">
+        <button class="btn-ghost" style="padding:4px; font-size:12px;" onclick="editUser('${u.username}')">แก้ไข</button>
+        <button class="btn-danger" style="padding:4px; font-size:12px;" onclick="deleteUser('${u.username}')">ลบ</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function populateUserRefIdDropdown(selectedId) {
+  const sel = $('#editUserRefId');
+  if(!sel) return;
+  let html = '<option value="">-- ไม่ระบุ (RefID) --</option>';
+  html += '<optgroup label="ชื่อนักเรียน">';
+  students.forEach(s => {
+    html += `<option value="${s.id}">${s.id} : ${s.name}</option>`;
+  });
+  html += '</optgroup>';
+  if(adminList && adminList.length > 0) {
+    html += '<optgroup label="ผู้ดูแล/พี่เลี้ยง">';
+    adminList.forEach(a => {
+      html += `<option value="${a.id}">${a.id} : ${a.name}</option>`;
+    });
+    html += '</optgroup>';
+  }
+  sel.innerHTML = html;
+  
+  let found = Array.from(sel.options).some(opt => opt.value === String(selectedId));
+  if(selectedId && !found) {
+    sel.innerHTML += `<option value="${selectedId}">${selectedId} (ไม่พบในฐานข้อมูล)</option>`;
+  }
+  
+  if(selectedId) sel.value = String(selectedId);
+  else sel.value = '';
+}
+
+window.openUserModal = function() {
+  $('#userModalTitle').textContent = 'เพิ่มผู้ใช้งาน';
+  $('#editOriginalUser').value = '';
+  $('#editUsername').value = '';
+  $('#editUserPass').value = '';
+  $('#editUserRole').value = 'student';
+  populateUserRefIdDropdown('');
+  $('#editUserFName').value = '';
+  $('#editUserLName').value = '';
+  $('#editUserNName').value = '';
+  $('#userModalOverlay').style.display = 'flex';
+}
+
+window.closeUserModal = function() {
+  $('#userModalOverlay').style.display = 'none';
+}
+
+window.editUser = function(username) {
+  const u = usersList.find(x => x.username === username);
+  if(!u) return;
+  $('#userModalTitle').textContent = 'แก้ไขผู้ใช้งาน';
+  $('#editOriginalUser').value = u.username;
+  $('#editUsername').value = u.username;
+  $('#editUserPass').value = '';
+  $('#editUserRole').value = u.role;
+  populateUserRefIdDropdown(u.refId || '');
+  $('#editUserFName').value = u.firstName || '';
+  $('#editUserLName').value = u.lastName || '';
+  $('#editUserNName').value = u.nickname || '';
+  $('#userModalOverlay').style.display = 'flex';
+}
+
+window.deleteUser = async function(username) {
+  if(!confirm(`ยืนยันลบผู้ใช้งาน ${username}?`)) return;
+  const res = await api.req('deleteUser', { username });
+  if(res && res.success) {
+    alert('ลบเรียบร้อย');
+    await loadAllData();
+    renderUsers();
+  } else {
+    alert('ลบไม่สำเร็จ');
+  }
+}
+
+window.saveUserModal = async function() {
+  const payload = {
+    originalUsername: $('#editOriginalUser').value.trim(),
+    username: $('#editUsername').value.trim(),
+    password: $('#editUserPass').value.trim(),
+    role: $('#editUserRole').value,
+    refId: $('#editUserRefId').value.trim(),
+    firstName: $('#editUserFName').value.trim(),
+    lastName: $('#editUserLName').value.trim(),
+    nickname: $('#editUserNName').value.trim()
+  };
+  
+  if(!payload.username) { alert('กรุณากรอก Username'); return; }
+  if(!payload.originalUsername && !payload.password) { alert('กรุณากรอก Password สำหรับผู้ใช้งานใหม่'); return; }
+  
+  const res = await api.req('saveUser', payload);
+  if(res && res.success) {
+    alert('บันทึกเรียบร้อย');
+    closeUserModal();
+    await loadAllData();
+    renderUsers();
+  } else {
+    alert('บันทึกไม่สำเร็จ');
+  }
+}
 
 // ---------- INIT ----------
 async function init(){
@@ -2275,6 +2580,10 @@ async function init(){
     
     if(!stId || !first) { alert('กรุณากรอก StudentID และชื่อ'); return; }
     
+    const btn = $('#addStudentBtn');
+    btn.disabled = true;
+    btn.textContent = 'กำลังบันทึก...';
+    
     students.push({
       id: stId,
       firstName: first,
@@ -2286,6 +2595,9 @@ async function init(){
     });
     
     await saveStudents();
+    
+    btn.disabled = false;
+    btn.textContent = 'บันทึก';
     $('#addStudentOverlay').style.display = 'none';
     
     renderStudentList();
@@ -2309,6 +2621,7 @@ async function init(){
     renderSchedule();
   };
 
+  if($('#exportTodayBtn')) $('#exportTodayBtn').onclick = exportTodayExcel;
   $('#exportExcel').onclick = exportExcel;
   $('#exportPdf').onclick = exportPdf;
   $('#leaveReqBtn').onclick = async () => {
