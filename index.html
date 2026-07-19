@@ -524,13 +524,19 @@
   <!-- ROLL CALL TAB -->
   <section id="tab-roll">
     <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
         <h2>เช็คชื่อ</h2>
-        <button class="btn-primary no-print" id="exportTodayBtn" style="font-size:13px; padding:6px 12px;">⬇️ โหลด Excel ของวันนี้</button>
+        <div style="display:flex; gap:10px;">
+          <button class="btn-ghost no-print" id="refreshRollBtn" style="font-size:13px; padding:6px 10px;">🔄 ดึงข้อมูลล่าสุด</button>
+          <button class="btn-primary no-print" id="exportTodayBtn" style="font-size:13px; padding:6px 12px;">⬇️ โหลด Excel ของวันนี้</button>
+        </div>
       </div>
-      <div class="row" style="margin-bottom:14px;">
-        <label style="font-size:14.5px; color:var(--ink-soft);">วันที่:</label>
-        <input type="date" id="rollDate">
+      <div class="row" style="margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+          <label style="font-size:14.5px; color:var(--ink-soft);">วันที่:</label>
+          <input type="date" id="rollDate">
+        </div>
+        <div id="rollSummary" style="font-size: 14.5px; font-weight: 600; display:flex; gap:12px;"></div>
       </div>
       <div id="liveClock" style="font-size: 16px; font-weight: bold; color: var(--primary); text-align: right; margin-bottom: 10px;"></div>
       <div class="today-schedule no-print" id="todayScheduleBox" style="display:none;"></div>
@@ -678,7 +684,10 @@
   <!-- HISTORY TAB (For Students) -->
   <section id="tab-history" style="display:none;">
     <div class="card">
-      <h2>📅 ประวัติการเข้าเรียนของฉัน</h2>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2>📅 ประวัติการเข้าเรียนของฉัน</h2>
+        <button class="btn-ghost" id="refreshHistoryBtn" style="font-size:13px; padding:6px 10px;">🔄 ดึงข้อมูลล่าสุด</button>
+      </div>
       <div id="historySummary" style="background:rgba(0,0,0,0.02); padding:14px; border-radius:8px; border:1px solid var(--paper-line); margin-bottom:16px; display:none;"></div>
       <div id="historyList"></div>
     </div>
@@ -931,7 +940,11 @@ function getVisibleStudents() {
   if (currentUser && currentUser.role === 'superadmin') {
     return students;
   }
-  return students.filter(s => s.firstName.toLowerCase() !== 'test' && s.name.toLowerCase() !== 'test');
+  return students.filter(s => {
+    if(s.firstName.toLowerCase() === 'test' || s.name.toLowerCase() === 'test') return false;
+    if((s.firstName || '').trim() === 'ว่าง' && (s.lastName || '').trim() === 'ว่าง') return false;
+    return true;
+  });
 }
 
 function renderStudentList(){
@@ -1097,6 +1110,8 @@ async function renderRoll(){
   const todayStr = dLocal.getFullYear() + '-' + (mLocal < 10 ? '0'+mLocal : mLocal) + '-' + (dayLocal < 10 ? '0'+dayLocal : dayLocal);
   let classEnded = false;
   
+  let countP = 0, countL = 0, countLv = 0, countA = 0;
+  
   if (currentDate < todayStr) {
     classEnded = true;
   } else if (currentDate === todayStr && todayClasses.length > 0) {
@@ -1123,6 +1138,11 @@ async function renderRoll(){
       status = 'absent';
     }
     
+    if (status === 'present') countP++;
+    else if (status === 'late') countL++;
+    else if (status === 'leave') countLv++;
+    else if (status === 'absent') countA++;
+    
     let badgeHtml = '<span style="font-size:13.5px; color:var(--ink-soft);">ยังไม่บันทึก</span>';
     if (status && statusStyleMap[status]) {
       const conf = statusStyleMap[status];
@@ -1142,6 +1162,16 @@ async function renderRoll(){
     `;
     box.appendChild(item);
   });
+  
+  const sumEl = $('#rollSummary');
+  if(sumEl) {
+    sumEl.innerHTML = `
+      <span style="color:var(--present)">มา: ${countP}</span>
+      <span style="color:var(--late)">สาย: ${countL}</span>
+      <span style="color:#383d41">ลา: ${countLv}</span>
+      <span style="color:var(--absent)">ขาด: ${countA}</span>
+    `;
+  }
 }
 
 function renderTodaySchedule(){
@@ -1845,6 +1875,15 @@ function switchTab(name){
   if(name === 'qrcodes') renderQrGrid();
   if(name === 'schedule') renderSchedule();
   if(name === 'absence') renderAbsence();
+  if(name === 'history' && currentUser && currentUser.role === 'student') {
+    // Auto-refresh in background when switching to this tab
+    const btn = $('#refreshHistoryBtn');
+    if(btn) { btn.textContent = 'กำลังโหลด...'; btn.disabled = true; }
+    loadAllData().then(() => {
+      renderHistory();
+      if(btn) { btn.textContent = '🔄 ดึงข้อมูลล่าสุด'; btn.disabled = false; }
+    });
+  }
   if(name === 'history') renderHistory();
   if(name === 'leave') renderLeaveRequest();
   if(name === 'leaveApprove') renderLeaveApprove();
@@ -2659,6 +2698,31 @@ async function init(){
   $('#exportAbsence').onclick = exportAbsence;
   $('#absOnlyMissing').onchange = renderAbsence;
   $('#printQrBtn').onclick = () => window.print();
+  
+  const refHistBtn = $('#refreshHistoryBtn');
+  if(refHistBtn) {
+    refHistBtn.onclick = async () => {
+      refHistBtn.textContent = 'กำลังโหลด...';
+      refHistBtn.disabled = true;
+      await loadAllData();
+      renderHistory();
+      refHistBtn.textContent = '🔄 ดึงข้อมูลล่าสุด';
+      refHistBtn.disabled = false;
+    };
+  }
+
+  const refRollBtn = $('#refreshRollBtn');
+  if(refRollBtn) {
+    refRollBtn.onclick = async () => {
+      refRollBtn.textContent = 'กำลังโหลด...';
+      refRollBtn.disabled = true;
+      await loadAllData();
+      renderRoll();
+      refRollBtn.textContent = '🔄 ดึงข้อมูลล่าสุด';
+      refRollBtn.disabled = false;
+    };
+  }
+
   $('#startScanBtn').onclick = startScan;
   $('#stopScanBtn').onclick = stopScan;
   $('#gpsCheckInBtn').onclick = handleGpsCheckIn;
