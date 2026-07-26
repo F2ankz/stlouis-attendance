@@ -3141,7 +3141,9 @@ async function init(){
       ws['!views'].push({ state: 'frozen', xSplit: 5, ySplit: 1, activePane: 'bottomRight', topLeftCell: 'F2' });
       
       XLSX.utils.book_append_sheet(wb, ws, 'Pivot Table');
-      XLSX.writeFile(wb, 'รายงานสรุปการมาเรียน-เซนต์หลุยส์.xlsx');
+      const now = new Date();
+      const dateStr = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+      XLSX.writeFile(wb, `รายงานสรุปการมาเรียน-เซนต์หลุยส์_${dateStr}.xlsx`);
     };
   }
 
