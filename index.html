@@ -570,7 +570,7 @@
     <button class="tab-btn" data-tab="schedule">ตารางเรียน</button>
     <button class="tab-btn" data-tab="absence">🚩 ใครขาดบ้าง</button>
     <button class="tab-btn" data-tab="stats">สรุปสถิติ</button>
-    <button class="tab-btn" data-tab="pivot" style="display:none;">รายงาน Pivot</button>
+    <button class="tab-btn" data-tab="pivot" style="display:none;">รายงานสรุปการมาเรียน</button>
     <button class="tab-btn" data-tab="history" style="display:none;">📅 ประวัติของฉัน</button>
     <button class="tab-btn" data-tab="leave" style="display:none;">📝 ยื่นใบลา</button>
     <button class="tab-btn" data-tab="leaveApprove" style="display:none;">✅ อนุมัติการลา</button>
@@ -747,7 +747,7 @@
   <!-- PIVOT TAB -->
   <section id="tab-pivot" style="display:none;">
     <div class="card">
-      <h2>รายงานสรุปนักเรียนที่เข้าเรียน (Pivot Table)</h2>
+      <h2>รายงานสรุปการมาเรียน</h2>
       <p class="hint">แสดงสถานะการมาเรียนของนักเรียนในแต่ละวันที่มีคลาสเรียน (อ้างอิงจากตารางเรียน)</p>
       <div style="overflow-x:auto;">
         <table id="pivotTable" style="white-space: nowrap; width: 100%; border-collapse: collapse;">
@@ -756,7 +756,7 @@
         </table>
       </div>
       <div class="export-row no-print">
-        <button class="btn-ghost" id="exportPivotExcelBtn">⬇ ส่งออก Excel (Pivot)</button>
+        <button class="btn-ghost" id="exportPivotExcelBtn">⬇ ส่งออก Excel</button>
       </div>
     </div>
   </section>
@@ -3141,7 +3141,7 @@ async function init(){
       ws['!views'].push({ state: 'frozen', xSplit: 5, ySplit: 1, activePane: 'bottomRight', topLeftCell: 'F2' });
       
       XLSX.utils.book_append_sheet(wb, ws, 'Pivot Table');
-      XLSX.writeFile(wb, 'รายงานPivot-เซนต์หลุยส์.xlsx');
+      XLSX.writeFile(wb, 'รายงานสรุปการมาเรียน-เซนต์หลุยส์.xlsx');
     };
   }
 
