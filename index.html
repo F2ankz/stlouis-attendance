@@ -453,6 +453,48 @@
   </div>
 </div>
 
+<div id="addScheduleOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center;">
+  <div class="login-box" style="text-align:left;">
+    <h2 style="text-align:center; margin-bottom:20px;">เพิ่มคาบเรียน</h2>
+    <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
+      <div>
+        <label style="font-size:13px; font-weight:bold; display:block; margin-bottom:4px;">วันที่</label>
+        <input type="date" id="addSchedDate" style="width:100%;">
+      </div>
+      
+      <div style="display:flex; gap:10px;">
+        <div style="flex:1;">
+          <label style="font-size:13px; font-weight:bold; display:block; margin-bottom:4px;">เริ่ม</label>
+          <input type="time" id="addSchedStart" value="09:30" style="width:100%;">
+        </div>
+        <div style="flex:1;">
+          <label style="font-size:13px; font-weight:bold; display:block; margin-bottom:4px;">สิ้นสุด</label>
+          <input type="time" id="addSchedEnd" value="11:30" style="width:100%;">
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size:13px; font-weight:bold; display:block; margin-bottom:4px;">หัวข้อ</label>
+        <input type="text" id="addSchedTopic" placeholder="เรื่องที่จะสอน" style="width:100%;">
+      </div>
+      
+      <div>
+        <label style="font-size:13px; font-weight:bold; display:block; margin-bottom:4px;">กิจกรรมพิเศษ (Event)</label>
+        <input type="text" id="addSchedSpecial" placeholder="รายละเอียดกิจกรรม (ถ้ามี)" style="width:100%;">
+      </div>
+      
+      <label style="display:flex; align-items:center; gap:8px; font-size:14px; font-weight:bold; cursor:pointer; margin-top:8px;">
+        <input type="checkbox" id="addSchedMakeup" style="width:18px; height:18px; accent-color:var(--primary);">
+        ตั้งเป็นคลาสชดเชยการขาดเรียน (Makeup)
+      </label>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn-ghost" id="addSchedCancelBtn" style="flex:1;">ยกเลิก</button>
+      <button class="btn-primary" id="addSchedSaveBtn" style="flex:1;">เพิ่มคาบเรียน</button>
+    </div>
+  </div>
+</div>
+
 <div id="addStudentOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center;">
   <div class="login-box">
     <h2>เพิ่มรายชื่อ</h2>
@@ -563,14 +605,21 @@
     <div class="card" style="text-align:center;">
       <h2>📍 เช็คชื่อด้วยพิกัด GPS</h2>
       <p style="color:var(--ink-soft); font-size:14px; margin-bottom:20px;">
-        ฟีเจอร์นี้สำหรับนักเรียนที่อยู่ภายในบริเวณ <b>วัดเซนต์หลุยส์ (ไม่เกิน 50 เมตร)</b><br>
+        ฟีเจอร์นี้สำหรับนักเรียนที่อยู่ภายในบริเวณ <b>วัดเซนต์หลุยส์ (ไม่เกิน 100 เมตร)</b><br>
         กรุณาอนุญาตการเข้าถึงตำแหน่งที่ตั้ง (Location) ก่อนใช้งาน
       </p>
       
-      <div style="margin-bottom:20px;">
-        <select id="gpsStudentSelect" style="width:100%; max-width:400px; padding:10px; font-size:15px; border-radius:8px; border:2px solid var(--paper-line);">
-          <option value="">-- เลือกชื่อของตนเอง --</option>
-        </select>
+      <div style="margin-bottom:15px; display:flex; flex-direction:column; align-items:center; gap:10px;">
+        <div style="width:100%; max-width:400px; text-align:left;">
+          <label style="font-size:14px; font-weight:bold; color:var(--ink-soft); display:block; margin-bottom:4px;">วันที่เช็คชื่อ:</label>
+          <input type="date" id="gpsDate" style="width:100%; padding:10px; font-size:15px; border-radius:8px; border:2px solid var(--paper-line); background:#ffffff;">
+        </div>
+        <div style="width:100%; max-width:400px; text-align:left;">
+          <label style="font-size:14px; font-weight:bold; color:var(--ink-soft); display:block; margin-bottom:4px;">ชื่อนักเรียน:</label>
+          <select id="gpsStudentSelect" style="width:100%; padding:10px; font-size:15px; border-radius:8px; border:2px solid var(--paper-line); background:#ffffff;">
+            <option value="">-- เลือกชื่อของตนเอง --</option>
+          </select>
+        </div>
       </div>
       
       <button class="btn-primary" id="gpsCheckInBtn" style="font-size:16px; padding:12px 24px;">📍 กดเพื่อเช็คชื่อเข้าเรียน</button>
@@ -649,12 +698,12 @@
     <div class="card">
       <h2>ตารางเรียน</h2>
       <p class="hint">กำหนดคาบเรียนและวิชาในแต่ละวัน ระบบจะบันทึกให้อัตโนมัติ และแสดงตารางของวันนั้นในหน้าเช็คชื่อ</p>
-      <div style="overflow-x:auto;">
-        <table class="sched-table" id="schedTable"></table>
-      </div>
-      <div class="export-row no-print">
+      <div class="export-row no-print" style="margin-bottom:15px; justify-content:flex-start;">
         <button class="btn-ghost" id="addPeriodBtn">+ เพิ่มคาบเรียน</button>
         <span id="schedSaveStatus" style="align-self:center; font-size:13.5px; color:var(--present); font-weight:600;"></span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="sched-table" id="schedTable"></table>
       </div>
     </div>
   </section>
@@ -840,9 +889,17 @@ function showGlobalLoading() {
   if(!el) {
     el = document.createElement('div');
     el.id = 'global-loading';
-    el.innerHTML = '<div style="background:var(--ink);color:white;padding:10px 20px;border-radius:999px;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,0.15);">กำลังโหลดข้อมูล / บันทึก... ☁️</div>';
-    el.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;transition:opacity 0.2s;';
+    el.innerHTML = '<div style="background:rgba(0,0,0,0.5);width:100%;height:100%;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);"><div style="background:white;color:var(--ink);padding:24px 40px;border-radius:16px;font-size:18px;font-weight:bold;box-shadow:0 10px 25px rgba(0,0,0,0.2);text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;"><div style="font-size:32px;animation: spin 2s linear infinite;">⏳</div><div>กรุณารอสักครู่...<br><span style="font-size:14px;font-weight:normal;color:#666;">กำลังติดต่อฐานข้อมูล</span></div></div></div>';
+    el.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:999999;transition:opacity 0.2s;';
     document.body.appendChild(el);
+    
+    // Add simple spin keyframes if not exists
+    if(!document.getElementById('spin-keyframes')) {
+      const style = document.createElement('style');
+      style.id = 'spin-keyframes';
+      style.innerHTML = '@keyframes spin { 100% { transform:rotate(360deg); } }';
+      document.head.appendChild(style);
+    }
   }
   el.style.opacity = '1';
   el.style.pointerEvents = 'auto';
@@ -859,7 +916,7 @@ function hideGlobalLoading() {
 const $ = (sel, root=document) => root.querySelector(sel);
 const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
-const STATUS_LABEL = { present: 'มา', late: 'สาย', absent: 'ขาด', leave: 'ลา' };
+const STATUS_LABEL = { present: 'มา', late: 'สาย', absent: 'ขาด', leave: 'ลา', makeup: 'มา(ชดเชย)' };
 const QR_PREFIX = 'qr-checkin:';
 const DAY_KEYS = ['sun','mon','tue','wed','thu','fri','sat'];
 const DAY_LABELS_TH = { sun:'อาทิตย์', mon:'จันทร์', tue:'อังคาร', wed:'พุธ', thu:'พฤหัสบดี', fri:'ศุกร์', sat:'เสาร์' };
@@ -935,7 +992,72 @@ async function loadAllData(){
     // เซ็ต property name ให้กับ UIงานฝั่ง UI
     students.forEach(s => s.name = `${s.firstName} ${s.lastName} ${s.nickname?`(${s.nickname})`:''}`.trim());
     adminList.forEach(s => s.name = `${s.firstName} ${s.lastName} ${s.nickname?`(${s.nickname})`:''}`.trim());
+    
+    const modified = applyAmnestyLogic();
+    if(modified && modified.length > 0) {
+       for (const d of modified) {
+         await api.req('saveRoll', { date: d, roll: allAttendance[d] }, true);
+       }
+    }
   }
+}
+
+function applyAmnestyLogic() {
+  const specialDates = scheduleData.periods.filter(p => p.makeup === 'Y').map(p => {
+    let d = String(p.date || '');
+    if (d.includes('GMT')) {
+      const tDate = new Date(d);
+      if (!isNaN(tDate)) {
+        const m = tDate.getMonth() + 1;
+        const day = tDate.getDate();
+        d = tDate.getFullYear() + '-' + (m < 10 ? '0'+m : m) + '-' + (day < 10 ? '0'+day : day);
+      }
+    }
+    return d;
+  }).filter(Boolean);
+  
+  if (specialDates.length === 0) return [];
+  
+  const sessionDates = classSessionDates();
+  let modifiedDates = new Set();
+  
+  getVisibleStudents().forEach(s => {
+    let attendedSpecialDates = [];
+    specialDates.forEach(sd => {
+      const rec = allAttendance[sd] ? allAttendance[sd][s.id] : null;
+      const status = rec ? getRecordStatus(rec) : null;
+      if (status === 'present' || status === 'late' || status === 'makeup') {
+        attendedSpecialDates.push(sd);
+      }
+    });
+    
+    if (attendedSpecialDates.length > 0) {
+      sessionDates.forEach(d => {
+        if (!specialDates.includes(d)) {
+          // Check if the student attended a makeup class AFTER this normal class date
+          let hasSubsequentMakeup = attendedSpecialDates.some(makeupDate => makeupDate > d);
+          
+          if (hasSubsequentMakeup) {
+            const rec = allAttendance[d] ? allAttendance[d][s.id] : null;
+            let status = rec ? getRecordStatus(rec) : null;
+            let isAbsent = false;
+            if (!status) {
+              if (isClassEndedForDate(d)) isAbsent = true;
+            } else if (status === 'absent') {
+              isAbsent = true;
+            }
+            
+            if (isAbsent) {
+              if (!allAttendance[d]) allAttendance[d] = {};
+              allAttendance[d][s.id] = { status: 'makeup', time: 'ชดเชย', scannedBy: 'Auto-Amnesty' };
+              modifiedDates.add(d);
+            }
+          }
+        }
+      });
+    }
+  });
+  return Array.from(modifiedDates);
 }
 
 async function loadStudents(){ /* Included in loadAllData */ }
@@ -948,7 +1070,15 @@ async function loadRoll(date){
 }
 async function saveRollData(date, data, quiet = false){
   allAttendance[date] = data; // Update cache
+  const modified = applyAmnestyLogic(); // Trigger amnesty recalculation for UI instantly
   const res = await api.req('saveRoll', { date: date, roll: data }, quiet);
+  
+  if(modified && modified.length > 0) {
+    for(const d of modified) {
+      if(d !== date) await api.req('saveRoll', { date: d, roll: allAttendance[d] }, true);
+    }
+  }
+  
   const el = $('#saveStatus');
   if(el){ el.textContent = res && res.success ? '✓ บันทึกแล้ว' : '❌ ผิดพลาด'; setTimeout(() => el.textContent='', 1500); }
 }
@@ -1088,6 +1218,7 @@ function renderStudentList(){
   
   // Populate GPS Dropdown (if admin)
   const gpsSel = $('#gpsStudentSelect');
+  const gpsDate = $('#gpsDate');
   if(gpsSel) {
     if(currentUser && currentUser.role === 'student'){
       const s = students.find(x => x.id === currentUser.refId);
@@ -1095,13 +1226,16 @@ function renderStudentList(){
         gpsSel.innerHTML = `<option value="${s.id}" selected>${s.name}</option>`;
         gpsSel.disabled = true;
       }
+      if(gpsDate) gpsDate.disabled = true;
     } else {
       const curVal = gpsSel.value;
       gpsSel.innerHTML = '<option value="">-- เลือกชื่อของน้อง --</option>' + 
         getVisibleStudents().map(s => `<option value="${s.id}">${s.name}</option>`).join('');
       if(curVal) gpsSel.value = curVal;
       gpsSel.disabled = false;
+      if(gpsDate) gpsDate.disabled = false;
     }
+    if(gpsDate && !gpsDate.value) gpsDate.value = currentDate;
   }
 }
 
@@ -1132,7 +1266,8 @@ async function renderRoll(){
     'present': { text: 'มา', bg: 'var(--present-bg)', color: 'var(--present)' },
     'late': { text: 'สาย', bg: '#fff3cd', color: '#856404' },
     'leave': { text: 'ลา', bg: '#e2e3e5', color: '#383d41' },
-    'absent': { text: 'ขาดเรียน', bg: 'var(--absent-bg)', color: 'var(--absent)' }
+    'absent': { text: 'ขาดเรียน', bg: 'var(--absent-bg)', color: 'var(--absent)' },
+    'makeup': { text: 'มา(ชดเชย)', bg: '#d1fae5', color: '#059669' }
   };
   
   const dLocal = new Date();
@@ -1246,17 +1381,35 @@ function renderTodaySchedule(){
 async function renderStats(){
   const all = await loadAllAttendance();
   const totals = {};
-  getVisibleStudents().forEach(s => totals[s.id] = { present:0, late:0, absent:0, leave:0 });
+  getVisibleStudents().forEach(s => totals[s.id] = { present:0, late:0, absent:0, leave:0, makeup:0 });
 
   const sessionDates = classSessionDates();
-  const totalSessionDays = sessionDates.length;
+  const specialDates = scheduleData.periods.filter(p => p.makeup === 'Y').map(p => {
+    let d = String(p.date || '');
+    if (d.includes('GMT')) {
+      const tDate = new Date(d);
+      if (!isNaN(tDate)) {
+        const m = tDate.getMonth() + 1;
+        const day = tDate.getDate();
+        d = tDate.getFullYear() + '-' + (m < 10 ? '0'+m : m) + '-' + (day < 10 ? '0'+day : day);
+      }
+    }
+    return d;
+  });
+  
+  const normalSessionDates = sessionDates.filter(d => !specialDates.includes(d));
+  const totalSessionDays = normalSessionDates.length;
   let daysCounted = totalSessionDays;
 
-  sessionDates.forEach(date => {
+  normalSessionDates.forEach(date => {
     const dayRecord = all[date] || {};
     students.forEach(s => {
       const rec = dayRecord[s.id];
-      const status = rec ? getRecordStatus(rec) : 'absent';
+      let status = rec ? getRecordStatus(rec) : null;
+      if (!status) {
+        if (isClassEndedForDate(date)) status = 'absent';
+      }
+      
       if(totals[s.id] && status){
         totals[s.id][status] = (totals[s.id][status]||0) + 1;
       }
@@ -1265,7 +1418,7 @@ async function renderStats(){
 
   let statsRows = getVisibleStudents().map(s => {
     const t = totals[s.id];
-    const totalAttended = t.present + t.late;
+    const totalAttended = t.present + t.late + t.makeup;
     const pct = totalSessionDays > 0 ? Math.round((totalAttended / totalSessionDays) * 100) : 0;
     return { s, t, pct };
   });
@@ -1273,7 +1426,7 @@ async function renderStats(){
   statsRows.sort((a, b) => {
     let valA, valB;
     if (statsSortCol === 'name') { valA = a.s.name; valB = b.s.name; }
-    else if (statsSortCol === 'present') { valA = a.t.present; valB = b.t.present; }
+    else if (statsSortCol === 'present') { valA = a.t.present + a.t.makeup; valB = b.t.present + b.t.makeup; }
     else if (statsSortCol === 'late') { valA = a.t.late; valB = b.t.late; }
     else if (statsSortCol === 'absent') { valA = a.t.absent; valB = b.t.absent; }
     else if (statsSortCol === 'pct') { valA = a.pct; valB = b.pct; }
@@ -1312,11 +1465,12 @@ async function renderStats(){
   }
   statsRows.forEach(row => {
     const { s, t, pct } = row;
-    sumP += t.present; sumL += t.late; sumA += t.absent; sumLeave += t.leave;
+    const totalP = t.present + t.makeup;
+    sumP += totalP; sumL += t.late; sumA += t.absent; sumLeave += t.leave;
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="name">${s.name}</td>
-      <td style="color:var(--present); font-weight:600;">${t.present}</td>
+      <td style="color:var(--present); font-weight:600;">${totalP}</td>
       <td style="color:var(--late); font-weight:600;">${t.late}</td>
       <td style="color:var(--ink-soft); font-weight:600;">${t.leave}</td>
       <td style="color:var(--absent); font-weight:600;">${t.absent}</td>
@@ -1375,6 +1529,18 @@ function isClassEndedForDate(dateStr) {
 
 async function renderPivot() {
   const all = await loadAllAttendance();
+  const specialDates = scheduleData.periods.filter(p => p.makeup === 'Y').map(p => {
+    let d = String(p.date || '');
+    if (d.includes('GMT')) {
+      const tDate = new Date(d);
+      if (!isNaN(tDate)) {
+        const m = tDate.getMonth() + 1;
+        const day = tDate.getDate();
+        d = tDate.getFullYear() + '-' + (m < 10 ? '0'+m : m) + '-' + (day < 10 ? '0'+day : day);
+      }
+    }
+    return d;
+  });
   const sessionDates = allClassSessionDates();
   
   const thead = $('#pivotHead');
@@ -1436,16 +1602,19 @@ async function renderPivot() {
       
       let badgeHtml = '-';
       if (status === 'present') {
-        tP++;
+        if (!specialDates.includes(date)) tP++;
         badgeHtml = '<span style="color:var(--present); font-weight:600;">มา</span>';
+      } else if (status === 'makeup') {
+        if (!specialDates.includes(date)) tP++;
+        badgeHtml = '<span style="color:#059669; font-weight:600;">มา(ชดเชย)</span>';
       } else if (status === 'late') {
-        tL++;
+        if (!specialDates.includes(date)) tL++;
         badgeHtml = '<span style="color:var(--late); font-weight:600;">สาย</span>';
       } else if (status === 'leave') {
-        tLv++;
+        if (!specialDates.includes(date)) tLv++;
         badgeHtml = '<span style="color:var(--ink-soft); font-weight:600;">ลา</span>';
       } else if (status === 'absent') {
-        tA++;
+        if (!specialDates.includes(date)) tA++;
         badgeHtml = '<span style="color:var(--absent); font-weight:600;">ขาด</span>';
       }
       
@@ -1620,7 +1789,7 @@ function renderSchedule(){
     wrap.id = 'schedTable';
     return;
   }
-  let thead = `<tr><th>วันที่/เวลา</th><th>หัวข้อ</th><th>กิจกรรมพิเศษ</th><th></th></tr>`;
+  let thead = `<tr><th>วันที่/เวลา</th><th>หัวข้อ</th><th>กิจกรรมพิเศษ</th><th>ชดเชย (Makeup)</th><th></th></tr>`;
   
   // Parse ugly GMT string if present to prevent empty time inputs
   let periods = scheduleData.periods.map(p => {
@@ -1662,6 +1831,7 @@ function renderSchedule(){
         </td>
         <td><input type="text" class="sched-subject" data-pid="${p.id}" data-field="topic" value="${p.topic||''}" placeholder="หัวข้อ"></td>
         <td><input type="text" class="sched-subject" data-pid="${p.id}" data-field="special" value="${p.special||''}" placeholder="กิจกรรมพิเศษ"></td>
+        <td style="text-align:center;"><input type="checkbox" class="sched-makeup" data-pid="${p.id}" data-field="makeup" ${p.makeup === 'Y' ? 'checked' : ''} style="width:20px; height:20px; cursor:pointer;" title="ติ๊กเพื่อตั้งเป็นคลาสพิเศษชดเชยการขาดเรียน"></td>
         <td><button class="btn-danger sched-del" data-pid="${p.id}">ลบ</button></td>
       </tr>
     `;
@@ -1672,11 +1842,11 @@ function renderSchedule(){
   newTable.innerHTML = thead + rows;
   document.getElementById('schedTable').replaceWith(newTable);
 
-  $$('.sched-subject, input[type=date], input[type=time]', newTable).forEach(inp => {
+  $$('.sched-subject, .sched-makeup, input[type=date], input[type=time]', newTable).forEach(inp => {
     inp.onchange = () => {
       const p = scheduleData.periods.find(x => x.id === inp.dataset.pid);
       if(!p) return;
-      p[inp.dataset.field] = inp.value;
+      p[inp.dataset.field] = inp.type === 'checkbox' ? (inp.checked ? 'Y' : 'N') : inp.value;
       saveSchedule();
       renderTodaySchedule();
     };
@@ -2101,9 +2271,9 @@ async function handleGpsCheckIn(){
     const lat = position.coords.latitude;
     const lon = position.coords.longitude;
     // TARGET LOCATION (Saint Louis Suksa School)
-    const TARGET_LAT = 13.71832;
-    const TARGET_LNG = 100.52416;
-    const MAX_DISTANCE_METERS = 50; 
+    const TARGET_LAT = 13.718583;
+    const TARGET_LNG = 100.523944;
+    const MAX_DISTANCE_METERS = 100; 
     
     const distance = getDistanceFromLatLonInMeters(lat, lon, TARGET_LAT, TARGET_LNG);
     if(distance > MAX_DISTANCE_METERS) {
@@ -2116,7 +2286,8 @@ async function handleGpsCheckIn(){
     
     // Auto-calculate status exactly like handleScannedId
     const student = students.find(s => s.id === stId);
-    const scanDate = currentDate;
+    const gpsDateInput = document.getElementById('gpsDate');
+    const scanDate = gpsDateInput && gpsDateInput.value ? gpsDateInput.value : currentDate;
     const time = nowTimeValue();
     let status = 'present';
     const todaysPeriods = scheduleData.periods.filter(p => p.date === scanDate).sort((a,b) => (a.start||'').localeCompare(b.start||''));
@@ -2828,11 +2999,48 @@ async function init(){
   $('#addPeriodBtn').onclick = () => {
     const dates = scheduleData.periods.map(p => p.date).filter(Boolean).sort();
     const lastDate = dates.length ? dates[dates.length-1] : null;
-    const nextDate = lastDate ? addDays(lastDate, 7) : upcomingSunday();
-    scheduleData.periods.push({ id: pid(), date: nextDate, start:'09:30', end:'11:30', topic:'', special:'' });
-    saveSchedule();
-    renderSchedule();
+    const nextDate = lastDate ? upcomingSunday(addDays(lastDate, 1)) : upcomingSunday();
+    
+    document.getElementById('addSchedDate').value = nextDate;
+    document.getElementById('addSchedStart').value = '09:30';
+    document.getElementById('addSchedEnd').value = '11:30';
+    document.getElementById('addSchedTopic').value = '';
+    document.getElementById('addSchedSpecial').value = '';
+    document.getElementById('addSchedMakeup').checked = false;
+    
+    document.getElementById('addScheduleOverlay').style.display = 'flex';
   };
+  
+  if(!document.getElementById('addSchedCancelBtn').onclick) {
+    document.getElementById('addSchedCancelBtn').onclick = () => {
+      document.getElementById('addScheduleOverlay').style.display = 'none';
+    };
+    
+    document.getElementById('addSchedSaveBtn').onclick = async () => {
+      const d = document.getElementById('addSchedDate').value;
+      const s = document.getElementById('addSchedStart').value;
+      const e = document.getElementById('addSchedEnd').value;
+      const t = document.getElementById('addSchedTopic').value.trim();
+      const sp = document.getElementById('addSchedSpecial').value.trim();
+      const m = document.getElementById('addSchedMakeup').checked ? 'Y' : 'N';
+      
+      if(!d) { alert('กรุณาเลือกวันที่'); return; }
+      
+      const btn = document.getElementById('addSchedSaveBtn');
+      btn.textContent = 'กรุณารอสักครู่...';
+      btn.disabled = true;
+      
+      scheduleData.periods.push({ id: pid(), date: d, start: s, end: e, topic: t, special: sp, makeup: m });
+      await saveSchedule();
+      
+      btn.textContent = 'เพิ่มคาบเรียน';
+      btn.disabled = false;
+      
+      renderSchedule();
+      renderTodaySchedule();
+      document.getElementById('addScheduleOverlay').style.display = 'none';
+    };
+  }
 
   if($('#exportTodayBtn')) $('#exportTodayBtn').onclick = exportTodayExcel;
   $('#exportExcel').onclick = exportExcel;
@@ -2841,6 +3049,18 @@ async function init(){
   if ($('#exportPivotExcelBtn')) {
     $('#exportPivotExcelBtn').onclick = async () => {
       const all = await loadAllAttendance();
+      const specialDates = scheduleData.periods.filter(p => p.makeup === 'Y').map(p => {
+        let d = String(p.date || '');
+        if (d.includes('GMT')) {
+          const tDate = new Date(d);
+          if (!isNaN(tDate)) {
+            const m = tDate.getMonth() + 1;
+            const day = tDate.getDate();
+            d = tDate.getFullYear() + '-' + (m < 10 ? '0'+m : m) + '-' + (day < 10 ? '0'+day : day);
+          }
+        }
+        return d;
+      });
       const sessionDates = allClassSessionDates();
       if (sessionDates.length === 0) {
         alert('ไม่มีข้อมูลสำหรับส่งออก');
@@ -2875,10 +3095,11 @@ async function init(){
           }
           
           let statusText = '-';
-          if (status === 'present') { statusText = 'มา'; tP++; }
-          else if (status === 'late') { statusText = 'สาย'; tL++; }
-          else if (status === 'leave') { statusText = 'ลา'; tLv++; }
-          else if (status === 'absent') { statusText = 'ขาด'; tA++; }
+          if (status === 'present') { statusText = 'มา'; if (!specialDates.includes(date)) tP++; }
+          else if (status === 'makeup') { statusText = 'มา(ชดเชย)'; if (!specialDates.includes(date)) tP++; }
+          else if (status === 'late') { statusText = 'สาย'; if (!specialDates.includes(date)) tL++; }
+          else if (status === 'leave') { statusText = 'ลา'; if (!specialDates.includes(date)) tLv++; }
+          else if (status === 'absent') { statusText = 'ขาด'; if (!specialDates.includes(date)) tA++; }
           
           row.push(statusText);
         });
@@ -2897,6 +3118,7 @@ async function init(){
         let color = null;
         let fontColor = 'FFFFFF';
         if (cell.v === 'มา') { color = '2F7A4F'; }
+        else if (cell.v === 'มา(ชดเชย)') { color = '059669'; }
         else if (cell.v === 'สาย') { color = 'B9791E'; }
         else if (cell.v === 'ลา') { color = '6B7280'; }
         else if (cell.v === 'ขาด') { color = 'A83A31'; }
