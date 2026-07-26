@@ -515,6 +515,7 @@
     <button class="tab-btn" data-tab="schedule">ตารางเรียน</button>
     <button class="tab-btn" data-tab="absence">🚩 ใครขาดบ้าง</button>
     <button class="tab-btn" data-tab="stats">สรุปสถิติ</button>
+    <button class="tab-btn" data-tab="pivot" style="display:none;">รายงาน Pivot</button>
     <button class="tab-btn" data-tab="history" style="display:none;">📅 ประวัติของฉัน</button>
     <button class="tab-btn" data-tab="leave" style="display:none;">📝 ยื่นใบลา</button>
     <button class="tab-btn" data-tab="leaveApprove" style="display:none;">✅ อนุมัติการลา</button>
@@ -677,6 +678,23 @@
       <div class="export-row no-print">
         <button class="btn-ghost" id="exportExcel">⬇ ส่งออก Excel</button>
         <button class="btn-ghost" id="exportPdf">🖨 ส่งออก PDF</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PIVOT TAB -->
+  <section id="tab-pivot" style="display:none;">
+    <div class="card">
+      <h2>รายงานสรุปนักเรียนที่เข้าเรียน (Pivot Table)</h2>
+      <p class="hint">แสดงสถานะการมาเรียนของนักเรียนในแต่ละวันที่มีคลาสเรียน (อ้างอิงจากตารางเรียน)</p>
+      <div style="overflow-x:auto;">
+        <table id="pivotTable" style="white-space: nowrap; width: 100%; border-collapse: collapse;">
+          <thead id="pivotHead"></thead>
+          <tbody id="pivotBody"></tbody>
+        </table>
+      </div>
+      <div class="export-row no-print">
+        <button class="btn-ghost" id="exportPivotExcelBtn">⬇ ส่งออก Excel (Pivot)</button>
       </div>
     </div>
   </section>
@@ -1304,6 +1322,120 @@ async function renderStats(){
   return { all, totals };
 }
 
+// ---------- PIVOT TABLE ----------
+function isClassEndedForDate(dateStr) {
+  const dLocal = new Date();
+  const mLocal = dLocal.getMonth() + 1;
+  const dayLocal = dLocal.getDate();
+  const todayStr = dLocal.getFullYear() + '-' + (mLocal < 10 ? '0'+mLocal : mLocal) + '-' + (dayLocal < 10 ? '0'+dayLocal : dayLocal);
+  
+  if (dateStr < todayStr) {
+    return true;
+  } else if (dateStr === todayStr) {
+    const todayClasses = scheduleData.periods.filter(p => {
+      let d = String(p.date || '');
+      if (d.includes('GMT')) {
+        const tDate = new Date(d);
+        if (!isNaN(tDate)) {
+          const m = tDate.getMonth() + 1;
+          const day = tDate.getDate();
+          d = tDate.getFullYear() + '-' + (m < 10 ? '0'+m : m) + '-' + (day < 10 ? '0'+day : day);
+        }
+      }
+      return d === dateStr;
+    });
+    if (todayClasses.length > 0) {
+      // Assuming periods are sorted or we just take the first one
+      const endStr = todayClasses[0].end;
+      if (endStr && typeof endStr === 'string' && endStr.includes(':')) {
+        const parts = endStr.split(':');
+        const endTotalMins = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+        const currentTotalMins = dLocal.getHours() * 60 + dLocal.getMinutes();
+        if (currentTotalMins > endTotalMins) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+async function renderPivot() {
+  const all = await loadAllAttendance();
+  const sessionDates = allClassSessionDates();
+  
+  const thead = $('#pivotHead');
+  const tbody = $('#pivotBody');
+  
+  if (sessionDates.length === 0) {
+    thead.innerHTML = '<tr><th>รหัสนักเรียน</th></tr>';
+    tbody.innerHTML = '<tr><td><div class="empty">ยังไม่มีวันเรียนที่ถึงกำหนด กรุณากำหนดวันเรียนในแท็บ "ตารางเรียน"</div></td></tr>';
+    return;
+  }
+  
+  // Header
+  let headHtml = '<tr>';
+  headHtml += '<th style="position:sticky; left:0; background:var(--card); z-index:2; min-width:80px; box-shadow: 2px 0 5px rgba(0,0,0,0.05);">รหัส</th>';
+  headHtml += '<th style="min-width:100px;">ชื่อนักบุญ</th>';
+  headHtml += '<th style="min-width:120px;">ชื่อ</th>';
+  headHtml += '<th style="min-width:120px;">นามสกุล</th>';
+  headHtml += '<th style="min-width:80px;">ชื่อเล่น</th>';
+  
+  sessionDates.forEach(date => {
+    const dStr = shortThaiDate(date);
+    headHtml += `<th style="text-align:center; min-width:70px;">${dStr}</th>`;
+  });
+  headHtml += '</tr>';
+  thead.innerHTML = headHtml;
+  
+  // Body
+  let bodyHtml = '';
+  const visibleStudents = getVisibleStudents();
+  if (visibleStudents.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty">ยังไม่มีรายชื่อนักเรียน</div></td></tr>';
+    return;
+  }
+  
+  visibleStudents.forEach(s => {
+    bodyHtml += '<tr>';
+    bodyHtml += `<td style="position:sticky; left:0; background:var(--card); z-index:1; font-family:'IBM Plex Mono', monospace; box-shadow: 2px 0 5px rgba(0,0,0,0.05);">${s.id}</td>`;
+    bodyHtml += `<td>${s.saint || '-'}</td>`;
+    bodyHtml += `<td class="name">${s.firstName || '-'}</td>`;
+    bodyHtml += `<td class="name">${s.lastName || '-'}</td>`;
+    bodyHtml += `<td>${s.nickname || '-'}</td>`;
+    
+    sessionDates.forEach(date => {
+      const rec = all[date] ? all[date][s.id] : null;
+      let status = rec ? getRecordStatus(rec) : null;
+      
+      if (!status) {
+        if (isClassEndedForDate(date)) {
+           status = 'absent';
+        } else {
+           status = 'future';
+        }
+      }
+      
+      let badgeHtml = '-';
+      if (status === 'present') {
+        badgeHtml = '<span style="color:var(--present); font-weight:600;">มา</span>';
+      } else if (status === 'late') {
+        badgeHtml = '<span style="color:var(--late); font-weight:600;">สาย</span>';
+      } else if (status === 'leave') {
+        badgeHtml = '<span style="color:var(--ink-soft); font-weight:600;">ลา</span>';
+      } else if (status === 'absent') {
+        badgeHtml = '<span style="color:var(--absent); font-weight:600;">ขาด</span>';
+      }
+      
+      bodyHtml += `<td style="text-align:center; border-right: 1px dashed var(--paper-line);">${badgeHtml}</td>`;
+    });
+    
+    bodyHtml += '</tr>';
+  });
+  
+  tbody.innerHTML = bodyHtml;
+}
+
 // ---------- ABSENCE (ใครขาดหน้าไหนบ้าง) ----------
 function shortThaiDate(dateStr){
   const d = new Date(dateStr + 'T00:00:00');
@@ -1325,6 +1457,21 @@ function classSessionDates(){
     return rawDate;
   }).filter(Boolean));
   return Array.from(set).filter(d => d <= today).sort();
+}
+function allClassSessionDates(){
+  const set = new Set(scheduleData.periods.map(p => {
+    let rawDate = String(p.date || '');
+    if (rawDate.includes('GMT')) {
+       const tDate = new Date(rawDate);
+       if (!isNaN(tDate)) {
+         const m = tDate.getMonth() + 1;
+         const day = tDate.getDate();
+         rawDate = tDate.getFullYear() + '-' + (m < 10 ? '0'+m : m) + '-' + (day < 10 ? '0'+day : day);
+       }
+    }
+    return rawDate;
+  }).filter(Boolean));
+  return Array.from(set).sort();
 }
 async function computeAbsence(){
   const all = await loadAllAttendance();
@@ -1866,11 +2013,12 @@ function switchTab(name){
     name = 'qrcodes'; // Force student to allowed tabs
   }
   
-  ['roll','scan','students','qrcodes','schedule','absence','stats','gps','history','leave','leaveApprove','users'].forEach(t => {
+  ['roll','scan','students','qrcodes','schedule','absence','stats','pivot','gps','history','leave','leaveApprove','users'].forEach(t => {
     $('#tab-' + t).style.display = (t === name) ? 'block' : 'none';
   });
   $$('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   if(name === 'stats') renderStats();
+  if(name === 'pivot') renderPivot();
   if(name === 'roll') renderRoll();
   if(name === 'qrcodes') renderQrGrid();
   if(name === 'schedule') renderSchedule();
@@ -2663,6 +2811,58 @@ async function init(){
   if($('#exportTodayBtn')) $('#exportTodayBtn').onclick = exportTodayExcel;
   $('#exportExcel').onclick = exportExcel;
   $('#exportPdf').onclick = exportPdf;
+  
+  if ($('#exportPivotExcelBtn')) {
+    $('#exportPivotExcelBtn').onclick = async () => {
+      const all = await loadAllAttendance();
+      const sessionDates = allClassSessionDates();
+      if (sessionDates.length === 0) {
+        alert('ไม่มีข้อมูลสำหรับส่งออก');
+        return;
+      }
+      
+      const wb = XLSX.utils.book_new();
+      const header = ['รหัสนักเรียน', 'ชื่อนักบุญ', 'ชื่อ', 'นามสกุล', 'ชื่อเล่น'];
+      sessionDates.forEach(d => header.push(d));
+      
+      const rows = [header];
+      getVisibleStudents().forEach(s => {
+        const row = [
+          s.id,
+          s.saint || '-',
+          s.firstName || '-',
+          s.lastName || '-',
+          s.nickname || '-'
+        ];
+        sessionDates.forEach(date => {
+          const rec = all[date] ? all[date][s.id] : null;
+          let status = rec ? getRecordStatus(rec) : null;
+          
+          if (!status) {
+            if (isClassEndedForDate(date)) {
+               status = 'absent';
+            } else {
+               status = 'future';
+            }
+          }
+          
+          let statusText = '-';
+          if (status === 'present') statusText = 'มา';
+          else if (status === 'late') statusText = 'สาย';
+          else if (status === 'leave') statusText = 'ลา';
+          else if (status === 'absent') statusText = 'ขาด';
+          
+          row.push(statusText);
+        });
+        rows.push(row);
+      });
+      
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      XLSX.utils.book_append_sheet(wb, ws, 'Pivot Table');
+      XLSX.writeFile(wb, 'รายงานPivot-เซนต์หลุยส์.xlsx');
+    };
+  }
+
   $('#leaveReqBtn').onclick = async () => {
     const date = $('#leaveReqDate').value;
     const reason = $('#leaveReqReason').value.trim();
