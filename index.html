@@ -398,6 +398,19 @@
   /* Logged In Info */
   .user-info { font-size: 13px; color: var(--ink-soft); display: flex; align-items: center; gap: 8px; }
   .user-info button { background: none; border: none; color: var(--absent); cursor: pointer; font-size: 13px; text-decoration: underline; padding: 0; }
+
+  /* Pivot Table Sticky Columns */
+  .pivot-col-1 { position: sticky; left: 0; background: var(--card); z-index: 1; min-width: 70px; max-width: 70px; font-family: 'IBM Plex Mono', monospace; }
+  .pivot-col-2 { position: sticky; left: 70px; background: var(--card); z-index: 1; min-width: 90px; max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
+  .pivot-col-3 { position: sticky; left: 160px; background: var(--card); z-index: 1; min-width: 100px; max-width: 100px; overflow: hidden; text-overflow: ellipsis; }
+  .pivot-col-4 { position: sticky; left: 260px; background: var(--card); z-index: 1; min-width: 100px; max-width: 100px; overflow: hidden; text-overflow: ellipsis; }
+  .pivot-col-5 { position: sticky; left: 360px; background: var(--card); z-index: 1; min-width: 80px; max-width: 80px; overflow: hidden; text-overflow: ellipsis; border-right: 2px solid var(--border); box-shadow: 2px 0 5px rgba(0,0,0,0.05); }
+  th.pivot-col-1, th.pivot-col-2, th.pivot-col-3, th.pivot-col-4, th.pivot-col-5 { z-index: 2; font-family: 'Sarabun', sans-serif; }
+  
+  @media (max-width: 768px) {
+    .pivot-col-2, .pivot-col-3, .pivot-col-4, .pivot-col-5 { position: static; left: auto; box-shadow: none; border-right: none; }
+    .pivot-col-1 { border-right: 2px solid var(--border); box-shadow: 2px 0 5px rgba(0,0,0,0.05); }
+  }
 </style>
 </head>
 <body>
@@ -776,7 +789,7 @@
   <footer>ข้อมูลถูกบันทึกไว้ในเบราว์เซอร์ของบัญชีนี้เท่านั้น <span id="app-version" style="opacity:0.3; margin-left: 10px;">(v2.1)</span></footer>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
@@ -1375,16 +1388,20 @@ async function renderPivot() {
   
   // Header
   let headHtml = '<tr>';
-  headHtml += '<th style="position:sticky; left:0; background:var(--card); z-index:2; min-width:80px; box-shadow: 2px 0 5px rgba(0,0,0,0.05);">รหัส</th>';
-  headHtml += '<th style="min-width:100px;">ชื่อนักบุญ</th>';
-  headHtml += '<th style="min-width:120px;">ชื่อ</th>';
-  headHtml += '<th style="min-width:120px;">นามสกุล</th>';
-  headHtml += '<th style="min-width:80px;">ชื่อเล่น</th>';
+  headHtml += '<th class="pivot-col-1">รหัส</th>';
+  headHtml += '<th class="pivot-col-2">ชื่อนักบุญ</th>';
+  headHtml += '<th class="pivot-col-3">ชื่อ</th>';
+  headHtml += '<th class="pivot-col-4">นามสกุล</th>';
+  headHtml += '<th class="pivot-col-5">ชื่อเล่น</th>';
   
   sessionDates.forEach(date => {
     const dStr = shortThaiDate(date);
     headHtml += `<th style="text-align:center; min-width:70px;">${dStr}</th>`;
   });
+  headHtml += '<th style="text-align:center; min-width:70px; font-weight:bold; color:var(--present); border-left: 2px solid var(--border);">มา</th>';
+  headHtml += '<th style="text-align:center; min-width:70px; font-weight:bold; color:var(--late);">สาย</th>';
+  headHtml += '<th style="text-align:center; min-width:70px; font-weight:bold; color:var(--ink-soft);">ลา</th>';
+  headHtml += '<th style="text-align:center; min-width:70px; font-weight:bold; color:var(--absent);">ขาด</th>';
   headHtml += '</tr>';
   thead.innerHTML = headHtml;
   
@@ -1397,12 +1414,13 @@ async function renderPivot() {
   }
   
   visibleStudents.forEach(s => {
+    let tP = 0, tL = 0, tLv = 0, tA = 0;
     bodyHtml += '<tr>';
-    bodyHtml += `<td style="position:sticky; left:0; background:var(--card); z-index:1; font-family:'IBM Plex Mono', monospace; box-shadow: 2px 0 5px rgba(0,0,0,0.05);">${s.id}</td>`;
-    bodyHtml += `<td>${s.saint || '-'}</td>`;
-    bodyHtml += `<td class="name">${s.firstName || '-'}</td>`;
-    bodyHtml += `<td class="name">${s.lastName || '-'}</td>`;
-    bodyHtml += `<td>${s.nickname || '-'}</td>`;
+    bodyHtml += `<td class="pivot-col-1">${s.id}</td>`;
+    bodyHtml += `<td class="pivot-col-2" title="${s.saint || '-'}">${s.saint || '-'}</td>`;
+    bodyHtml += `<td class="pivot-col-3 name" title="${s.firstName || '-'}">${s.firstName || '-'}</td>`;
+    bodyHtml += `<td class="pivot-col-4 name" title="${s.lastName || '-'}">${s.lastName || '-'}</td>`;
+    bodyHtml += `<td class="pivot-col-5" title="${s.nickname || '-'}">${s.nickname || '-'}</td>`;
     
     sessionDates.forEach(date => {
       const rec = all[date] ? all[date][s.id] : null;
@@ -1418,18 +1436,26 @@ async function renderPivot() {
       
       let badgeHtml = '-';
       if (status === 'present') {
+        tP++;
         badgeHtml = '<span style="color:var(--present); font-weight:600;">มา</span>';
       } else if (status === 'late') {
+        tL++;
         badgeHtml = '<span style="color:var(--late); font-weight:600;">สาย</span>';
       } else if (status === 'leave') {
+        tLv++;
         badgeHtml = '<span style="color:var(--ink-soft); font-weight:600;">ลา</span>';
       } else if (status === 'absent') {
+        tA++;
         badgeHtml = '<span style="color:var(--absent); font-weight:600;">ขาด</span>';
       }
       
       bodyHtml += `<td style="text-align:center; border-right: 1px dashed var(--paper-line);">${badgeHtml}</td>`;
     });
     
+    bodyHtml += `<td style="text-align:center; font-weight:bold; color:var(--present); border-left: 2px solid var(--border);">${tP}</td>`;
+    bodyHtml += `<td style="text-align:center; font-weight:bold; color:var(--late);">${tL}</td>`;
+    bodyHtml += `<td style="text-align:center; font-weight:bold; color:var(--ink-soft);">${tLv}</td>`;
+    bodyHtml += `<td style="text-align:center; font-weight:bold; color:var(--absent);">${tA}</td>`;
     bodyHtml += '</tr>';
   });
   
@@ -2824,6 +2850,7 @@ async function init(){
       const wb = XLSX.utils.book_new();
       const header = ['รหัสนักเรียน', 'ชื่อนักบุญ', 'ชื่อ', 'นามสกุล', 'ชื่อเล่น'];
       sessionDates.forEach(d => header.push(d));
+      header.push('มา', 'สาย', 'ลา', 'ขาด');
       
       const rows = [header];
       getVisibleStudents().forEach(s => {
@@ -2834,6 +2861,7 @@ async function init(){
           s.lastName || '-',
           s.nickname || '-'
         ];
+        let tP = 0, tL = 0, tLv = 0, tA = 0;
         sessionDates.forEach(date => {
           const rec = all[date] ? all[date][s.id] : null;
           let status = rec ? getRecordStatus(rec) : null;
@@ -2847,17 +2875,49 @@ async function init(){
           }
           
           let statusText = '-';
-          if (status === 'present') statusText = 'มา';
-          else if (status === 'late') statusText = 'สาย';
-          else if (status === 'leave') statusText = 'ลา';
-          else if (status === 'absent') statusText = 'ขาด';
+          if (status === 'present') { statusText = 'มา'; tP++; }
+          else if (status === 'late') { statusText = 'สาย'; tL++; }
+          else if (status === 'leave') { statusText = 'ลา'; tLv++; }
+          else if (status === 'absent') { statusText = 'ขาด'; tA++; }
           
           row.push(statusText);
         });
+        row.push(tP, tL, tLv, tA);
         rows.push(row);
       });
       
       const ws = XLSX.utils.aoa_to_sheet(rows);
+      
+      // Add colors using xlsx-js-style
+      for (const key in ws) {
+        if (key[0] === '!') continue;
+        const cell = ws[key];
+        if (!cell || cell.v === undefined) continue;
+        
+        let color = null;
+        let fontColor = 'FFFFFF';
+        if (cell.v === 'มา') { color = '2F7A4F'; }
+        else if (cell.v === 'สาย') { color = 'B9791E'; }
+        else if (cell.v === 'ลา') { color = '6B7280'; }
+        else if (cell.v === 'ขาด') { color = 'A83A31'; }
+        
+        if (color) {
+          cell.s = {
+            fill: { fgColor: { rgb: color } },
+            font: { color: { rgb: fontColor }, bold: true },
+            alignment: { horizontal: 'center', vertical: 'center' }
+          };
+        } else if (cell.v === '-') {
+          cell.s = {
+            font: { color: { rgb: '9CA3AF' } },
+            alignment: { horizontal: 'center', vertical: 'center' }
+          };
+        }
+      }
+      
+      if(!ws['!views']) ws['!views'] = [];
+      ws['!views'].push({ state: 'frozen', xSplit: 5, ySplit: 1, activePane: 'bottomRight', topLeftCell: 'F2' });
+      
       XLSX.utils.book_append_sheet(wb, ws, 'Pivot Table');
       XLSX.writeFile(wb, 'รายงานPivot-เซนต์หลุยส์.xlsx');
     };
