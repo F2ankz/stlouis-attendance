@@ -62,7 +62,8 @@ function doGet(e) {
             lastName: String(dataS[i][2] || ''),
             nickname: String(dataS[i][3] || ''),
             saint: String(dataS[i][4] || ''),
-            qrCode: String(dataS[i][5] || '')
+            qrCode: String(dataS[i][5] || ''),
+            status: dataS[i][6] !== undefined && dataS[i][6] !== '' ? Number(dataS[i][6]) : 1
           });
         }
       }
@@ -178,11 +179,11 @@ function doPost(e) {
     var shS = ss.getSheetByName('ชื่อนักเรียน');
     if(!shS) shS = ss.insertSheet('ชื่อนักเรียน');
     shS.clear();
-    shS.appendRow(['StudentID', 'ชื่อ', 'นามสกุล', 'ชื่อเล่น', 'นักบุญ', 'QR Code']);
+    shS.appendRow(['StudentID', 'ชื่อ', 'นามสกุล', 'ชื่อเล่น', 'นักบุญ', 'QR Code', 'Status']);
     var rows = postData.students.map(function(s) {
-      return [s.id, s.firstName, s.lastName, s.nickname, s.saint, s.qrCode];
+      return [s.id, s.firstName, s.lastName, s.nickname, s.saint, s.qrCode, s.status !== undefined ? s.status : 1];
     });
-    if(rows.length > 0) shS.getRange(2, 1, rows.length, 6).setValues(rows);
+    if(rows.length > 0) shS.getRange(2, 1, rows.length, 7).setValues(rows);
     return ContentService.createTextOutput(JSON.stringify({ success: true }))
       .setMimeType(ContentService.MimeType.JSON);
   }

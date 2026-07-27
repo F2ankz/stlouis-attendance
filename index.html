@@ -446,6 +446,10 @@
     <input type="text" id="editStuLast" placeholder="นามสกุล">
     <input type="text" id="editStuNick" placeholder="ชื่อเล่น">
     <input type="text" id="editStuSaint" placeholder="นักบุญ">
+    <select id="editStuStatus" style="width:100%; padding:10px; margin-bottom:12px; font-size:15px; border-radius:8px; border:2px solid var(--paper-line);">
+      <option value="1">🟢 Active (ใช้งาน)</option>
+      <option value="0">⚪ Inactive (ปิดการใช้งาน)</option>
+    </select>
     <div class="row" style="justify-content:center; gap:10px; margin-top: 15px;">
       <button class="btn-ghost" id="editStuCancelBtn" style="flex:1;">ยกเลิก</button>
       <button class="btn-primary" id="editStuSaveBtn" style="flex:1;">บันทึก</button>
@@ -503,6 +507,10 @@
     <input type="text" id="newStudentLast" placeholder="นามสกุล">
     <input type="text" id="newStudentNick" placeholder="ชื่อเล่น">
     <input type="text" id="newStudentSaint" placeholder="นักบุญ">
+    <select id="newStudentStatus" style="width:100%; padding:10px; margin-bottom:12px; font-size:15px; border-radius:8px; border:2px solid var(--paper-line);">
+      <option value="1">🟢 Active (ใช้งาน)</option>
+      <option value="0">⚪ Inactive (ปิดการใช้งาน)</option>
+    </select>
     <div style="display:flex; gap:10px; margin-top:20px;">
       <button class="btn-ghost" id="addStuCancelBtn" style="flex:1;">ยกเลิก</button>
       <button class="btn-primary" id="addStudentBtn" style="flex:1;">บันทึก</button>
@@ -672,8 +680,16 @@
   <section id="tab-students" style="display:none;">
     <div class="card">
       <h2>รายชื่อนักเรียน</h2>
-      <div class="row" style="margin-bottom:16px;">
+      <div class="row" style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
         <button class="btn-primary" id="openAddStudentModalBtn">+ เพิ่มรายชื่อใหม่</button>
+        <div style="display:flex; align-items:center;">
+          <label style="font-size:14px; font-weight:bold; color:var(--ink-soft); margin-right:8px;">ตัวกรอง:</label>
+          <select id="studentFilterSelect" onchange="renderStudentList()" style="padding:8px 12px; font-size:14px; border-radius:8px; border:2px solid var(--paper-line); outline:none; background:white; cursor:pointer;">
+            <option value="all">ทั้งหมด</option>
+            <option value="active">เฉพาะ Active</option>
+            <option value="inactive">เฉพาะ Inactive</option>
+          </select>
+        </div>
       </div>
       <div style="overflow-x:auto; margin-top: 16px;">
         <table id="studentTable"></table>
@@ -1097,11 +1113,16 @@ async function saveSchedule(){
 function uid(){ return 's_' + Math.random().toString(36).slice(2,9); }
 function pid(){ return 'p_' + Math.random().toString(36).slice(2,9); }
 
-function getVisibleStudents() {
-  if (currentUser && currentUser.role === 'superadmin') {
-    return students;
+function getVisibleStudents(includeInactive = false) {
+  let list = students;
+  if (!includeInactive) {
+    list = list.filter(s => s.status !== 0 && String(s.status) !== '0');
   }
-  return students.filter(s => {
+  
+  if (currentUser && currentUser.role === 'superadmin') {
+    return list;
+  }
+  return list.filter(s => {
     if(s.firstName.toLowerCase() === 'test' || s.name.toLowerCase() === 'test') return false;
     if((s.firstName || '').trim() === 'ว่าง' && (s.lastName || '').trim() === 'ว่าง') return false;
     return true;
@@ -1121,24 +1142,39 @@ function renderStudentList(){
       <th>ชื่อ</th>
       <th>นามสกุล</th>
       <th style="width:80px;">ชื่อเล่น</th>
+      <th style="width:70px; text-align:center;">สถานะ</th>
       <th style="width:70px; text-align:center;">QR Code</th>
       <th style="width:120px; text-align:center;">จัดการ</th>
     </tr>`;
-    let tbody = getVisibleStudents().map((s, i) => `
+    const filterVal = document.getElementById('studentFilterSelect') ? document.getElementById('studentFilterSelect').value : 'all';
+    let filteredList = getVisibleStudents(true);
+    if(filterVal === 'active') {
+      filteredList = filteredList.filter(s => s.status === undefined || s.status === 1 || String(s.status) === '1');
+    } else if(filterVal === 'inactive') {
+      filteredList = filteredList.filter(s => s.status === 0 || String(s.status) === '0');
+    }
+    
+    let tbody = filteredList.map((s, i) => {
+      const isActive = s.status === undefined || s.status === 1 || String(s.status) === '1';
+      const statusBadge = isActive 
+        ? `<span style="background:var(--present); color:white; padding:4px 8px; border-radius:12px; font-size:12px;">Active</span>`
+        : `<span style="background:var(--ink-soft); color:white; padding:4px 8px; border-radius:12px; font-size:12px;">Inactive</span>`;
+      return `
       <tr>
         <td style="font-family:'IBM Plex Mono', monospace;">${s.id}</td>
         <td>${s.saint || '-'}</td>
         <td class="name">${s.firstName || '-'}</td>
         <td class="name">${s.lastName || '-'}</td>
         <td>${s.nickname || '-'}</td>
+        <td style="text-align:center;">${statusBadge}</td>
         <td style="text-align:center;"><div class="mini-qr" id="mini-qr-${s.id}" style="display:inline-block;"></div></td>
         <td style="text-align:center; white-space:nowrap;"><button class="btn-ghost edit-stu" data-id="${s.id}" style="padding:6px 10px; font-size:13px; margin-right:4px;">แก้ไข</button><button class="btn-danger del-stu" data-id="${s.id}">ลบ</button></td>
       </tr>
-    `).join('');
+    `}).join('');
     tbl.innerHTML = thead + tbody;
     
     // Generate mini QR codes
-  getVisibleStudents().forEach((s) => {
+  filteredList.forEach((s) => {
       const el = document.getElementById(`mini-qr-${s.id}`);
       if(el) {
         new QRCode(el, {
@@ -1164,6 +1200,7 @@ function renderStudentList(){
           document.getElementById('editStuLast').value = s.lastName || '';
           document.getElementById('editStuNick').value = s.nickname || '';
           document.getElementById('editStuSaint').value = s.saint || '';
+          document.getElementById('editStuStatus').value = (s.status !== undefined ? s.status : 1).toString();
           document.getElementById('editStudentOverlay').style.display = 'flex';
         }
       };
@@ -1183,6 +1220,7 @@ function renderStudentList(){
           s.lastName = document.getElementById('editStuLast').value.trim();
           s.nickname = document.getElementById('editStuNick').value.trim();
           s.saint = document.getElementById('editStuSaint').value.trim();
+          s.status = Number(document.getElementById('editStuStatus').value);
           s.name = `${s.firstName} ${s.lastName} ${s.nickname ? '('+s.nickname+')' : ''}`.trim();
           
           const sbtn = document.getElementById('editStuSaveBtn');
@@ -2042,6 +2080,12 @@ async function handleScannedId(rawId){
     beep(false);
     return;
   }
+  
+  if ((student.status === 0 || String(student.status) === '0') && student.firstName.toLowerCase() !== 'test' && student.name.toLowerCase() !== 'test') {
+    flashScan('❌ บัญชีนี้ถูกปิดการใช้งาน (Inactive)', true);
+    beep(false);
+    return;
+  }
   const scanDate = $('#scanDate').value || currentDate;
   const time = nowTimeValue();
   
@@ -2286,6 +2330,12 @@ async function handleGpsCheckIn(){
     
     // Auto-calculate status exactly like handleScannedId
     const student = students.find(s => s.id === stId);
+    
+    if (student && (student.status === 0 || String(student.status) === '0') && student.firstName.toLowerCase() !== 'test' && student.name.toLowerCase() !== 'test') {
+      msgEl.innerHTML = '❌ บัญชีของคุณถูกปิดการใช้งาน (Inactive)';
+      msgEl.style.color = 'var(--absent)';
+      return;
+    }
     const gpsDateInput = document.getElementById('gpsDate');
     const scanDate = gpsDateInput && gpsDateInput.value ? gpsDateInput.value : currentDate;
     const time = nowTimeValue();
@@ -2961,6 +3011,7 @@ async function init(){
     const last = $('#newStudentLast').value.trim();
     const nick = $('#newStudentNick').value.trim();
     const saint = $('#newStudentSaint').value.trim();
+    const status = Number($('#newStudentStatus').value);
     
     if(!stId || !first) { alert('กรุณากรอก StudentID และชื่อ'); return; }
     
@@ -2975,6 +3026,7 @@ async function init(){
       nickname: nick,
       saint: saint,
       qrCode: QR_PREFIX + stId,
+      status: status,
       name: `${first} ${last} ${nick ? '('+nick+')' : ''}`.trim()
     });
     
