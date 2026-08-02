@@ -2746,7 +2746,7 @@ window.deleteMyLeave = async function(leaveId) {
       if (matchId) {
         const rec = allAttendance[lv.date][matchId];
         if (rec.status === 'leave') {
-          delete allAttendance[lv.date][matchId];
+          allAttendance[lv.date][matchId] = { status: 'absent', time: '' };
           await saveRollData(lv.date, allAttendance[lv.date], true);
         }
       }

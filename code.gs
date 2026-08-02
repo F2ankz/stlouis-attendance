@@ -226,15 +226,16 @@ function doPost(e) {
     newRows.push(header);
     
     var noCount = 1;
-    var existingLeaves = {};
+    var existingRecords = {};
     for(var i=1; i<data.length; i++) {
       var d = toDateStr(data[i][2]);
       if(d === date) {
-        var st = String(data[i][4] || '').trim();
-        if (st === 'leave') {
-          var sid = String(data[i][1] || '').replace(/^'/, '');
-          existingLeaves[sid] = { time: toTimeStr(data[i][3]), user: String(data[i][5] || '') };
-        }
+        var sid = String(data[i][1] || '').replace(/^'/, '');
+        existingRecords[sid] = {
+           status: String(data[i][4] || '').trim(),
+           time: toTimeStr(data[i][3]),
+           scannedBy: String(data[i][5] || '')
+        };
       } else if(d !== '') { 
         data[i][0] = noCount++;
         data[i][2] = "'" + d;
@@ -244,13 +245,19 @@ function doPost(e) {
       }
     }
     
-    for(var sid in existingLeaves) {
-      if (!roll[sid] || !roll[sid].status || roll[sid].status === 'absent') {
-        roll[sid] = { status: 'leave', time: existingLeaves[sid].time, scannedBy: existingLeaves[sid].user };
+    for(var sid in existingRecords) {
+      var rec = existingRecords[sid];
+      if (rec.status === 'leave') {
+        if (!roll[sid] || !roll[sid].status || roll[sid].status === 'absent') {
+          roll[sid] = { status: 'leave', time: rec.time, scannedBy: rec.scannedBy };
+        }
+      } else if (!roll[sid]) {
+        roll[sid] = { status: rec.status, time: rec.time, scannedBy: rec.scannedBy };
       }
     }
     
     for(var sId in roll) {
+      if (!roll[sId].status) continue;
       newRows.push([
         noCount++, 
         "'" + sId, 
